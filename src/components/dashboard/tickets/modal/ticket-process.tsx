@@ -79,7 +79,7 @@ export default function TicketProcessModalForm({ open, handleClose, ticketID, fe
                     )}
                     {active_tab === "two" && (
                         <>
-                            <EngineerPage open={open} handleClose={handleModalClose} ticketID={ticketID} />
+                            <EngineerPage open={open} handleClose={handleModalClose} ticketID={ticketID} fetchticketData={fetchticketData} />
                         </>
                     )}
                 </Box>

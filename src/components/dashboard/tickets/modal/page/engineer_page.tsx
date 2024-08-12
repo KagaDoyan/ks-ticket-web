@@ -51,7 +51,7 @@ const spare_status: spare_status[] = [
     { name: 'replace' },
 ]
 
-export default function EngineerPage({ open, handleClose, ticketID }: { open: boolean, handleClose: () => void, ticketID: number }): React.JSX.Element {
+export default function EngineerPage({ open, handleClose, ticketID ,fetchticketData}: { open: boolean, handleClose: () => void, ticketID: number , fetchticketData: () => void}): React.JSX.Element {
     const [formData, setFormData] = useState<FormData>({
         solution: '',
         investigation: '',
@@ -358,7 +358,8 @@ export default function EngineerPage({ open, handleClose, ticketID }: { open: bo
             body: payload
         }).then((res) => {
             if (res.ok) {
-                toast.success("Ticket closed successfully");
+                fetchticketData();
+                toast.success("Ticket update successfully");
             } else {
                 toast.error("Failed to update ticket");
             }
