@@ -45,6 +45,7 @@
     "react-hook-form": "7.52.0",
     "react-toastify": "^10.0.5",
     "styled-components": "^6.1.11",
+    "sweetalert2": "^11.12.4",
     "zod": "3.23.8"
   },
   "devDependencies": {

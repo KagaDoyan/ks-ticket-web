@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth/client";
-import { Autocomplete, Box, Button, Checkbox, FormControlLabel, Grid, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material";
 import useOnMount from "@mui/utils/useOnMount";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -44,6 +44,12 @@ interface FormData {
     time_in: string;
     time_out: string;
     uploadedFiles?: File[];
+    ticket_image?: image_url[];
+}
+
+interface image_url {
+    name: string
+    path: string
 }
 
 const spare_status: spare_status[] = [
@@ -51,7 +57,7 @@ const spare_status: spare_status[] = [
     { name: 'replace' },
 ]
 
-export default function EngineerPage({ open, handleClose, ticketID ,fetchticketData}: { open: boolean, handleClose: () => void, ticketID: number , fetchticketData: () => void}): React.JSX.Element {
+export default function EngineerPage({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState<FormData>({
         solution: '',
         investigation: '',
@@ -67,19 +73,20 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
         action: '',
         time_in: '',
         time_out: '',
-        uploadedFiles: []
+        uploadedFiles: [],
+        ticket_image: []
     });
 
 
     const [BrandOption, setBrandOption] = useState<brand[]>([])
     const [ModelOption, setModelOption] = useState<model[]>([])
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
-    const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string }[]>([]);
+    const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string,status: string }[]>([]);
     const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string }[]>([]);
 
     const addShopItem = () => {
         if (shopitems.length < 4) {
-            setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '' }]);
+            setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'repair' }]);
         } else {
             toast.error("You can only add up to 5 items.");
         }
@@ -117,6 +124,24 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
         }
     };
 
+    const handleShopModelChange = (index: number, model: model) => {
+        const updatedItems = [...shopitems];
+        updatedItems[index] = { ...updatedItems[index], model_id: model.id, model: model.name };
+        setShopItem(updatedItems);
+    }
+
+    const handleShopCategoryChange = (index: number, category: category) => {
+        const updatedItems = [...shopitems];
+        updatedItems[index] = { ...updatedItems[index], category_id: category.id, category: category.name };
+        setShopItem(updatedItems);
+    }
+
+    const handleShopBrandChange = (index: number, brand: brand) => {
+        const updatedItems = [...shopitems];
+        updatedItems[index] = { ...updatedItems[index], brand_id: brand.id, brand: brand.name };
+        setShopItem(updatedItems);
+    }
+
     const removeShopItem = (index: number) => {
         const updatedItems = shopitems.filter((_, i) => i !== index);
         setShopItem(updatedItems);
@@ -138,7 +163,6 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
             updatedItems[index] = { ...updatedItems[index], [field]: Intvalue };
             setSpareItem(updatedItems);
             console.log(spareitems);
-
         } else {
             const updatedItems = [...spareitems];
             updatedItems[index] = { ...updatedItems[index], [field]: value };
@@ -255,11 +279,9 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                                 resolve_remark: data.data.resolve_remark,
                                 action: data.data.action, // assuming action_status is an array of strings
                                 time_in: dayjs(data.data.time_in).format('YYYY-MM-DD HH:mm'),
-                                time_out: dayjs(data.data.time_out).format('YYYY-MM-DD HH:mm')
-
+                                time_out: dayjs(data.data.time_out).format('YYYY-MM-DD HH:mm'),
+                                ticket_image: [...data.data.ticket_image],
                             });
-                            console.log(data.data.spare_item);
-                            console.log(data.data.shop_item);
 
                             if (data.data.spare_item?.length > 0) {
                                 setSpareItem([...data.data.spare_item]);
@@ -309,6 +331,9 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
             ...formData,
             [name]: name === 'resolve_status' ? checked : value
         });
+
+        console.log(formData);
+
     };
 
     useOnMount(() => {
@@ -561,6 +586,11 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                                 Item {index + 1}
                             </Typography>
                             <TextField
+                                label="Id"
+                                value={item.id}
+                                sx={{ display: 'none' }}
+                            />
+                            <TextField
                                 label="Serial Number"
                                 value={item.serial_number}
                                 onChange={(e) => handleShopItemChange(index, 'serial_number', e.target.value)}
@@ -575,13 +605,14 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                                 value={CategoryOption.find((category) => category.name === item.category) || null}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
+                                        handleShopItemChange(index, 'category_id', "0")
                                         handleShopItemChange(index, 'category', "")
                                     }
-                                    const selectedOption = newValue ? newValue.name : null;
+                                    const selectedOption = newValue ? newValue : null;
                                     if (!selectedOption) {
                                         return;
                                     }
-                                    handleShopItemChange(index, 'category', selectedOption);
+                                    handleShopCategoryChange(index, selectedOption);
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Category" />}
                             />
@@ -592,13 +623,14 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                                 value={BrandOption.find((brand) => brand.name === item.brand) || null}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
+                                        handleShopItemChange(index, 'brand_id', "0")
                                         handleShopItemChange(index, 'brand', "")
                                     }
-                                    const selectedOption = newValue ? newValue.name : null;
+                                    const selectedOption = newValue ? newValue : null;
                                     if (!selectedOption) {
                                         return;
                                     }
-                                    handleShopItemChange(index, 'brand', selectedOption);
+                                    handleShopBrandChange(index, selectedOption);
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Brand" />}
                             />
@@ -609,13 +641,14 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                                 value={ModelOption.find((model) => model.name === item.model) || null}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
+                                        handleShopItemChange(index, 'model_id', "0")
                                         handleShopItemChange(index, 'model', "")
                                     }
-                                    const selectedOption = newValue ? newValue.name : null;
+                                    const selectedOption = newValue ? newValue : null;
                                     if (!selectedOption) {
                                         return;
                                     }
-                                    handleShopItemChange(index, 'model', selectedOption);
+                                    handleShopModelChange(index, selectedOption);
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
@@ -667,7 +700,7 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                             <TextField
                                 label="Id"
                                 value={item.id}
-                                hidden
+                                sx={{ display: 'none' }}
                             />
                             <TextField
                                 label="Serial Number"
@@ -684,6 +717,7 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                                 value={CategoryOption.find((category) => category.name === item.category) || null}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
+                                        handleSpareItemChange(index, 'category_id', "0")
                                         handleSpareItemChange(index, 'category', "")
                                     }
                                     const selectedOption = newValue ? newValue : null;
@@ -702,6 +736,7 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                                 value={BrandOption.find((brand) => brand.name === item.brand) || null}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
+                                        handleSpareItemChange(index, 'brand_id', "0")
                                         handleSpareItemChange(index, 'brand', "")
                                     }
                                     const selectedOption = newValue ? newValue : null;
@@ -792,12 +827,38 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
                 />
             </Grid>
             <Grid item xs={12} sm={3}>
-                <Select value={formData.action} onChange={handleActionChange} name="action">
-                    <MenuItem value="repair">repair</MenuItem>
-                    <MenuItem value="clean">clean</MenuItem>
-                    <MenuItem value="spare">spare</MenuItem>
-                    <MenuItem value="replace">replace</MenuItem>
-                </Select>
+                <FormControl>
+                    <FormLabel id="demo-form-control-label-placement">Action</FormLabel>
+                    <RadioGroup
+                        row
+                        aria-labelledby="demo-form-control-label-placement"
+                        name="action"
+                        defaultValue="repair"
+                        value={formData.action}
+                        onChange={handleChange}
+                    >
+                        <FormControlLabel
+                            value="Repair"
+                            control={<Radio />}
+                            label="repair"
+                        />
+                        <FormControlLabel
+                            value="clean"
+                            control={<Radio />}
+                            label="Clean"
+                        />
+                        <FormControlLabel
+                            value="spare"
+                            control={<Radio />}
+                            label="Spare"
+                        />
+                        <FormControlLabel
+                            value="replace"
+                            control={<Radio />}
+                            label="Replace"
+                        />
+                    </RadioGroup>
+                </FormControl>
             </Grid>
             <Grid item xs={12} sm={9}>
                 <TextField
@@ -843,7 +904,7 @@ export default function EngineerPage({ open, handleClose, ticketID ,fetchticketD
             </Stack>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12}>
-                    <ImageUpload onUpload={handleImageUpload} />
+                    <ImageUpload onUpload={handleImageUpload} formData={formData} setFormData={setFormData} />
                 </Grid>
             </Grid>
             <Stack justifyContent={"flex-end"} direction="row" spacing={2}>

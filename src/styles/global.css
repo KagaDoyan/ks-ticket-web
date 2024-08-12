@@ -20,6 +20,10 @@
   --icon-fontSize-lg: 1.5rem;
 }
 
+.swal2-container {
+  z-index: 9999;
+}
+
 *:focus-visible {
   outline: 2px solid rgb(255, 163, 71);
 }
