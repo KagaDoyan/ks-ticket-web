@@ -1,0 +1,69 @@
+/* Remove if fonts are not used */
+@import '~@fontsource/inter/100.css';
+@import '~@fontsource/inter/200.css';
+@import '~@fontsource/inter/300.css';
+@import '~@fontsource/inter/400.css';
+@import '~@fontsource/inter/500.css';
+@import '~@fontsource/inter/600.css';
+@import '~@fontsource/inter/700.css';
+@import '~@fontsource/inter/800.css';
+@import '~@fontsource/inter/900.css';
+@import '~@fontsource/roboto-mono/300.css';
+@import '~@fontsource/roboto-mono/400.css';
+@import '~@fontsource/plus-jakarta-sans/600.css';
+@import '~@fontsource/plus-jakarta-sans/700.css';
+
+/* Variables */
+:root {
+  --icon-fontSize-sm: 1rem;
+  --icon-fontSize-md: 1.25rem;
+  --icon-fontSize-lg: 1.5rem;
+}
+
+*:focus-visible {
+  outline: 2px solid rgb(255, 163, 71);
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: Arial, sans-serif;
+  color: #333333;
+  background-color: #f0f0f0;
+}
+
+main {
+  color: #333333;
+  height: 100%;
+  background-color: #f0f0f0;
+}
+
+/* styles/global.css */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  font-size: 24px;
+  color: #333;
+}
+
+/* Customize nprogress bar color */
+#nprogress .bar {
+  background: orange; /* Use the brand's orange theme color */
+}
+
+/* Customize nprogress spinner */
+#nprogress .spinner-icon {
+  border-top-color: orange;
+  border-left-color: orange;
+}

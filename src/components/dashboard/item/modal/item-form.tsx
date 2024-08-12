@@ -1,0 +1,418 @@
+import { Box, Modal, Button, TextField, Typography, Stack, Grid, Select, MenuItem, SelectChangeEvent, InputLabel, Autocomplete } from "@mui/material";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { authClient } from "@/lib/auth/client";
+import useOnMount from "@mui/utils/useOnMount";
+import dayjs from "dayjs";
+
+const style = {
+    position: 'absolute' as 'absolute',
+    padding: 10,
+    borderRadius: 3,
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: {
+        xs: '90%', // Mobile
+        sm: '80%', // Tablet
+        md: '60%', // Small desktop
+        lg: '60%', // Large desktop
+    },
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+};
+
+interface brand {
+    id: number
+    name: string
+}
+
+interface category {
+    id: number
+    name: string
+}
+
+interface model {
+    id: number
+    name: string
+    brand_id: number
+}
+export default function ItemModalForm({ open, handleClose, itemID, fetchitemData }: { open: boolean, handleClose: () => void, itemID: number, fetchitemData: () => void }): React.JSX.Element {
+    const [formData, setFormData] = useState({
+        serial_number: "",
+        category_id: 0,
+        brand_id: 0,
+        model_id: 0,
+        warranty_expiry_date: "",
+        status: "in_stock"
+    });
+
+    const [StatusOption, setStatusOption] = useState([])
+    const [BrandOption, setBrandOption] = useState<brand[]>([])
+    const [ModelOption, setModelOption] = useState<model[]>([])
+    const [CategoryOption, setCategoryOption] = useState<category[]>([])
+
+
+    const getStatusOption = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/status`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setStatusOption(data.data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch status option");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch status option");
+            });
+    }
+
+    const getBrandOption = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/brand/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setBrandOption(data.data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch brand option");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch brand option");
+            });
+    }
+
+    const getCategoryOption = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCategoryOption(data.data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch category option");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch category option");
+            });
+    }
+
+    const getModelOption = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/model/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setModelOption(data.data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch model option");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch model option");
+            });
+    }
+
+    const getitemData = () => {
+        if (itemID) {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/${itemID}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${authClient.getToken()}`
+                }
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        res.json().then((data) => {
+                            setFormData({
+                                serial_number: data.data.serial_number,
+                                category_id: data.data.category_id,
+                                brand_id: data.data.brand_id,
+                                model_id: data.data.model_id,
+                                warranty_expiry_date: dayjs(data.data.warranty_expiry_date).format('YYYY-MM-DD'),
+                                status: data.data.status
+                            });
+                        })
+                    } else {
+                        throw new Error("Failed to fetch item data");
+                    }
+                }).catch((err) => {
+                    toast.error("Failed to fetch item data");
+                });
+        }
+    }
+
+    const clearFormData = () => {
+        setFormData({
+            serial_number: "",
+            category_id: 0,
+            brand_id: 0,
+            model_id: 0,
+            warranty_expiry_date: "",
+            status: "in_stock"
+        });
+    }
+
+    const closeModal = () => {
+        clearFormData()
+        handleClose();
+    }
+
+    useEffect(() => {
+        getitemData();
+        if (itemID == 0) {
+            clearFormData()
+        }
+    }, [itemID]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (itemID) {
+            //update
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/${itemID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authClient.getToken()}`
+                },
+                body: JSON.stringify(formData)
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        toast.success("item updated successfully");
+                        fetchitemData();
+                        handleClose();
+                        clearFormData();
+                    } else {
+                        throw new Error("Failed to update item");
+                    }
+                }).catch((err) => {
+                    toast.error("Failed to update item");
+                });
+
+        } else {
+            //create
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authClient.getToken()}`
+                },
+                body: JSON.stringify(formData)
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        toast.success("item created successfully");
+                        fetchitemData();
+                        handleClose();
+                        clearFormData();
+                    } else {
+                        throw new Error("Failed to create item");
+                    }
+                })
+                .catch((err) => {
+                    toast.error("Failed to create item");
+                });
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    useOnMount(() => {
+        getStatusOption()
+        getBrandOption()
+        getCategoryOption()
+        getModelOption()
+    })
+
+
+    return (
+        <Modal
+            open={open}
+            onClose={closeModal}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+        >
+            <Box sx={style}>
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                    Item form
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                        width: "100%",
+                        margin: "auto",
+                        mt: 2
+                    }}
+                >
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                name="serial_number"
+                                label="Serial Number"
+                                type="text"
+                                value={formData.serial_number}
+                                onChange={handleChange}
+                                fullWidth
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={ModelOption}
+                                getOptionLabel={(option) => option.name}
+                                value={ModelOption.find((model) => model.id === formData.model_id) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            model_id: 0
+                                        })
+                                    }
+                                    const selectedOption = newValue ? newValue.id : null;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        model_id: selectedOption || 0
+                                    });
+                                    console.log(formData);
+                                }}
+                                renderInput={(params) => <TextField required {...params} label="Model" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={BrandOption}
+                                getOptionLabel={(option) => option.name}
+                                value={BrandOption.find((brand) => brand.id === formData.brand_id) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            brand_id: 0
+                                        })
+                                    }
+                                    const selectedOption = newValue ? newValue.id : null;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        brand_id: selectedOption || 0
+                                    });
+                                }}
+                                renderInput={(params) => <TextField required {...params} label="Brand" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={CategoryOption}
+                                getOptionLabel={(option) => option.name}
+                                value={CategoryOption.find((category) => category.id === formData.category_id) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            category_id: 0
+                                        })
+                                    }
+                                    const selectedOption = newValue ? newValue.id : null;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        category_id: selectedOption || 0
+                                    });
+                                    console.log(formData);
+                                }}
+                                renderInput={(params) => <TextField required {...params} label="Category" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={StatusOption}
+                                getOptionLabel={(option) => option}
+                                value={StatusOption.find((status) => status === formData.status) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            status: ""
+                                        })
+                                        return;
+                                    }
+                                    const selectedOption = newValue;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        status: selectedOption || ""
+                                    });
+                                    console.log(formData);
+                                }}
+                                renderInput={(params) => <TextField required name="status" {...params} label="Status" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                name="warranty_expiry_date"
+                                label="Warranty Expiry Date"
+                                type="date"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                required
+                                value={formData.warranty_expiry_date}
+                                onChange={handleChange}
+                                fullWidth
+                            />
+                        </Grid>
+                    </Grid>
+                    <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
+                        <Button onClick={closeModal} variant="contained" color="warning">
+                            Close
+                        </Button>
+                        <Button type="submit" variant="contained" color="success">
+                            {itemID ? "Update" : "Add"}
+                        </Button>
+                    </Stack>
+
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
