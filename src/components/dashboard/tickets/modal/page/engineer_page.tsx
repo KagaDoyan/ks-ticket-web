@@ -7,6 +7,7 @@ import ImageUpload, { ExtendedFile } from './ImageUpload';
 import dayjs from "dayjs";
 import { date } from "zod";
 import formatDate from "@/lib/dateformat";
+import CraeteKoonServiceForm from "./pdf/koonservice";
 
 interface brand {
     id: number
@@ -45,6 +46,7 @@ interface FormData {
     time_out: string;
     uploadedFiles?: File[];
     ticket_image?: image_url[];
+    delete_images?: string[];
 }
 
 interface image_url {
@@ -74,14 +76,15 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         time_in: '',
         time_out: '',
         uploadedFiles: [],
-        ticket_image: []
+        ticket_image: [],
+        delete_images: [],
     });
 
-
+    const [ticketData, setTicketData] = useState<any>()
     const [BrandOption, setBrandOption] = useState<brand[]>([])
     const [ModelOption, setModelOption] = useState<model[]>([])
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
-    const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string,status: string }[]>([]);
+    const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string, status: string }[]>([]);
     const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string }[]>([]);
 
     const addShopItem = () => {
@@ -265,6 +268,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                 .then((res) => {
                     if (res.ok) {
                         res.json().then((data) => {
+                            setTicketData(data.data);
                             setFormData({
                                 solution: data.data.solution,
                                 investigation: data.data.investigation,
@@ -363,9 +367,16 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         payload.append('action', formData.action);
         payload.append('time_in', formatDate(formData.time_in));
         payload.append('time_out', formatDate(formData.time_out));
+
         if (formData.uploadedFiles) {
             for (let i = 0; i < formData.uploadedFiles.length; i++) {
                 payload.append('images', formData.uploadedFiles[i]);
+            }
+        }
+
+        if (formData.delete_images) {
+            for (let i = 0; i < formData.delete_images.length; i++) {
+                payload.append('delete_images', formData.delete_images[i]);
             }
         }
 
@@ -373,6 +384,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         // Assuming shopitems and spareitems are arrays or objects, you'll need to serialize them if needed.
         payload.append('store_item', JSON.stringify(shopitems));
         payload.append('spare_item', JSON.stringify(spareitems));
+
 
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/close/${ticketID}`, {
             method: 'PUT',
@@ -384,6 +396,12 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         }).then((res) => {
             if (res.ok) {
                 fetchticketData();
+                setFormData({
+                    ...formData,
+                    uploadedFiles: [],
+                    delete_images: [],
+                })
+                fetchticketDatails();
                 toast.success("Ticket update successfully");
             } else {
                 toast.error("Failed to update ticket");
@@ -410,6 +428,9 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         });
     }
 
+    const handleCreatePDF = () => {
+        const html = CraeteKoonServiceForm(ticketID);
+    }
     return (
         <>
             <Grid container spacing={2} sx={{ overflow: 'scroll auto' }}>
@@ -904,12 +925,15 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             </Stack>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12}>
-                    <ImageUpload onUpload={handleImageUpload} formData={formData} setFormData={setFormData} />
+                    <ImageUpload onUpload={handleImageUpload} formdata={formData} setFormData={setFormData} />
                 </Grid>
             </Grid>
             <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
+                </Button>
+                <Button onClick={handleCreatePDF} variant="contained" color="warning">
+                    PDF
                 </Button>
                 <Button variant="contained" color="success" onClick={handleSubmit}>
                     Update
