@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import { date } from "zod";
 import formatDate from "@/lib/dateformat";
 import CraeteKoonServiceForm from "./pdf/koonservice";
+import Swal from "sweetalert2";
 
 interface brand {
     id: number
@@ -147,7 +148,34 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
 
     const removeShopItem = (index: number) => {
         const updatedItems = shopitems.filter((_, i) => i !== index);
-        setShopItem(updatedItems);
+        const removeItem = shopitems.filter((_, i) => i == index)[0];
+        if (removeItem.id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "this item had been recorded are you sure you want to delete it?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/store/${removeItem.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'authorization': `Bearer ${authClient.getToken()}`
+                        }
+                    }).then((res) => {
+                        if (res.ok) {
+                            setShopItem(updatedItems);
+                            toast.success('Item deleted');
+                        }
+                    })
+                }
+            })
+        } else {
+            setShopItem(updatedItems);
+        }
     };
 
     const addSpareItem = () => {
@@ -194,7 +222,34 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
 
     const removeSpareItem = (index: number) => {
         const updatedItems = spareitems.filter((_, i) => i !== index);
-        setSpareItem(updatedItems);
+        const removeItem = spareitems.filter((_, i) => i == index)[0];
+        if (removeItem.id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "this item had been recorded are you sure you want to delete it?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/spare/${removeItem.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'authorization': `Bearer ${authClient.getToken()}`
+                        }
+                    }).then((res) => {
+                        if (res.ok) {
+                            setSpareItem(updatedItems);
+                            toast.success('Item deleted');
+                        }
+                    })
+                }
+            })
+        } else {
+            setSpareItem(updatedItems);
+        }
     };
 
     const getBrandOption = () => {
