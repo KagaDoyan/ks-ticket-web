@@ -484,7 +484,13 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
     }
 
     const handleCreatePDF = () => {
-        const html = CraeteKoonServiceForm(ticketID);
+        const html = CraeteKoonServiceForm(ticketData);
+        const printWindow = window.open('', '', 'height=600,width=800');
+
+        printWindow?.document.write(html);
+        printWindow?.document.close(); // Ensure the content is fully loaded
+        printWindow?.focus();
+        printWindow?.print();
     }
     return (
         <>

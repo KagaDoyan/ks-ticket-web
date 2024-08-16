@@ -14,7 +14,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { Button, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
+import { Badge, Button, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
@@ -147,7 +147,7 @@ export function ItemPage(): React.JSX.Element {
                 </InputAdornment>
               }
               onChange={(e) => setSearch(e.target.value)}
-              sx={{ maxWidth: '300px' ,height: '40px'}}
+              sx={{ maxWidth: '300px', height: '40px' }}
             />
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchitemData}>
               refresh
@@ -186,7 +186,7 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.model.name}</TableCell>
                     <TableCell>{row.engineer?.name ? row.engineer.name : 'WareHouse'}</TableCell>
                     <TableCell>{dayjs(row.waranty_expiry_date).format('MMM D, YYYY')}</TableCell>
-                    <TableCell>{row.status}</TableCell>
+                    <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
                     <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEdititem(row.id)}>
