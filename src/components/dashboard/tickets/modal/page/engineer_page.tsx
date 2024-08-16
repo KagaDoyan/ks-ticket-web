@@ -484,13 +484,14 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
     }
 
     const handleCreatePDF = () => {
+        console.log(ticketData);
+        
         const html = CraeteKoonServiceForm(ticketData);
         const printWindow = window.open('', '', 'height=600,width=800');
 
         printWindow?.document.write(html);
         printWindow?.document.close(); // Ensure the content is fully loaded
         printWindow?.focus();
-        printWindow?.print();
     }
     return (
         <>
@@ -920,9 +921,9 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                         onChange={handleChange}
                     >
                         <FormControlLabel
-                            value="Repair"
+                            value="repair"
                             control={<Radio />}
-                            label="repair"
+                            label="Repair"
                         />
                         <FormControlLabel
                             value="clean"

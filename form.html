@@ -4,8 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report</title>
     <style>
+        input[type="radio"] {
+            display: none;
+        }
+
+        /* Custom checkbox label */
+        input[type="radio"]+label {
+            position: relative;
+            padding-left: 24px;
+            /* Adjust padding for the custom checkbox */
+            cursor: pointer;
+            font-size: 12px;
+            /* Match your 12px font size */
+        }
+
+        /* Custom checkbox appearance */
+        input[type="radio"]+label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 2px;
+            /* Align with text */
+            width: 16px;
+            /* Size of the custom checkbox */
+            height: 16px;
+            border: 1px solid #666;
+            /* Border color */
+            background-color: #fff;
+            /* Background color */
+            border-radius: 3px;
+            /* Rounded corners */
+        }
+
+        /* Checkmark when selected */
+        input[type="radio"]:checked+label::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            /* Position of the checkmark */
+            top: 8px;
+            width: 6px;
+            /* Width of the checkmark */
+            height: 10px;
+            /* Height of the checkmark */
+            border: solid #666;
+            border-width: 0 2px 2px 0;
+            /* Creates the checkmark shape */
+            transform: rotate(45deg);
+            /* Rotates to form the checkmark */
+        }
+
         b {
             font-weight: bold;
         }
@@ -77,7 +126,7 @@
             .form-container {
                 width: 100%;
                 margin: 0;
-                padding: 0;
+                padding: 10mm;
                 border: none;
             }
 
@@ -87,7 +136,7 @@
 
             @page {
                 size: A4;
-                margin: 10mm;
+                margin: 0;
             }
         }
     </style>
@@ -197,23 +246,29 @@
             <!-- Section 3 -->
             <tbody style="border: 1px solid black;">
                 <tr>
-                    <td colspan="24">ปัญหาที่ตรวจพบ / Ticket Description: <underline>${data.contact}</underline>
+                    <td colspan="24">
+                        ปัญหาที่ตรวจพบ / Ticket Description: <underline>${data.contact}</underline>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="24">วิธีแก้ปัญหา / Solution: <underline>${data.contact}</underline>
+                    <td colspan="24">
+                        วิธีแก้ปัญหา / Solution: <underline>${data.contact}</underline>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="7" style="text-align: left;">ปัญหาได้รับการแก้ไข / Resolved:</td>
+                    <td colspan="7" style="text-align: left;">
+                        ปัญหาได้รับการแก้ไข / Resolved:
+                    </td>
                     <td colspan="3" style="text-align: left;">
-                        <input type="checkbox" id="resolved1" name="resolved" value="resolved">
+                        <input type="radio" id="resolved1" name="resolve_status" value="resolved" ${data.resolve_status
+                            ? 'checked' : '' }>
                         <label for="resolved1">แก้ไขจบ</label>
                     </td>
                     <td colspan="14" style="text-align: left;">
-                        <input type="checkbox" id="resolved2" name="resolved" value="notresolved">
-                        <label for="resolved2">ยังไม่เสร็จ เนื่องจาก (ระบุสาเหตุ): </label>
-                        <underline>${data.contact}</underline>
+                        <input type="radio" id="resolved2" name="resolve_status" value="notresolved"
+                            ${!data.resolve_status ? 'checked' : '' }>
+                        <label for="resolved2">ยังไม่เสร็จ เนื่องจาก (ระบุสาเหตุ):</label>
+                        <u>${!data.resolve_status ? data.resolve_remark : ''}</u>
                     </td>
                 </tr>
                 <tr>
@@ -309,41 +364,35 @@
                     <td colspan="12" style="text-align: center; vertical-align: top; border-right: 1px solid #000;">
                         ตราประทับ/ Stamp :
                     </td>
-                    <td colspan="12" style="border-left: 1px solid #000;">
-                        <table border="0" style="width: 100%;">
-                            <tbody>
-                                <tr>
-                                    <td style="text-align: right;" colspan="2">ผู้รับบริการ/ Customer Sign:</td>
-                                    <td colspan="2">${data.customerSign}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: right;" colspan="2">ผู้ให้บริการ/ Service Sign:</td>
-                                    <td colspan="2">${data.serviceSign}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: right;" colspan="2">วันที่ / Date:</td>
-                                    <td colspan="2">${data.date}</td>
-                                </tr>
-                                <tr>
-                            </tbody>
-                            <tbody style="border: 1px solid black;">
-                                <tr>
-                                    <td style="text-align: center;" colspan="2">เวลาเข้างาน/ Time In:</td>
-                                    <td style="text-align: center;" colspan="2">เวลาออกงาน / Time Out:</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;" colspan="2">${data.timeIn}</td>
-                                    <td style="text-align: center;" colspan="2">${data.timeOut}</td>
-                                </tr>
-                            </tbody>
+                    <td colspan="13">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border: none;">
+                                <td style="text-align: right;" colspan="2">ผู้รับบริการ/ Customer Sign:</td>
+                                <td colspan="2">${data.customerSign}</td>
+                            </tr>
+                            <tr style="border: none;">
+                                <td style="text-align: right;" colspan="2">ผู้ให้บริการ/ Service Sign:</td>
+                                <td colspan="2">${data.serviceSign}</td>
+                            </tr style="border: none;">
+                            <tr style="border: none;">
+                                <td style="text-align: right;" colspan="2">วันที่ / Date:</td>
+                                <td colspan="2">${data.date}</td>
+                            </tr>
+                            <tr>
+                            <tr style="border-top: 1px solid #000;">
+                                <td style="text-align: center; border-right: 1px solid #000;" colspan="2">เวลาเข้างาน/
+                                    Time In:</td>
+                                <td style="text-align: center;" colspan="2">เวลาออกงาน / Time Out:</td>
+                            </tr>
+                            <tr style="border: none;">
+                                <td style="text-align: center; border-right: 1px solid #000;" colspan="2">${data.timeIn}
+                                </td>
+                                <td style="text-align: center;" colspan="2">${data.timeOut}</td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
             </tbody>
-        </table>
-        </td>
-        </tr>
-        </tbody>
-
-        </tbody>
         </table>
     </div>
 </body>
