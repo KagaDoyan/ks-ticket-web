@@ -74,8 +74,6 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                 if (res.ok) {
                     res.json().then((data) => {
                         setCustomers(data.data);
-                        console.log(customers);
-                        
                     })
                 }
             })
@@ -91,8 +89,6 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                 .then((res) => {
                     if (res.ok) {
                         res.json().then((data) => {
-                            setSelectedProvinceId(data.data.province_id)
-                            setSelectedCustomerId(data.data.customer_id)
                             setFormData({
                                 shop_number: data.data.shop_number,
                                 shop_name: data.data.shop_name,
@@ -100,8 +96,8 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                                 email: data.data.email,
                                 latitude: data.data.latitude,
                                 longitude: data.data.longitude,
-                                province_id: 0,
-                                customer_id: 0,
+                                province_id: data.data.province_id,
+                                customer_id: data.data.customers_id,
                             });
                         })
                     } else {
@@ -114,7 +110,6 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
     }
 
     const clearFormData = () => {
-        setSelectedProvinceId(0)
         setFormData({
             shop_number: "",
             shop_name: "",
@@ -147,8 +142,6 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                 body: JSON.stringify(
                     {
                         ...formData,
-                        province_id: selectedProvinceId,
-                        customer_id: selectedCustomerId
                     }
                 )
             })
@@ -176,8 +169,6 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                 body: JSON.stringify(
                     {
                         ...formData,
-                        province_id: selectedProvinceId,
-                        customer_id: selectedCustomerId
                     }
                 )
             })
@@ -297,10 +288,13 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                             <Autocomplete
                                 options={provinces}
                                 getOptionLabel={(option) => option.name}
-                                value={provinces.find((province) => province.id === selectedProvinceId) || null}
+                                value={provinces.find((province) => province.id === formData.province_id) || null}
                                 onChange={(event, newValue) => {
-                                    const selectedId = newValue ? newValue.id : null;
-                                    setSelectedProvinceId(selectedId);
+                                    const selectedId = newValue ? newValue.id : 0;
+                                    setFormData({
+                                        ...formData,
+                                        province_id: selectedId
+                                    })
                                 }}
                                 renderInput={(params) => <TextField {...params} label="Province" />}
                             />
@@ -308,11 +302,14 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                         <Grid item xs={12} sm={6}>
                             <Autocomplete
                                 options={customers}
-                                getOptionLabel={(option) => option.shortname}
-                                value={customers.find((customer) => customer.id === selectedCustomerId) || null}
+                                getOptionLabel={(option) => option.fullname}
+                                value={customers.find((customer) => customer.id === formData.customer_id) || null}
                                 onChange={(event, newValue) => {
-                                    const selectedId = newValue ? newValue.id : null;
-                                    setSelectedCustomerId(selectedId);
+                                    const selectedId = newValue ? newValue.id : 0;
+                                    setFormData({
+                                        ...formData,
+                                        customer_id: selectedId
+                                    })
                                 }}
                                 renderInput={(params) => <TextField {...params} label="Customer" />}
                             />

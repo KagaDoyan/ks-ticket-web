@@ -420,8 +420,8 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         payload.append('resolve_status', formData.resolve_status ? 'true' : 'false');
         payload.append('resolve_remark', formData.resolve_remark);
         payload.append('action', formData.action);
-        payload.append('time_in', formatDate(formData.time_in));
-        payload.append('time_out', formatDate(formData.time_out));
+        payload.append('time_in', formData.time_in);
+        payload.append('time_out', formData.time_out);
 
         if (formData.uploadedFiles) {
             for (let i = 0; i < formData.uploadedFiles.length; i++) {
@@ -485,8 +485,8 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
 
     const handleCreatePDF = () => {
         console.log(ticketData);
-        
-        const html = CraeteKoonServiceForm(ticketData);
+
+        const html = CraeteKoonServiceForm('koon', ticketData);
         const printWindow = window.open('', '', 'height=600,width=800');
 
         printWindow?.document.write(html);

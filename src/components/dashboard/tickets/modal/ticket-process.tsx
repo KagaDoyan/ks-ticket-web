@@ -11,7 +11,12 @@ const style = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '60%',
+    width: {
+        xs: '90%', // Mobile
+        sm: '80%', // Tablet
+        md: '60%', // Small desktop
+        lg: '60%', // Large desktop
+    },
     maxHeight: '90%',
     overflow: "scroll",
     bgcolor: 'background.paper',

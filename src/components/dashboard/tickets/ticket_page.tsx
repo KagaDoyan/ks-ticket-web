@@ -21,6 +21,7 @@ import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import CreateTicketModalForm from './modal/ticket-form';
 import TicketProcessModalForm from './modal/ticket-process';
+import Swal from 'sweetalert2';
 
 interface User {
   id: number;
@@ -159,21 +160,33 @@ export function TicketPage(): React.JSX.Element {
   }
 
   const handleDeleteticket = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authClient.getToken()}`
+          }
+        }).then((res) => {
+          if (res.ok) {
+            fetchticketData();
+            toast.success("ticket deleted successfully");
+          } else {
+            throw new Error("Failed to delete ticket");
+          }
+        }).catch((err) => {
+          toast.error("Failed to delete ticket");
+        });
       }
-    }).then((res) => {
-      if (res.ok) {
-        fetchticketData();
-        toast.success("ticket deleted successfully");
-      } else {
-        throw new Error("Failed to delete ticket");
-      }
-    }).catch((err) => {
-      toast.error("Failed to delete ticket");
-    });
+    })
   }
 
   React.useEffect(() => {
@@ -250,7 +263,7 @@ export function TicketPage(): React.JSX.Element {
                       <TableCell>{row.created_user.fullname}</TableCell>
                       <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                       <TableCell>{dayjs(row.due_by).format('MMM D, YYYY hh:mm:ss')}</TableCell>
-                      <TableCell>{row.engineer.name+' '+row.engineer.lastname}</TableCell>
+                      <TableCell>{row.engineer.name + ' ' + row.engineer.lastname}</TableCell>
                       <TableCell><Box sx={{ bgcolor: getStatusColor(row.ticket_status), display: 'inline-block', height: '10', width: '10', borderRadius: '5px', marginRight: '5px', padding: '5px', color: 'white' }}>{row.ticket_status}</Box></TableCell>
                       <TableCell>
                         <IconButton color='warning' onClick={() => handleEditticket(row.id)}>

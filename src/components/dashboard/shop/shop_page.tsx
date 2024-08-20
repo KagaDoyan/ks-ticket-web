@@ -21,10 +21,6 @@ import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import ShopModalForm from './modal/shop-form';
 
-function noop(): void {
-  // do nothing
-}
-
 export interface shop {
   id: number,
   shop_name: string,

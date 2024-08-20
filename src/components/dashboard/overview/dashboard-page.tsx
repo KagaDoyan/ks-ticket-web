@@ -4,14 +4,86 @@ import { Avatar, Box, Card, CardContent, Grid, Stack, Table, TableBody, TableHea
 import { Receipt } from "@mui/icons-material";
 import Chart from "react-apexcharts";
 import { useEffect, useState } from "react";
-import { ApexOptions } from "apexcharts";
 import { toast } from "react-toastify";
 import { styled } from '@mui/material/styles';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import AlertModal from "./modal/alert_modal";
+import { authClient } from "@/lib/auth/client";
+import useOnMount from "@mui/utils/useOnMount";
+import dayjs from "dayjs";
+
+interface TicketData {
+    ticket_status: string;
+    customer: { shortname: string };
+}
+
 export default function DashboardPage(): React.JSX.Element {
-    const [modal_open, setModalOpen] = useState(false)
-    const handleModalClose = () => setModalOpen(false)
+    const [ticketData, setTickets] = useState<TicketData[]>([]);
+    const [series, setSeries] = useState<any[]>([]);
+    const [startdata, setStartDate] = useState<string>(dayjs(Date.now() - 7 * 24 * 60 * 60 * 1000).format('YYYY-MM-DD'));
+    const [enddata, setEndDate] = useState<string>(dayjs(Date.now()).format('YYYY-MM-DD'));
+    const [customers, setCustomers] = useState<string[]>([]);
+    const [modal_open, setModalOpen] = useState(false);
+
+    const handleModalClose = () => setModalOpen(false);
+
+    useEffect(() => {
+        fetchCustomer();
+        fetchTicketByDate();
+    }, [startdata, enddata]);
+
+    useEffect(() => {
+        const initialSeries: { name: string, data: number[] }[] = ["open", "pending", "spare", "close"].map(status => (
+            {
+                name: status.charAt(0).toUpperCase() + status.slice(1),
+                data: []
+            }
+        ));
+        customers.forEach((customer) => {
+            const seriesIndexOpen = initialSeries.findIndex(series => series.name.toLowerCase() === 'open');
+            const seriesIndexPending = initialSeries.findIndex(series => series.name.toLowerCase() === 'pending');
+            const seriesIndexSpare = initialSeries.findIndex(series => series.name.toLowerCase() === 'spare');
+            const seriesIndexClosed = initialSeries.findIndex(series => series.name.toLowerCase() === 'close');
+            initialSeries[seriesIndexOpen].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'open' && ticket.customer.shortname === customer).length);
+            initialSeries[seriesIndexPending].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'pending' && ticket.customer.shortname === customer).length);
+            initialSeries[seriesIndexSpare].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'spare' && ticket.customer.shortname === customer).length);
+            initialSeries[seriesIndexClosed].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'close' && ticket.customer.shortname === customer).length);
+        });
+        setSeries(initialSeries);
+    }, [ticketData]);
+
+    const fetchCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        }).then((res) => {
+            if (res.ok) {
+                res.json().then((data) => {
+                    const customersList = data.data.map((customer: any) => customer.shortname);
+                    setCustomers(customersList);
+                });
+            }
+        }).catch(err => {
+            console.error("Failed to fetch customers:", err);
+        });
+    };
+
+    const fetchTicketByDate = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${startdata}&end=${enddata}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        }).then((res) => {
+            if (res.ok) {
+                res.json().then((data) => {
+                    setTickets(data.data);
+                });
+            }
+        })
+    };
 
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
         [`&.${tableCellClasses.head}`]: {
@@ -22,57 +94,15 @@ export default function DashboardPage(): React.JSX.Element {
             fontSize: 14,
         },
     }));
+
     const StyledTableRow = styled(TableRow)(({ theme }) => ({
         '&:nth-of-type(odd)': {
             backgroundColor: theme.palette.action.hover,
         },
-        // hide last border
         '&:last-child td, &:last-child th': {
             border: 0,
         },
     }));
-    const options: ApexOptions = {
-        chart: {
-            toolbar: {
-                tools: {
-                    download: false,
-                    selection: true,
-                },
-            },
-            id: "basic-bar",
-            events: {
-                dataPointSelection: (event, chartContext, config) => {
-                    const { dataPointIndex, seriesIndex } = config;
-                    const category = options.xaxis?.categories[dataPointIndex];
-                    const seriesName = series[seriesIndex].name;
-                    const value = series[seriesIndex].data[dataPointIndex];
-                    // alert(`Category: ${category}\nSeries: ${seriesName}\nValue: ${value}`);
-                    toast.info(`Category: ${category}\nSeries: ${seriesName}\nValue: ${value}`);
-                }
-            }
-        },
-        xaxis: {
-            categories: ['KFC', 'Pizza', 'OKJ']
-        },
-        colors: ['rgb(240, 128, 128)', 'rgb(255, 153, 153)', 'rgb(255, 204, 153)', 'rgb(153, 255, 153)'], // Custom colors for Open, Pending, Spare, Close
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: '55%',
-            },
-        },
-        dataLabels: {
-            enabled: true,
-        },
-        stroke: {
-            show: true,
-            width: 2,
-            colors: ['transparent'],
-        },
-        fill: {
-            opacity: 1,
-        }
-    }
 
     const mocktikcets = [
         {
@@ -91,25 +121,6 @@ export default function DashboardPage(): React.JSX.Element {
             status: "open",
             due_by: "2024-07-18 21:30:00",
         }
-    ]
-
-    const series = [
-        {
-            name: 'Open',
-            data: [10, 5, 2],
-        },
-        {
-            name: 'Pending',
-            data: [6, 7, 3],
-        },
-        {
-            name: 'Spare',
-            data: [8, 6, 2],
-        },
-        {
-            name: 'Closed',
-            data: [3, 7, 2],
-        }
     ];
 
     interface CountdownProps {
@@ -121,6 +132,7 @@ export default function DashboardPage(): React.JSX.Element {
         minutes: number;
         seconds: number;
     }
+
     const Countdown: React.FC<CountdownProps> = ({ dueDate }) => {
         const calculateTimeLeft = (): TimeLeft => {
             const difference = +new Date(dueDate) - +new Date();
@@ -153,19 +165,16 @@ export default function DashboardPage(): React.JSX.Element {
         }, [dueDate]);
 
         useEffect(() => {
-            // Function to show the alert
             const showAlert = () => {
-              setModalOpen(true);
+                setModalOpen(true);
             };
-        
-            // Set up the interval
+
             const intervalId = setInterval(() => {
-              showAlert();
+                showAlert();
             }, 100000000);
 
-            // Clean up the interval on component unmount
             return () => clearInterval(intervalId);
-          }, []);
+        }, []);
 
         return (
             <p style={{ color: 'red' }}>
@@ -268,43 +277,98 @@ export default function DashboardPage(): React.JSX.Element {
                                 Ticket Status Overview by Customer
                             </Typography>
                             <Chart
-                                options={options}
+                                options={{
+                                    chart: {
+                                        toolbar: {
+                                            tools: {
+                                                download: false,
+                                                selection: true,
+                                            },
+                                        },
+                                        animations: {
+                                            enabled: false, // Disable animations
+                                        },
+                                        id: "basic-bar",
+                                        events: {
+                                            dataPointSelection: (event, chartContext, config) => {
+                                                const { seriesIndex, dataPointIndex } = config;
+                                                const selectedSeriesName = config.w.config.series[seriesIndex].name;
+                                                const selectedCategory = config.w.config.xaxis.categories[dataPointIndex];
+
+                                                // Alert the category and series name
+                                                alert(`Category: ${selectedCategory}\nSeries: ${selectedSeriesName}`);
+                                            },
+                                        },
+                                    },
+                                    xaxis: {
+                                        categories: customers, // Set customers as categories
+                                        title: {
+                                            text: "Customers",
+                                        },
+                                    },
+                                    yaxis: {
+                                        title: {
+                                            text: "Ticket Status Count",
+                                        },
+                                    },
+                                    colors: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
+                                    plotOptions: {
+                                        bar: {
+                                            dataLabels: {
+                                                position: 'top',
+                                            }
+                                        }
+                                    },
+                                    dataLabels: {
+                                        enabled: true,
+                                        offsetY: -20,
+                                        style: {
+                                            fontSize: '12px',
+                                            colors: ["#304758"]
+                                        }
+                                    },
+                                }}
                                 series={series}
                                 type="bar"
                                 width="100%"
-                                height={350}
+                                height="400px"
                             />
                         </CardContent>
                     </Card>
-
                 </Grid>
                 <Grid item xs={12}>
                     <Card>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>ticket number</TableCell>
-                                    <TableCell>incident no</TableCell>
-                                    <TableCell>title</TableCell>
-                                    <TableCell>status</TableCell>
-                                    <TableCell>due_by</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {mocktikcets.map((row) => (
-                                    <StyledTableRow
-                                        key={row.ticket_id}
-                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                    >
-                                        <StyledTableCell>{row.ticket_id}</StyledTableCell>
-                                        <StyledTableCell>{row.incident_no}</StyledTableCell>
-                                        <StyledTableCell>{row.title}</StyledTableCell>
-                                        <StyledTableCell><Box sx={{ bgcolor: "rgb(240, 128, 128)", display: 'inline-block', height: '10', width: '10', borderRadius: '5px', marginRight: '5px', padding: '5px', color: 'white' }}>{row.status}</Box></StyledTableCell>
-                                        <StyledTableCell sx={{ width: '200px' }}><Countdown dueDate={row.due_by} /></StyledTableCell>
-                                    </StyledTableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                        <CardContent>
+                            <Typography variant="h6" color={'text.secondary'} component="div">
+                                Tickets
+                            </Typography>
+                            <Box overflow="auto">
+                                <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <StyledTableCell>Ticket ID</StyledTableCell>
+                                            <StyledTableCell align="right">Incident No</StyledTableCell>
+                                            <StyledTableCell align="right">Status</StyledTableCell>
+                                            <StyledTableCell align="right">Due By</StyledTableCell>
+                                            <StyledTableCell align="right">Time Left</StyledTableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {mocktikcets.map((row) => (
+                                            <StyledTableRow key={row.ticket_id}>
+                                                <StyledTableCell component="th" scope="row">
+                                                    {row.ticket_id}
+                                                </StyledTableCell>
+                                                <StyledTableCell align="right">{row.incident_no}</StyledTableCell>
+                                                <StyledTableCell align="right">{row.status}</StyledTableCell>
+                                                <StyledTableCell align="right">{row.due_by}</StyledTableCell>
+                                                <StyledTableCell align="right"><Countdown dueDate={row.due_by} /></StyledTableCell>
+                                            </StyledTableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </Box>
+                        </CardContent>
                     </Card>
                 </Grid>
             </Grid>
