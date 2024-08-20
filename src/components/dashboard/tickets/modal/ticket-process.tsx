@@ -2,7 +2,7 @@ import { Box, Modal, Typography, Tabs, Tab } from "@mui/material";
 import TicketPage from "./page/ticket_page";
 import { useState } from "react";
 import EngineerPage from "./page/engineer_page";
-import { maxHeight } from "@mui/system";
+import ReturnPage from "./page/return_page";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -85,6 +85,11 @@ export default function TicketProcessModalForm({ open, handleClose, ticketID, fe
                     {active_tab === "two" && (
                         <>
                             <EngineerPage open={open} handleClose={handleModalClose} ticketID={ticketID} fetchticketData={fetchticketData} />
+                        </>
+                    )}
+                    {active_tab === "three" && (
+                        <>
+                            <ReturnPage open={open} handleClose={handleModalClose} ticketID={ticketID} fetchticketData={fetchticketData} />
                         </>
                     )}
                 </Box>

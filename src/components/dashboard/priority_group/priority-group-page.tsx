@@ -16,8 +16,11 @@ import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/di
 import { Button, Grid, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
-import { Delete, Edit, Refresh } from '@mui/icons-material';
+import { Delete, Edit, List, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
+import PriorityGroupModalForm from './modal/priority_group_form';
+import PriorityModalForm from './modal/priority_form';
+import Swal from 'sweetalert2';
 
 interface priority_group {
     id: number;
@@ -36,9 +39,13 @@ export function PriorityGroupPage(): React.JSX.Element {
     const [search, setSearch] = React.useState<string>('');
     const [count, setCount] = React.useState(0);
     const [prioritiesID, setprioritiesID] = React.useState(0);
+    const [priorityGroupID, setpriorityGroupID] = React.useState(0);
+    const [priorityID, setpriorityID] = React.useState(0);
 
     const [open, setOpen] = React.useState(false);
+    const [popen, setpopen] = React.useState(false)
     const handleOpen = () => setOpen(true);
+    const handlePopen = () => setpopen(true);
 
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
@@ -70,8 +77,6 @@ export function PriorityGroupPage(): React.JSX.Element {
                         setCount(data.total_rows);
                     })
                 }
-                console.log(rows);
-                
             }).catch((err) => {
                 // throw new Error(err);
                 toast.error("Failed to fetch priorities data");
@@ -79,26 +84,70 @@ export function PriorityGroupPage(): React.JSX.Element {
     }
 
     const handleEditpriorities = (id: number) => {
-        setprioritiesID(id)
-        handleOpen()
+        setpriorityID(id)
+        handlePopen()
     }
 
     const handleDeletepriorities = (id: number) => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorities/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${authClient.getToken()}`
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priority/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authClient.getToken()}`
+                    }
+                })
+                    .then((res) => {
+                        if (res.ok) {
+                            fetchprioritiesData();
+                            toast.success('Priority deleted successfully');
+                        } else {
+                            toast.error("Failed to delete priority");
+                        }
+                    }).catch((err) => {
+                        toast.error("Failed to delete priority");
+                    });
             }
-        }).then((res) => {
-            if (res.ok) {
-                fetchprioritiesData();
-                toast.success("priorities deleted successfully");
-            } else {
-                throw new Error("Failed to delete priorities");
+        })
+    }
+
+    const handleDeleteprioritiesGroup = (id: number) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {   
+            if (result.isConfirmed) {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authClient.getToken()}`
+                    }
+                })
+                    .then((res) => {
+                        if (res.ok) {
+                            fetchprioritiesData();
+                            toast.success('Priority Group deleted successfully');
+                        } else {
+                            toast.error("Failed to delete priority group");
+                        }
+                    }).catch((err) => {
+                        toast.error("Failed to delete priority group");
+                    });
             }
-        }).catch((err) => {
-            toast.error("Failed to delete priorities");
-        });
+        })
     }
 
     React.useEffect(() => {
@@ -109,13 +158,35 @@ export function PriorityGroupPage(): React.JSX.Element {
         handleOpen()
     }
 
+    const HandModalPriorityAdd = () => {
+        handlePopen()
+    }
+
     const handleModalClose = () => {
         setOpen(false)
         setprioritiesID(0)
     }
 
+    const handlePModalClose = () => {
+        setpopen(false)
+        setpriorityID(0)
+    }
+
+    function formatTime(seconds: number): string {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = seconds % 60;
+
+        const minutesDisplay = minutes > 0 ? `${minutes}m ` : '';
+        const secondsDisplay = remainingSeconds > 0 ? `${remainingSeconds}s` : '';
+
+        return `${hours}h ${minutesDisplay}${secondsDisplay}`.trim();
+    }
+
     return (
         <>
+            <PriorityModalForm open={popen} handleClose={handlePModalClose} prioritiesID={priorityID} priority_group_id={priorityGroupID} fetchprioritiesData={fetchprioritiesData} />
+            <PriorityGroupModalForm open={open} handleClose={handleModalClose} prioritiesID={prioritiesID} fetchprioritiesData={fetchprioritiesData} />
             <Stack direction="row" spacing={3}>
                 <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
                     <Typography variant="h5">priorities</Typography>
@@ -139,7 +210,7 @@ export function PriorityGroupPage(): React.JSX.Element {
                 </Stack>
                 <div>
                     <Button onClick={HandleModalAddData} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
-                        Add
+                        Add Group
                     </Button>
                 </div>
             </Stack>
@@ -165,7 +236,10 @@ export function PriorityGroupPage(): React.JSX.Element {
                                                     <IconButton color='warning' onClick={() => handleEditpriorities(row.id)}>
                                                         <Edit />
                                                     </IconButton>
-                                                    <IconButton color='error' onClick={() => handleDeletepriorities(row.id)}>
+                                                    <IconButton color='primary' onClick={() => setpriorityGroupID(row.id)}>
+                                                        <List />
+                                                    </IconButton>
+                                                    <IconButton color='error' onClick={() => handleDeleteprioritiesGroup(row.id)}>
                                                         <Delete />
                                                     </IconButton>
                                                 </TableCell>
@@ -186,6 +260,58 @@ export function PriorityGroupPage(): React.JSX.Element {
                             rowsPerPageOptions={[5, 10, 25]}
                         />
                     </Card>
+                </Grid>
+                <Grid item xs={6}>
+                    {priorityGroupID > 0 ?
+                        <Card sx={{ height: '100%' }}>
+                            <Typography variant="h6" sx={{ p: 2 }}>
+                                {rows.filter((row) => row.id == priorityGroupID)[0].group_name} Priorities
+                            </Typography>
+                            <Divider />
+                            {rows.filter((row) => row.id == priorityGroupID)[0].priorities.length > 0 ?
+                                <Box sx={{ overflowX: 'auto' }}>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>priority</TableCell>
+                                                <TableCell>time</TableCell>
+                                                <TableCell>action</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {rows.filter((row) => row.id == priorityGroupID)[0].priorities.map((row) => {
+                                                return (
+                                                    <TableRow hover key={row.id}>
+                                                        <TableCell>{row.name}</TableCell>
+                                                        <TableCell>{formatTime(row.time_sec)}</TableCell>
+                                                        <TableCell>
+                                                            <IconButton color='warning' onClick={() => handleEditpriorities(row.id)}>
+                                                                <Edit />
+                                                            </IconButton>
+                                                            <IconButton color='error' onClick={() => handleDeletepriorities(row.id)}>
+                                                                <Delete />
+                                                            </IconButton>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                            <TableRow>
+                                                <TableCell colSpan={3} sx={{ textAlign: 'center' }}>
+                                                    <Button onClick={HandModalPriorityAdd} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
+                                                        Add Priority
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </Box>
+                                : <Typography sx={{ p: 2, textAlign: 'center' }}>
+                                    <Button onClick={HandModalPriorityAdd} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
+                                        Add Priority
+                                    </Button>
+                                </Typography>}
+                        </Card>
+                        : ""}
                 </Grid>
             </Grid>
         </>

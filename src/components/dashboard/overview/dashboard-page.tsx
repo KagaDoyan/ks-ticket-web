@@ -1,6 +1,6 @@
 'use client'
 
-import { Avatar, Box, Card, CardContent, Grid, Stack, Table, TableBody, TableHead, TableRow, Typography, useTheme } from "@mui/material";
+import { Avatar, Badge, Box, Card, CardContent, Grid, Stack, Table, TableBody, TableHead, TableRow, Typography, useTheme } from "@mui/material";
 import { Receipt } from "@mui/icons-material";
 import Chart from "react-apexcharts";
 import { useEffect, useState } from "react";
@@ -11,10 +11,15 @@ import AlertModal from "./modal/alert_modal";
 import { authClient } from "@/lib/auth/client";
 import useOnMount from "@mui/utils/useOnMount";
 import dayjs from "dayjs";
+import { borderRadius } from "@mui/system";
 
 interface TicketData {
+    id: number;
     ticket_status: string;
     customer: { shortname: string };
+    due_by: string;
+    inc_number: string;
+    ticket_number: string;
 }
 
 export default function DashboardPage(): React.JSX.Element {
@@ -79,6 +84,8 @@ export default function DashboardPage(): React.JSX.Element {
         }).then((res) => {
             if (res.ok) {
                 res.json().then((data) => {
+                    console.log(data.data);
+
                     setTickets(data.data);
                 });
             }
@@ -86,10 +93,6 @@ export default function DashboardPage(): React.JSX.Element {
     };
 
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
-        [`&.${tableCellClasses.head}`]: {
-            backgroundColor: theme.palette.common.black,
-            color: theme.palette.common.white,
-        },
         [`&.${tableCellClasses.body}`]: {
             fontSize: 14,
         },
@@ -201,7 +204,7 @@ export default function DashboardPage(): React.JSX.Element {
                                     <Typography color="text.secondary" variant="overline">
                                         Open
                                     </Typography>
-                                    <Typography variant="h4">2</Typography>
+                                    <Typography variant="h4">{ticketData.filter((ticket) => ticket.ticket_status === 'open').length}</Typography>
                                 </Stack>
                                 <Avatar sx={{ backgroundColor: 'rgb(240, 128, 128)', height: '56px', width: '56px' }}>
                                     <Receipt sx={{ fontSize: 'var(--icon-fontSize-lg)' }} />
@@ -221,7 +224,7 @@ export default function DashboardPage(): React.JSX.Element {
                                     <Typography color="text.secondary" variant="overline">
                                         Pending
                                     </Typography>
-                                    <Typography variant="h4">5</Typography>
+                                    <Typography variant="h4">{ticketData.filter((ticket) => ticket.ticket_status === 'pending').length}</Typography>
                                 </Stack>
                                 <Avatar sx={{ backgroundColor: 'rgb(255, 153, 153)', height: '56px', width: '56px' }}>
                                     <Receipt sx={{ fontSize: 'var(--icon-fontSize-lg)' }} />
@@ -241,7 +244,7 @@ export default function DashboardPage(): React.JSX.Element {
                                     <Typography color="text.secondary" variant="overline">
                                         Spare
                                     </Typography>
-                                    <Typography variant="h4">3</Typography>
+                                    <Typography variant="h4">{ticketData.filter((ticket) => ticket.ticket_status === 'spare').length}</Typography>
                                 </Stack>
                                 <Avatar sx={{ backgroundColor: 'rgb(255, 204, 153)', height: '56px', width: '56px' }}>
                                     <Receipt sx={{ fontSize: 'var(--icon-fontSize-lg)' }} />
@@ -261,7 +264,7 @@ export default function DashboardPage(): React.JSX.Element {
                                     <Typography color="text.secondary" variant="overline">
                                         Closed
                                     </Typography>
-                                    <Typography variant="h4">10</Typography>
+                                    <Typography variant="h4">{ticketData.filter((ticket) => ticket.ticket_status === 'close').length}</Typography>
                                 </Stack>
                                 <Avatar sx={{ backgroundColor: 'rgb(153, 255, 153)', height: '56px', width: '56px' }}>
                                     <Receipt sx={{ fontSize: 'var(--icon-fontSize-lg)' }} />
@@ -344,7 +347,7 @@ export default function DashboardPage(): React.JSX.Element {
                             </Typography>
                             <Box overflow="auto">
                                 <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                                    <TableHead>
+                                    <TableHead style={{ borderRadius: "8px 8px 0 0" }}>
                                         <TableRow>
                                             <StyledTableCell>Ticket ID</StyledTableCell>
                                             <StyledTableCell align="right">Incident No</StyledTableCell>
@@ -354,13 +357,13 @@ export default function DashboardPage(): React.JSX.Element {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {mocktikcets.map((row) => (
-                                            <StyledTableRow key={row.ticket_id}>
+                                        {ticketData.filter((ticket) => ticket.ticket_status == 'open').map((row) => (
+                                            <StyledTableRow key={row.id}>
                                                 <StyledTableCell component="th" scope="row">
-                                                    {row.ticket_id}
+                                                    {row.ticket_number}
                                                 </StyledTableCell>
-                                                <StyledTableCell align="right">{row.incident_no}</StyledTableCell>
-                                                <StyledTableCell align="right">{row.status}</StyledTableCell>
+                                                <StyledTableCell align="right">{row.inc_number}</StyledTableCell>
+                                                <StyledTableCell align="right"><Badge color={row.ticket_status === 'Closed' ? 'success' : 'warning'}>{row.ticket_status}</Badge></StyledTableCell>
                                                 <StyledTableCell align="right">{row.due_by}</StyledTableCell>
                                                 <StyledTableCell align="right"><Countdown dueDate={row.due_by} /></StyledTableCell>
                                             </StyledTableRow>
