@@ -17,7 +17,7 @@ import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/di
 import { Badge, Button, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
-import { Delete, Edit, Refresh } from '@mui/icons-material';
+import { Delete, Edit, PersonAddAlt1Outlined, PersonRemoveAlt1Outlined, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import ItemModalForm from './modal/item-form';
 
@@ -41,6 +41,7 @@ export interface item {
     id: number;
     name: string;
   };
+  engineers_id: number;
   engineer: {
     id: number;
     name: string;
@@ -117,6 +118,24 @@ export function ItemPage(): React.JSX.Element {
     });
   }
 
+  const handleRemoveEngineer = (id: number) => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/${id}/engineer`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
+    }).then((res) => {
+      if (res.ok) {
+        fetchitemData();
+        toast.success("Engineer removed successfully");
+      } else {
+        throw new Error("Failed to remove engineer");
+      }
+    }).catch((err) => {
+      toast.error("Failed to remove engineer");
+    });
+  }
+
   React.useEffect(() => {
     fetchitemData();
   }, [page, rowsPerPage, search])
@@ -184,7 +203,7 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.category.name}</TableCell>
                     <TableCell>{row.brand.name}</TableCell>
                     <TableCell>{row.model.name}</TableCell>
-                    <TableCell>{row.engineer?.name ? row.engineer.name : 'WareHouse'}</TableCell>
+                    <TableCell><Badge badgeContent={row.engineer?.name ? row.engineer.name : 'WareHouse'} color={row.engineer?.name ? 'primary' : 'warning'} /></TableCell>
                     <TableCell>{dayjs(row.waranty_expiry_date).format('MMM D, YYYY')}</TableCell>
                     <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
                     <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
@@ -192,6 +211,11 @@ export function ItemPage(): React.JSX.Element {
                       <IconButton color='warning' onClick={() => handleEdititem(row.id)}>
                         <Edit />
                       </IconButton>
+                      {row.engineers_id === null || row.engineers_id === 0 ? <IconButton color='primary'>
+                        <PersonAddAlt1Outlined />
+                      </IconButton> : <IconButton color='error' onClick={() => handleRemoveEngineer(row.id)}>
+                        <PersonRemoveAlt1Outlined />
+                      </IconButton>}
                       <IconButton color='error' onClick={() => handleDeleteitem(row.id)}>
                         <Delete />
                       </IconButton>

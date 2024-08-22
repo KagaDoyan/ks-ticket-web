@@ -9,6 +9,7 @@ import { date } from "zod";
 import formatDate from "@/lib/dateformat";
 import CraeteKoonServiceForm from "./pdf/koonservice";
 import Swal from "sweetalert2";
+import MenuButton from "./menu_button";
 
 interface brand {
     id: number
@@ -481,17 +482,6 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             ...formData,
             [name]: value
         });
-    }
-
-    const handleCreatePDF = () => {
-        console.log(ticketData);
-
-        const html = CraeteKoonServiceForm('koon', ticketData);
-        const printWindow = window.open('', '', 'height=600,width=800');
-
-        printWindow?.document.write(html);
-        printWindow?.document.close(); // Ensure the content is fully loaded
-        printWindow?.focus();
     }
     return (
         <>
@@ -994,9 +984,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
                 </Button>
-                <Button onClick={handleCreatePDF} variant="contained" color="warning">
-                    PDF
-                </Button>
+                <MenuButton data={ticketData} />
                 <Button variant="contained" color="success" onClick={handleSubmit}>
                     Update
                 </Button>

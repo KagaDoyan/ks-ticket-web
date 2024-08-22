@@ -4,14 +4,12 @@ import { Avatar, Badge, Box, Card, CardContent, Grid, Stack, Table, TableBody, T
 import { Receipt } from "@mui/icons-material";
 import Chart from "react-apexcharts";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { styled } from '@mui/material/styles';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import AlertModal from "./modal/alert_modal";
 import { authClient } from "@/lib/auth/client";
-import useOnMount from "@mui/utils/useOnMount";
 import dayjs from "dayjs";
-import { borderRadius } from "@mui/system";
+import TextField from '@mui/material/TextField';
 
 interface TicketData {
     id: number;
@@ -25,8 +23,10 @@ interface TicketData {
 export default function DashboardPage(): React.JSX.Element {
     const [ticketData, setTickets] = useState<TicketData[]>([]);
     const [series, setSeries] = useState<any[]>([]);
-    const [startdata, setStartDate] = useState<string>(dayjs(Date.now() - 7 * 24 * 60 * 60 * 1000).format('YYYY-MM-DD'));
-    const [enddata, setEndDate] = useState<string>(dayjs(Date.now()).format('YYYY-MM-DD'));
+    const [dateRange, setDateRange] = useState<[string, string]>([
+        dayjs(Date.now() - 7 * 24 * 60 * 60 * 1000).format('YYYY-MM-DD'),
+        dayjs(Date.now()).format('YYYY-MM-DD')
+    ]);
     const [customers, setCustomers] = useState<string[]>([]);
     const [modal_open, setModalOpen] = useState(false);
 
@@ -35,7 +35,7 @@ export default function DashboardPage(): React.JSX.Element {
     useEffect(() => {
         fetchCustomer();
         fetchTicketByDate();
-    }, [startdata, enddata]);
+    }, [dateRange]);
 
     useEffect(() => {
         const initialSeries: { name: string, data: number[] }[] = ["open", "pending", "spare", "close"].map(status => (
@@ -76,7 +76,8 @@ export default function DashboardPage(): React.JSX.Element {
     };
 
     const fetchTicketByDate = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${startdata}&end=${enddata}`, {
+        const [start, end] = dateRange;
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${start}&end=${end}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -84,12 +85,12 @@ export default function DashboardPage(): React.JSX.Element {
         }).then((res) => {
             if (res.ok) {
                 res.json().then((data) => {
-                    console.log(data.data);
-
                     setTickets(data.data);
                 });
             }
-        })
+        }).catch(err => {
+            console.error("Failed to fetch tickets:", err);
+        });
     };
 
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -107,75 +108,28 @@ export default function DashboardPage(): React.JSX.Element {
         },
     }));
 
-    const mocktikcets = [
-        {
-            id: 1,
-            title: 'pos pc broken',
-            ticket_id: "12345",
-            incident_no: "inc_12345",
-            status: "open",
-            due_by: "2024-07-18 21:00:00",
-        },
-        {
-            id: 1,
-            title: 'pos pc broken',
-            ticket_id: "123456",
-            incident_no: "inc_123456",
-            status: "open",
-            due_by: "2024-07-18 21:30:00",
-        }
-    ];
-
-    interface CountdownProps {
-        dueDate: string;
-    }
-
-    interface TimeLeft {
-        hours: number;
-        minutes: number;
-        seconds: number;
-    }
-
-    const Countdown: React.FC<CountdownProps> = ({ dueDate }) => {
-        const calculateTimeLeft = (): TimeLeft => {
+    const Countdown: React.FC<{ dueDate: string }> = ({ dueDate }) => {
+        const calculateTimeLeft = () => {
             const difference = +new Date(dueDate) - +new Date();
-            let timeLeft: TimeLeft;
-
-            if (difference > 0) {
-                timeLeft = {
+            return difference > 0
+                ? {
                     hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
                     minutes: Math.floor((difference / 1000 / 60) % 60),
                     seconds: Math.floor((difference / 1000) % 60)
-                };
-            } else {
-                timeLeft = {
-                    hours: 0,
-                    minutes: 0,
-                    seconds: 0
-                };
-            }
-            return timeLeft;
+                }
+                : { hours: 0, minutes: 0, seconds: 0 };
         };
 
-        const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft());
+        const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
         useEffect(() => {
-            const timer = setInterval(() => {
-                setTimeLeft(calculateTimeLeft());
-            }, 1000);
-
+            const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
             return () => clearInterval(timer);
         }, [dueDate]);
 
         useEffect(() => {
-            const showAlert = () => {
-                setModalOpen(true);
-            };
-
-            const intervalId = setInterval(() => {
-                showAlert();
-            }, 100000000);
-
+            const showAlert = () => setModalOpen(true);
+            const intervalId = setInterval(showAlert, 100000000);
             return () => clearInterval(intervalId);
         }, []);
 
@@ -191,8 +145,14 @@ export default function DashboardPage(): React.JSX.Element {
             <AlertModal modal_open={modal_open} handleModalClose={handleModalClose} />
             <Grid container spacing={2}>
                 <Grid item lg={12} md={12} xs={12}>
-                    <Typography variant="h6" color={'text.secondary'}>Dashboard</Typography>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6" color={'text.secondary'}>
+                            Dashboard
+                        </Typography>
+                        
+                    </Stack>
                 </Grid>
+
                 <Grid item lg={3} md={6} xs={12}>
                     <Card sx={{
                         width: '100%',

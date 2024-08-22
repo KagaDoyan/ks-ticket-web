@@ -90,7 +90,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
 
     const addShopItem = () => {
         if (shopitems.length < 4) {
-            setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'repair' }]);
+            setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'return', id: 0 }]);
         } else {
             toast.error("You can only add up to 5 items.");
         }
@@ -385,7 +385,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 sx={{ display: 'none' }}
                             />
                             <TextField
-                                disabled
+                                disabled={item.id != 0}
                                 label="Serial Number"
                                 value={item.serial_number}
                                 onChange={(e) => handleShopItemChange(index, 'serial_number', e.target.value)}
@@ -394,7 +394,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
                             />
                             <Autocomplete
-                                disabled
+                                disabled={item.id != 0}
                                 size="small"
                                 options={CategoryOption}
                                 getOptionLabel={(option) => option.name}
@@ -413,7 +413,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 renderInput={(params) => <TextField required {...params} label="Category" />}
                             />
                             <Autocomplete
-                                disabled
+                                disabled={item.id != 0}
                                 size="small"
                                 options={BrandOption}
                                 getOptionLabel={(option) => option.name}
@@ -432,7 +432,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 renderInput={(params) => <TextField required {...params} label="Brand" />}
                             />
                             <Autocomplete
-                                disabled
+                                disabled={item.id != 0}
                                 size="small"
                                 options={ModelOption}
                                 getOptionLabel={(option) => option.name}
@@ -451,7 +451,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
                             <TextField
-                                disabled
+                                disabled={item.id != 0}
                                 label="Warranty Expiry Date"
                                 type="date"
                                 InputLabelProps={{ shrink: true }}
@@ -507,9 +507,11 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             <Grid container spacing={2}>
                 {spareitems.length == 0 ? (
                     <Grid item xs={12} sm={6}>
-                        <Button onClick={addSpareItem} variant="contained" color="primary">
-                            Add item
-                        </Button>
+                        <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
+                            <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
+                                No Spare Item
+                            </Typography>
+                        </Stack>
                     </Grid>
                 ) : spareitems.map((item, index) => (
                     <Grid item xs={12} sm={6} key={index}>
