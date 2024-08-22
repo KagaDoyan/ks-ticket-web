@@ -30,6 +30,10 @@ interface spare_status {
     name: string
 }
 
+interface store_status {
+    name: string
+}
+
 interface FormData {
     solution: string;
     investigation: string;
@@ -58,6 +62,11 @@ interface image_url {
 const spare_status: spare_status[] = [
     { name: 'spare' },
     { name: 'replace' },
+]
+
+const store_status: store_status[] = [
+    { name: 'repair' },
+    { name: 'return' },
 ]
 
 export default function ReturnPage({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
@@ -175,14 +184,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             })
         } else {
             setShopItem(updatedItems);
-        }
-    };
-
-    const addSpareItem = () => {
-        if (spareitems.length < 4) {
-            setSpareItem([...spareitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'spare', model_id: 0 }]);
-        } else {
-            toast.error("You can only add up to 4 items.");
         }
     };
 
@@ -463,12 +464,12 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                             />
                             <Autocomplete
                                 size="small"
-                                options={[{ name: "return" }, { name: "repair" }]}
+                                options={store_status}
                                 getOptionLabel={(option) => option.name}
                                 value={
                                     item.status
-                                        ? [{ name: "return" }, { name: "repair" }].find((status) => status.name === item.status)
-                                        : [{ name: "return" }, { name: "repair" }][1] || null
+                                        ? store_status.find((status) => status.name === item.status)
+                                        : store_status[0] || null
                                 }
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
