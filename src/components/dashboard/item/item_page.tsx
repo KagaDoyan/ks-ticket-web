@@ -20,6 +20,8 @@ import { toast } from 'react-toastify';
 import { Delete, Edit, PersonAddAlt1Outlined, PersonRemoveAlt1Outlined, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import ItemModalForm from './modal/item-form';
+import EngineerSelectionModal from './modal/engineer_select';
+import Swal from 'sweetalert2';
 
 export interface item {
   id: number;
@@ -58,6 +60,13 @@ export function ItemPage(): React.JSX.Element {
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
+
+  const [eopen, seteOpen] = React.useState(false);
+  const handleEOpen = (id: number) => {
+    setitemID(id);
+    seteOpen(true);
+  };
+  const handleEClose = () => seteOpen(false);
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -119,21 +128,37 @@ export function ItemPage(): React.JSX.Element {
   }
 
   const handleRemoveEngineer = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/${id}/engineer`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
+    Swal.fire({
+      title: 'please confirm',
+      text: 'Are you sure you want to return the item?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/engineer/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authClient.getToken()}`
+          },
+          body: JSON.stringify({
+            engineer_id: null
+          })
+        }).then((res) => {
+          if (res.ok) {
+            fetchitemData();
+            toast.success("Engineer removed successfully");
+          } else {
+            throw new Error("Failed to remove engineer");
+          }
+        }).catch((err) => {
+          toast.error("Failed to remove engineer");
+        });
       }
-    }).then((res) => {
-      if (res.ok) {
-        fetchitemData();
-        toast.success("Engineer removed successfully");
-      } else {
-        throw new Error("Failed to remove engineer");
-      }
-    }).catch((err) => {
-      toast.error("Failed to remove engineer");
-    });
+    })
   }
 
   React.useEffect(() => {
@@ -151,6 +176,7 @@ export function ItemPage(): React.JSX.Element {
 
   return (
     <>
+      <EngineerSelectionModal open={eopen} handleClose={handleEClose} itemID={itemID} fetchitemData={fetchitemData}/>
       <ItemModalForm open={open} handleClose={handleModalClose} itemID={itemID} fetchitemData={fetchitemData} />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
@@ -211,7 +237,7 @@ export function ItemPage(): React.JSX.Element {
                       <IconButton color='warning' onClick={() => handleEdititem(row.id)}>
                         <Edit />
                       </IconButton>
-                      {row.engineers_id === null || row.engineers_id === 0 ? <IconButton color='primary'>
+                      {row.engineers_id === null || row.engineers_id === 0 ? <IconButton color='primary' onClick={() => handleEOpen(row.id)}>
                         <PersonAddAlt1Outlined />
                       </IconButton> : <IconButton color='error' onClick={() => handleRemoveEngineer(row.id)}>
                         <PersonRemoveAlt1Outlined />
