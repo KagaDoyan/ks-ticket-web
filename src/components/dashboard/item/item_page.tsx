@@ -217,7 +217,7 @@ export function ItemPage(): React.JSX.Element {
                 <TableCell>location</TableCell>
                 <TableCell>waranty expiry date</TableCell>
                 <TableCell>status</TableCell>
-                <TableCell>Created at</TableCell>
+                {/* <TableCell>Created at</TableCell> */}
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -229,10 +229,10 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.category.name}</TableCell>
                     <TableCell>{row.brand.name}</TableCell>
                     <TableCell>{row.model.name}</TableCell>
-                    <TableCell><Badge badgeContent={row.engineer?.name ? row.engineer.name : 'WareHouse'} color={row.engineer?.name ? 'primary' : 'warning'} /></TableCell>
+                    <TableCell sx={{textAlign: 'center'}}><Badge badgeContent={row.engineer?.name ? row.engineer.name : 'WareHouse'} color={row.engineer?.name ? 'primary' : 'warning'} /></TableCell>
                     <TableCell>{dayjs(row.waranty_expiry_date).format('MMM D, YYYY')}</TableCell>
                     <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
-                    <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
+                    {/* <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell> */}
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEdititem(row.id)}>
                         <Edit />

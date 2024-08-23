@@ -164,7 +164,7 @@ export default function PriorityModalForm({ open, handleClose, prioritiesID, pri
                         required
                     />
                     <TextField
-                        label="time"
+                        label="time (in second format)"
                         name="time_sec"
                         type="number"
                         value={formData.time_sec}
