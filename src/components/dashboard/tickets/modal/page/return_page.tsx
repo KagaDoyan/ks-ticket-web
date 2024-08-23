@@ -1,11 +1,9 @@
 import { authClient } from "@/lib/auth/client";
-import { Autocomplete, Box, Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Button, Grid, Stack, TextField, Typography } from "@mui/material";
 import useOnMount from "@mui/utils/useOnMount";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import ImageUpload, { ExtendedFile } from './ImageUpload';
 import dayjs from "dayjs";
-import { date } from "zod";
 import formatDate from "@/lib/dateformat";
 import CraeteKoonServiceForm from "./pdf/koonservice";
 import Swal from "sweetalert2";
@@ -94,12 +92,12 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     const [BrandOption, setBrandOption] = useState<brand[]>([])
     const [ModelOption, setModelOption] = useState<model[]>([])
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
-    const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string, status: string }[]>([]);
-    const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string }[]>([]);
+    const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
+    const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
 
     const addShopItem = () => {
         if (shopitems.length < 4) {
-            setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'return', id: 0 }]);
+            setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'return', id: 0, type: '' }]);
         } else {
             toast.error("You can only add up to 5 items.");
         }
@@ -347,7 +345,53 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     }, [shopitems, spareitems])
 
     const handleSubmit = () => {
-        toast.success("Ticket updated successfully");
+        const shopItemsWithType = shopitems.map(item => ({
+            ...item,
+            ticket_type: 'store'
+        }));
+
+        const spareItemsWithType = spareitems.map(item => ({
+            ...item,
+            ticket_type: 'spare'
+        }));
+
+        // Combine the two arrays
+        const returnItem = [...shopItemsWithType, ...spareItemsWithType];
+        const formattedItems = returnItem.map(item => ({
+            id: item.id,
+            serial_number: item.serial_number,
+            category_id: item.category,
+            brand_id: item.brand,
+            model_id: item.model,
+            warranty_expiry_date: item.warranty_expire_date,
+            inc_number: '',
+            status: item.status,
+            type: item.type,
+            ticket_type: item.ticket_type
+        }));
+        console.log(formattedItems);
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/returnItem/${ticketID}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authClient.getToken()}`
+            },
+            body: JSON.stringify({
+                return_item: formattedItems
+            })
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        console.log(data);
+                    })
+                } else {
+                    toast.error("Failed to create ticket");
+                }
+            }).catch((err) => {
+                toast.error("Failed to create ticket");
+            });
+
     }
 
     const handleCreatePDF = () => {

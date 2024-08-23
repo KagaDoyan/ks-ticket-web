@@ -3,7 +3,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
     var FormName = ''
     var logo = ''
     console.log(data);
-    
+
     switch (form) {
         case 'koon':
             FormName = 'Koon Service'
@@ -257,6 +257,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                     </td>
                     <td colspan="3" style="text-align: left;">
                       <input 
+                        onclick="return false;"
                         type="checkbox" 
                         id="resolved1" 
                         name="resolved" 
@@ -265,6 +266,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                     </td>
                     <td colspan="14" style="text-align: left;">
                       <input 
+                        onclick="return false;"
                         type="checkbox" 
                         id="resolved2" 
                         name="resolved" 
@@ -290,19 +292,19 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                 <tr>
                     <td colspan="4" style="vertical-align: top;">วิธีดำเนินการ/Action:</td>
                     <td colspan="4" style="vertical-align: top;">
-                        <input type="checkbox" id="action1" name="action" value="repair">
+                        <input type="checkbox" id="action1" name="action" value="repair" onclick="return false;">
                         <label for="action1">ซ่อม / Repair</label>
                     </td>
                     <td colspan="6" style="vertical-align: top;">
-                        <input type="checkbox" id="action2" name="action" value="clean">
+                        <input type="checkbox" id="action2" name="action" value="clean" onclick="return false;">
                         <label for="action2">ทำความสะอาด / Clean </label>
                     </td>
                     <td colspan="6" style="vertical-align: top;">
-                        <input type="checkbox" id="action3" name="action" value="spare">
+                        <input type="checkbox" id="action3" name="action" value="spare" onclick="return false;">
                         <label for="action3">เปลี่ยนชั่วคราว / Temporary</label>
                     </td>
                     <td colspan="4" style="vertical-align: top;">
-                        <input type="checkbox" id="action4" name="action" value="replace">
+                        <input type="checkbox" id="action4" name="action" value="replace" onclick="return false;">
                         <label for="action4">เปลี่ยนถาวร / Permanent</label>
                     </td>
                     <script>

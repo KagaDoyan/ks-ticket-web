@@ -535,14 +535,14 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                     />
                 </Grid>
                 <Grid item xs={12} sm={8}>
-                    <TextField
+                    {/* <TextField
                         required
                         label="ticket description"
                         name="close_description"
                         value={formData.close_description}
                         onChange={handleChange}
                         fullWidth
-                    />
+                    /> */}
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <TextField
