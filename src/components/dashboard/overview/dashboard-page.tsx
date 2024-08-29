@@ -10,6 +10,7 @@ import AlertModal from "./modal/alert_modal";
 import { authClient } from "@/lib/auth/client";
 import dayjs from "dayjs";
 import TextField from '@mui/material/TextField';
+import TableModal from "./modal/data_modal";
 
 interface TicketData {
     id: number;
@@ -27,6 +28,11 @@ export default function DashboardPage(): React.JSX.Element {
         dayjs(Date.now() - 7 * 24 * 60 * 60 * 1000).format('YYYY-MM-DD'),
         dayjs(Date.now()).format('YYYY-MM-DD')
     ]);
+    const [chart_table_data, setChartTableData] = useState<any[]>([]);
+    const [table_modal_open, setTableModalOpen] = useState(false);
+    const handleTableModalClose = () => setTableModalOpen(false);
+    const handleTableModalOpen = () => setTableModalOpen(true);
+
     const [customers, setCustomers] = useState<string[]>([]);
     const [modal_open, setModalOpen] = useState(false);
 
@@ -113,35 +119,41 @@ export default function DashboardPage(): React.JSX.Element {
             const difference = +new Date(dueDate) - +new Date();
             return difference > 0
                 ? {
+                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
                     hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
                     minutes: Math.floor((difference / 1000 / 60) % 60),
                     seconds: Math.floor((difference / 1000) % 60)
                 }
-                : { hours: 0, minutes: 0, seconds: 0 };
+                : { days: 0, hours: 0, minutes: 0, seconds: 0 };
         };
-
+    
         const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
+    
         useEffect(() => {
             const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
             return () => clearInterval(timer);
         }, [dueDate]);
-
+    
         useEffect(() => {
             const showAlert = () => setModalOpen(true);
             const intervalId = setInterval(showAlert, 100000000);
             return () => clearInterval(intervalId);
         }, []);
-
+    
+        const isOverdue = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
+    
         return (
             <p style={{ color: 'red' }}>
-                {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+                {isOverdue
+                    ? 'Overdue'
+                    : `${timeLeft.days}d ${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`}
             </p>
         );
     };
 
     return (
         <>
+            <TableModal open={table_modal_open} handleClose={handleTableModalClose} data={chart_table_data}/>
             <AlertModal modal_open={modal_open} handleModalClose={handleModalClose} />
             <Grid container spacing={2}>
                 <Grid item lg={12} md={12} xs={12}>
@@ -259,7 +271,9 @@ export default function DashboardPage(): React.JSX.Element {
                                                 const selectedCategory = config.w.config.xaxis.categories[dataPointIndex];
 
                                                 // Alert the category and series name
-                                                alert(`Category: ${selectedCategory}\nSeries: ${selectedSeriesName}`);
+                                                setChartTableData(ticketData.filter((ticket) => ticket.customer.shortname === selectedCategory && ticket.ticket_status === selectedSeriesName.toLowerCase()));
+                                                handleTableModalOpen();
+                                                // console.log(ticketData);
                                             },
                                         },
                                     },
@@ -323,9 +337,9 @@ export default function DashboardPage(): React.JSX.Element {
                                                     {row.ticket_number}
                                                 </StyledTableCell>
                                                 <StyledTableCell align="right">{row.inc_number}</StyledTableCell>
-                                                <StyledTableCell align="right"><Badge color={row.ticket_status === 'Closed' ? 'success' : 'warning'}>{row.ticket_status}</Badge></StyledTableCell>
+                                                <StyledTableCell align="right"><Badge color={row.ticket_status === 'Closed' ? 'success' : 'error'} badgeContent={row.ticket_status}/></StyledTableCell>
                                                 <StyledTableCell align="right">{row.due_by}</StyledTableCell>
-                                                <StyledTableCell align="right"><Countdown dueDate={row.due_by} /></StyledTableCell>
+                                                <StyledTableCell sx={{maxWidth: "100px"}} align="right"><Countdown dueDate={row.due_by} /></StyledTableCell>
                                             </StyledTableRow>
                                         ))}
                                     </TableBody>

@@ -10,6 +10,8 @@ import formatDate from "@/lib/dateformat";
 import CraeteKoonServiceForm from "./pdf/koonservice";
 import Swal from "sweetalert2";
 import MenuButton from "./menu_button";
+import { EmailOutlined } from "@mui/icons-material";
+import EmailPreviewPagefunction from "./email_preview_page";
 
 interface brand {
     id: number
@@ -81,6 +83,8 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         ticket_image: [],
         delete_images: [],
     });
+
+    const [openEmailPreview, setOpenEmailPreview] = useState(false);
 
     const [ticketData, setTicketData] = useState<any>()
     const [BrandOption, setBrandOption] = useState<brand[]>([])
@@ -396,6 +400,18 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
 
     };
 
+    const handleEmailPreview = () => {
+        setOpenEmailPreview(true);
+    }
+
+    const handleEmail = () => {
+        if (formData.ticket_status != 'close') {
+            toast.error("Please close the ticket first before sending email");
+        } else {
+            handleEmailPreview()
+        }
+    }
+
     useOnMount(() => {
         fetchticketDatails();
         getBrandOption()
@@ -485,6 +501,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
     }
     return (
         <>
+            <EmailPreviewPagefunction open={openEmailPreview} handleClose={() => setOpenEmailPreview(false)} ticketData={ticketData} />
             <Grid container spacing={2} sx={{ overflow: 'scroll auto' }}>
                 <Grid item xs={12} sm={12}>
                     <TextField
@@ -981,10 +998,13 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                 </Grid>
             </Grid>
             <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
+                <Button startIcon={<EmailOutlined />} onClick={handleEmail} variant="contained" color="error">
+                    Email
+                </Button>
+                <MenuButton data={ticketData} />
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
                 </Button>
-                <MenuButton data={ticketData} />
                 <Button variant="contained" color="success" onClick={handleSubmit}>
                     Update
                 </Button>

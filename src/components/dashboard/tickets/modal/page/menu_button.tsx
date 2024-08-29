@@ -3,6 +3,7 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import CraeteKoonServiceForm from './pdf/koonservice';
+import { PictureAsPdfOutlined } from '@mui/icons-material';
 
 const MenuButton = ({ data }: { data: any }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -27,7 +28,7 @@ const MenuButton = ({ data }: { data: any }) => {
 
   return (
     <div>
-      <Button variant="contained" onClick={handleClick}>
+      <Button startIcon={<PictureAsPdfOutlined />} variant="contained" onClick={handleClick}>
         PDF
       </Button>
       <Menu

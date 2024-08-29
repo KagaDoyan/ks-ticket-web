@@ -1,5 +1,5 @@
 import { paths } from '@/paths';
-import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, MoveToInboxOutlined, Person2Outlined, StoreMallDirectoryOutlined } from "@mui/icons-material";
+import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, MoveToInboxOutlined, Person2Outlined, ReportOffOutlined, StoreMallDirectoryOutlined, SummarizeOutlined } from "@mui/icons-material";
 
 export const navItems = [
   {
@@ -8,6 +8,7 @@ export const navItems = [
     items: [
       { key: 'dashboard', title: 'Dashboard', href: paths.dashboard.overview, icon: AssessmentOutlined },
       { key: 'ticket', title: 'ticket', href: paths.dashboard.ticket, icon: ConfirmationNumberOutlined },
+      { key: 'report', title: 'report', href: paths.dashboard.report, icon: SummarizeOutlined },
     ]
   },
   {

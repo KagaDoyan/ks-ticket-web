@@ -52,7 +52,7 @@ interface engineer {
 
 export default function CreateTicketModalForm({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
-        inc_number: "",
+        inc_number: "n/a",
         customer_id: 0,
         shop_id: 0,
         open_date: "",
@@ -118,7 +118,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
 
     const clearFormData = () => {
         setFormData({
-            inc_number: "",
+            inc_number: "n/a",
             customer_id: 0,
             shop_id: 0,
             open_date: "",
