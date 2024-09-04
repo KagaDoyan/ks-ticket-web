@@ -59,6 +59,7 @@ interface image_url {
 
 const spare_status: spare_status[] = [
     { name: 'spare' },
+    { name: 'return' },
     { name: 'replace' },
 ]
 
@@ -87,6 +88,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         ticket_image: [],
         delete_images: [],
     });
+    const [incident_number, setIncidentNumber] = useState<string>('');
 
     const [ticketData, setTicketData] = useState<any>()
     const [BrandOption, setBrandOption] = useState<brand[]>([])
@@ -290,24 +292,24 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     if (res.ok) {
                         res.json().then((data) => {
                             setTicketData(data.data);
-                            setFormData({
-                                solution: data.data.solution,
-                                investigation: data.data.investigation,
-                                close_description: data.data.close_description,
-                                item_brand: data.data.item_brand,
-                                item_category: data.data.item_category,
-                                item_model: data.data.item_model,
-                                item_sn: data.data.item_sn,
-                                ticket_status: data.data.ticket_status,
-                                warranty_exp: dayjs(data.data.warranty_exp).format('YYYY-MM-DD'),
-                                resolve_status: data.data.resolve_status ? true : false,
-                                resolve_remark: data.data.resolve_remark,
-                                action: data.data.action, // assuming action_status is an array of strings
-                                time_in: dayjs(data.data.time_in).format('YYYY-MM-DD HH:mm'),
-                                time_out: dayjs(data.data.time_out).format('YYYY-MM-DD HH:mm'),
-                                ticket_image: [...data.data.ticket_image],
-                            });
-
+                            // setFormData({
+                            //     solution: data.data.solution,
+                            //     investigation: data.data.investigation,
+                            //     close_description: data.data.close_description,
+                            //     item_brand: data.data.item_brand,
+                            //     item_category: data.data.item_category,
+                            //     item_model: data.data.item_model,
+                            //     item_sn: data.data.item_sn,
+                            //     ticket_status: data.data.ticket_status,
+                            //     warranty_exp: dayjs(data.data.warranty_exp).format('YYYY-MM-DD'),
+                            //     resolve_status: data.data.resolve_status ? true : false,
+                            //     resolve_remark: data.data.resolve_remark,
+                            //     action: data.data.action, // assuming action_status is an array of strings
+                            //     time_in: dayjs(data.data.time_in).format('YYYY-MM-DD HH:mm'),
+                            //     time_out: dayjs(data.data.time_out).format('YYYY-MM-DD HH:mm'),
+                            //     ticket_image: [...data.data.ticket_image],
+                            // });
+                            setIncidentNumber(data.data.inc_number)
                             if (data.data.spare_item?.length > 0) {
                                 setSpareItem([...data.data.spare_item]);
                             }
@@ -364,12 +366,11 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             brand_id: item.brand,
             model_id: item.model,
             warranty_expiry_date: item.warranty_expire_date,
-            inc_number: '',
+            inc_number: incident_number,
             status: item.status,
             type: item.type,
             ticket_type: item.ticket_type
         }));
-        console.log(formattedItems);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/returnItem/${ticketID}`, {
             method: 'POST',
             headers: {
@@ -377,7 +378,9 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                 'Authorization': `Bearer ${authClient.getToken()}`
             },
             body: JSON.stringify({
-                return_item: formattedItems
+                return_item: {
+                    items: formattedItems
+                }
             })
         })
             .then((res) => {

@@ -235,7 +235,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                 </tr>
                 <tr>
                     <td colspan="24"><b>รายละเอียด ของอาการเสียที่แจ้ง/ Description :</b>
-                        <underline>${data.description}</underline>
+                        <underline>${data.description.replace(/\n/g, '<br>')}</underline>
                     </td>
                 </tr>
             </tbody>
