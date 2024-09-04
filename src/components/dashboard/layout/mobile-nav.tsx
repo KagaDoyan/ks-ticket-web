@@ -66,7 +66,7 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
           <React.Fragment key={item.key}>
             {item.group && (
               <>
-                <Typography sx={{ padding:1,fontSize:'14px',color: 'var(--mui-palette-neutral-500)'}}>
+                <Typography sx={{ padding: 1, fontSize: '14px', color: 'var(--mui-palette-neutral-500)' }}>
                   {item.group}
                 </Typography>
                 {/* <Divider sx={{ borderColor: 'var(--mui-palette-divider)' }} /> */}
@@ -102,7 +102,7 @@ interface NavItemProps extends Omit<NavItemConfig, 'items'> {
 }
 
 function NavItem({ disabled, external, href, icon, matcher, pathname, title }: NavItemProps): React.JSX.Element {
-  const active = isNavItemActive({ disabled, external, href, matcher, pathname });
+  const active = isNavItemActive(pathname, href);
   const Icon = icon
 
   return (
