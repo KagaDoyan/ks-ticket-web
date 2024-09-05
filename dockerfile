@@ -1,8 +1,17 @@
-# Use the official Nginx image
-FROM nginx:alpine
+FROM node:18-alpine
 
-# Copy the entire content of the current directory into the nginx root directory
-COPY ./out/ /usr/share/nginx/html/
+WORKDIR /app
 
-# Nginx listens on port 80 by default
+COPY package.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+COPY .next ./.next
+
 EXPOSE 80
+
+CMD ["npm", "run", "start"]
