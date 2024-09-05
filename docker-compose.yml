@@ -1,8 +1,12 @@
 version: '3'
+
 services:
-  nginx:
-    image: nginx:alpine
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8080:80"
     volumes:
       - ./out:/usr/share/nginx/html
+    restart: always

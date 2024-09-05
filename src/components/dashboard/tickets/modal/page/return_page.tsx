@@ -121,8 +121,11 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                     ...newItems[index],
                                     serial_number: value,
                                     category: data.data.category.name,
+                                    category_id: data.data.category.id,
                                     brand: data.data.brand.name,
+                                    brand_id: data.data.brand.id,
                                     model: data.data.model.name,
+                                    model_id: data.data.model.id,
                                     warranty_expire_date: formatDate(data.data.warranty_expiry_date)
                                 };
                                 return newItems;
@@ -349,23 +352,28 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     const handleSubmit = () => {
         const shopItemsWithType = shopitems.map(item => ({
             ...item,
-            ticket_type: 'store'
+            ticket_type: 'store',
+            type: 'outside'
         }));
 
         const spareItemsWithType = spareitems.map(item => ({
             ...item,
-            ticket_type: 'spare'
+            ticket_type: 'spare',
+            type: 'inside'
         }));
+
+        console.log(shopItemsWithType, spareItemsWithType);
+        
 
         // Combine the two arrays
         const returnItem = [...shopItemsWithType, ...spareItemsWithType];
         const formattedItems = returnItem.map(item => ({
             id: item.id,
             serial_number: item.serial_number,
-            category_id: item.category,
-            brand_id: item.brand,
-            model_id: item.model,
-            warranty_expiry_date: item.warranty_expire_date,
+            category_id: item.category_id,
+            brand_id: item.brand_id,
+            model_id: item.model_id,
+            warranty_expiry_date: new Date(item.warranty_expire_date),
             inc_number: incident_number,
             status: item.status,
             type: item.type,
@@ -378,9 +386,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                 'Authorization': `Bearer ${authClient.getToken()}`
             },
             body: JSON.stringify({
-                return_item: {
-                    items: formattedItems
-                }
+                items: formattedItems
             })
         })
             .then((res) => {
