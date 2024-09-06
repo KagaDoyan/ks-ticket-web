@@ -19,6 +19,8 @@ interface shop {
     province: {
         priority_group: priority_group
     }
+    latitude: string
+    longitude: string
 }
 
 interface priority_group {
@@ -35,6 +37,7 @@ interface engineer {
     id: number
     name: string,
     lastname: string,
+    distance: number
 }
 export default function TicketPage({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
@@ -61,6 +64,11 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     const [priorityOptions, setpriorityOptions] = useState<priority[]>([]);
     const [enginnerOption, setEngineerOption] = useState<engineer[]>([]);
     const [priority_time, setpriority_time] = useState(0);
+    const [shoplatlng, setShoplatlng] = useState({ lat: "", lng: "" });
+
+    const HandleShopLatLngChange = (lat: string, lng: string) => {
+        setShoplatlng({ lat: lat, lng: lng })
+    }
 
     const fetchTicketDetails = (ticketID: number, setFormData: any, setShopOptions: any, setPriorityOptions: any, setPriorityTime: any, customerOptions: customer[], shopOptions: shop[]) => {
         if (ticketID) {
@@ -152,7 +160,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     }
 
     const fetchEngineer = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/engineer/option/location`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/enigeer/${formData.shop_id ? formData.shop_id : 0}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -164,9 +172,11 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                         setEngineerOption(data.data);
                     })
                 } else {
+                    setEngineerOption([]);
                     throw new Error("Failed to fetch engineer options");
                 }
             }).catch((err) => {
+                setEngineerOption([]);
                 toast.error("Failed to fetch engineer options");
             });
     }
@@ -238,6 +248,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
         fetchEngineer();
         fetchShop();
     }, [formData.shop_id])
+
 
     useEffect(() => {
         if (formData.open_date && formData.open_time && priority_time) {
@@ -314,6 +325,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                                 shop_id: selectedOption
                             });
                             setpriorityOptions(shopOptions.find((shop) => shop.id === selectedOption)?.province.priority_group.priorities || []);
+                            HandleShopLatLngChange(shopOptions.find((shop) => shop.id === selectedOption)?.latitude || "", shopOptions.find((shop) => shop.id === selectedOption)?.longitude || "");
                         }}
                         renderInput={(params) => <TextField required {...params} label="Shop" />}
                     />
@@ -419,7 +431,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                 <Grid item xs={12} sm={6}>
                     <Autocomplete
                         options={enginnerOption}
-                        getOptionLabel={(option) => option.name + ' ' + option.lastname}
+                        getOptionLabel={(option) => option.name + ' ' + option.lastname + ' ' + option.distance + " km"}
                         value={enginnerOption.find((engineer) => engineer.id === formData.engineer_id) || null}
                         onChange={(event, newValue, reason) => {
                             if (reason === "clear") {

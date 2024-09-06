@@ -3,7 +3,6 @@ import { Autocomplete, Button, Grid, Stack, TextField, Typography } from "@mui/m
 import useOnMount from "@mui/utils/useOnMount";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import dayjs from "dayjs";
 import formatDate from "@/lib/dateformat";
 import CraeteKoonServiceForm from "./pdf/koonservice";
 import Swal from "sweetalert2";
@@ -96,6 +95,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
     const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
     const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
+    const [returnitems, setReturnItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
 
     const addShopItem = () => {
         if (shopitems.length < 4) {
@@ -172,7 +172,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/store/${removeItem.id}`, {
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/returnItem/${removeItem.id}`, {
                         method: 'DELETE',
                         headers: {
                             'authorization': `Bearer ${authClient.getToken()}`
@@ -180,7 +180,8 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     }).then((res) => {
                         if (res.ok) {
                             setShopItem(updatedItems);
-                            toast.success('Item deleted');
+                            toast.success('return item deleted');
+                            fetchticketDatails();
                         }
                     })
                 }
@@ -295,29 +296,15 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     if (res.ok) {
                         res.json().then((data) => {
                             setTicketData(data.data);
-                            // setFormData({
-                            //     solution: data.data.solution,
-                            //     investigation: data.data.investigation,
-                            //     close_description: data.data.close_description,
-                            //     item_brand: data.data.item_brand,
-                            //     item_category: data.data.item_category,
-                            //     item_model: data.data.item_model,
-                            //     item_sn: data.data.item_sn,
-                            //     ticket_status: data.data.ticket_status,
-                            //     warranty_exp: dayjs(data.data.warranty_exp).format('YYYY-MM-DD'),
-                            //     resolve_status: data.data.resolve_status ? true : false,
-                            //     resolve_remark: data.data.resolve_remark,
-                            //     action: data.data.action, // assuming action_status is an array of strings
-                            //     time_in: dayjs(data.data.time_in).format('YYYY-MM-DD HH:mm'),
-                            //     time_out: dayjs(data.data.time_out).format('YYYY-MM-DD HH:mm'),
-                            //     ticket_image: [...data.data.ticket_image],
-                            // });
                             setIncidentNumber(data.data.inc_number)
                             if (data.data.spare_item?.length > 0) {
                                 setSpareItem([...data.data.spare_item]);
                             }
                             if (data.data.store_item?.length > 0) {
                                 setShopItem([...data.data.store_item]);
+                            }
+                            if (data.data.return_item?.length > 0) {
+                                setReturnItem([...data.data.return_item]);
                             }
                         })
                     } else {
@@ -363,7 +350,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         }));
 
         console.log(shopItemsWithType, spareItemsWithType);
-        
+
 
         // Combine the two arrays
         const returnItem = [...shopItemsWithType, ...spareItemsWithType];
@@ -392,7 +379,9 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             .then((res) => {
                 if (res.ok) {
                     res.json().then((data) => {
-                        console.log(data);
+                        toast.success(data.data.message);
+                        fetchticketData()
+                        fetchticketDatails()
                     })
                 } else {
                     toast.error("Failed to create ticket");
@@ -413,6 +402,59 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         printWindow?.document.close(); // Ensure the content is fully loaded
         printWindow?.focus();
     }
+
+    const isItemSaved = (serial_number: string) => {
+        return returnitems.some((returnItem) => returnItem.serial_number === serial_number);
+    };
+
+    const isItemInShopOrSpare = (serial_number: string) => {
+        return (
+            shopitems.some((item) => item.serial_number === serial_number) ||
+            spareitems.some((item) => item.serial_number === serial_number)
+        );
+    };
+
+    // Filter returnitems to get unmatched items
+    const unmatchedReturnItems = returnitems.filter(
+        (returnItem) => !isItemInShopOrSpare(returnItem.serial_number)
+    );
+
+    // Push unmatched return items to shopitems
+    const addUnmatchedToShopItems = () => {
+        if (unmatchedReturnItems.length > 0) {
+            setShopItem((prevShopItems) => [...prevShopItems, ...unmatchedReturnItems]);
+        }
+    };
+
+    // Effect to add unmatched return items to shopitems when unmatched items are found
+    useEffect(() => {
+        addUnmatchedToShopItems();
+    }, [unmatchedReturnItems]);
+    const replaceMatchingItems = () => {
+        // Create new arrays for shopitems and spareitems with replacements
+        const updatedShopItems = shopitems.map((shopItem) => {
+            const matchedReturnItem = returnitems.find(
+                (returnItem) => returnItem.serial_number === shopItem.serial_number
+            );
+            return matchedReturnItem ? { ...shopItem, ...matchedReturnItem } : shopItem;
+        });
+
+        const updatedSpareItems = spareitems.map((spareItem) => {
+            const matchedReturnItem = returnitems.find(
+                (returnItem) => returnItem.serial_number === spareItem.serial_number
+            );
+            return matchedReturnItem ? { ...spareItem, ...matchedReturnItem } : spareItem;
+        });
+
+        // Update state with the new arrays
+        setShopItem(updatedShopItems);
+        setSpareItem(updatedSpareItems);
+    };
+
+    // Effect to replace matching items when returnitems change
+    useEffect(() => {
+        replaceMatchingItems();
+    }, [returnitems]);
     return (
         <>
             <Stack justifyContent={"flex-start"} direction="row" spacing={2}>
@@ -431,7 +473,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     <Grid item xs={12} sm={6} key={index}>
                         <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
                             <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                Item {index + 1}
+                                Item {index + 1} {isItemSaved(item.serial_number) ? <p style={{ color: 'green' }}>Saved</p> : ""}
                             </Typography>
                             <TextField
                                 label="Id"
@@ -571,7 +613,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     <Grid item xs={12} sm={6} key={index}>
                         <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
                             <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                Item {index + 1}
+                                Item {index + 1} {isItemSaved(item.serial_number) ? <p style={{ color: 'green' }}>Saved</p> : ""}
                             </Typography>
                             <TextField
                                 label="Id"
