@@ -393,10 +393,15 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             ...formData,
             [name]: name === 'resolve_status' ? checked : value
         });
-
-        console.log(formData);
-
     };
+
+    const warranty_expiry = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        })
+    }
 
     const handleEmailPreview = () => {
         setOpenEmailPreview(true);
@@ -669,7 +674,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                         type="date"
                         InputLabelProps={{ shrink: true }}
                         value={formData.warranty_exp}
-                        onChange={handleChange}
+                        onChange={e => setFormData({ ...formData, warranty_exp: dayjs(e.target.value).format('YYYY-MM-DD') })}
                         fullWidth
                     />
                 </Grid>
