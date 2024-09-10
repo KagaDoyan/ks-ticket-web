@@ -20,6 +20,7 @@ import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import CustomerModalForm from './modal/customer-form';
+import Swal from 'sweetalert2';
 
 function noop(): void {
   // do nothing
@@ -85,21 +86,33 @@ export function CustomerPage(): React.JSX.Element {
   }
 
   const handleDeletecustomer = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authClient.getToken()}`
+          }
+        }).then((res) => {
+          if (res.ok) {
+            fetchcustomerData();
+            toast.success("customer deleted successfully");
+          } else {
+            throw new Error("Failed to delete customer");
+          }
+        }).catch((err) => {
+          toast.error("Failed to delete customer");
+        });
       }
-    }).then((res) => {
-      if (res.ok) {
-        fetchcustomerData();
-        toast.success("customer deleted successfully");
-      } else {
-        throw new Error("Failed to delete customer");
-      }
-    }).catch((err) => {
-      toast.error("Failed to delete customer");
-    });
+    })
   }
 
   React.useEffect(() => {
@@ -132,7 +145,7 @@ export function CustomerPage(): React.JSX.Element {
                 </InputAdornment>
               }
               onChange={(e) => setSearch(e.target.value)}
-              sx={{ maxWidth: '300px' ,height: '40px'}}
+              sx={{ maxWidth: '300px', height: '40px' }}
             />
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchcustomerData}>
               refresh

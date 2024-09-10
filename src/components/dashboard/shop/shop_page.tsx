@@ -20,6 +20,7 @@ import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import ShopModalForm from './modal/shop-form';
+import Swal from 'sweetalert2';
 
 export interface shop {
   id: number,
@@ -100,21 +101,33 @@ export function ShopPage(): React.JSX.Element {
   }
 
   const handleDeleteshop = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shop/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shop/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authClient.getToken()}`
+          }
+        }).then((res) => {
+          if (res.ok) {
+            fetchshopData();
+            toast.success("shop deleted successfully");
+          } else {
+            throw new Error("Failed to delete shop");
+          }
+        }).catch((err) => {
+          toast.error("Failed to delete shop");
+        });
       }
-    }).then((res) => {
-      if (res.ok) {
-        fetchshopData();
-        toast.success("shop deleted successfully");
-      } else {
-        throw new Error("Failed to delete shop");
-      }
-    }).catch((err) => {
-      toast.error("Failed to delete shop");
-    });
+    })
   }
 
   React.useEffect(() => {

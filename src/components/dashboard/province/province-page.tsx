@@ -19,6 +19,7 @@ import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import ProvinceModalForm from './modal/province-form';
+import Swal from 'sweetalert2';
 
 interface province {
     id: number;
@@ -82,21 +83,33 @@ export function ProvincePage(): React.JSX.Element {
     }
 
     const handleDeleteprovince = (id: number) => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${authClient.getToken()}`
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authClient.getToken()}`
+                    }
+                }).then((res) => {
+                    if (res.ok) {
+                        fetchprovinceData();
+                        toast.success("province deleted successfully");
+                    } else {
+                        throw new Error("Failed to delete province");
+                    }
+                }).catch((err) => {
+                    toast.error("Failed to delete province");
+                });
             }
-        }).then((res) => {
-            if (res.ok) {
-                fetchprovinceData();
-                toast.success("province deleted successfully");
-            } else {
-                throw new Error("Failed to delete province");
-            }
-        }).catch((err) => {
-            toast.error("Failed to delete province");
-        });
+        })
     }
 
     React.useEffect(() => {

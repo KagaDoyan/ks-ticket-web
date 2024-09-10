@@ -24,6 +24,7 @@ import { Delete, Edit, Key, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import { bgcolor } from '@mui/system';
 import UserPasswordModalForm from './modal/change_password';
+import Swal from 'sweetalert2';
 
 function noop(): void {
   // do nothing
@@ -103,21 +104,33 @@ export function UserTable(): React.JSX.Element {
   }
 
   const handleDeleteUser = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authClient.getToken()}`
+          }
+        }).then((res) => {
+          if (res.ok) {
+            fetchUserData();
+            toast.success("User deleted successfully");
+          } else {
+            throw new Error("Failed to delete user");
+          }
+        }).catch((err) => {
+          toast.error("Failed to delete user");
+        });
       }
-    }).then((res) => {
-      if (res.ok) {
-        fetchUserData();
-        toast.success("User deleted successfully");
-      } else {
-        throw new Error("Failed to delete user");
-      }
-    }).catch((err) => {
-      toast.error("Failed to delete user");
-    });
+    })
   }
 
   React.useEffect(() => {

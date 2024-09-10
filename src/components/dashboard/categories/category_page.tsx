@@ -20,6 +20,7 @@ import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import CategoryModalForm from './modal/category-form';
+import Swal from 'sweetalert2';
 
 function noop(): void {
   // do nothing
@@ -84,21 +85,33 @@ export function CategoryPage(): React.JSX.Element {
   }
 
   const handleDeletecategory = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authClient.getToken()}`
+          }
+        }).then((res) => {
+          if (res.ok) {
+            fetchcategoryData();
+            toast.success("category deleted successfully");
+          } else {
+            throw new Error("Failed to delete category");
+          }
+        }).catch((err) => {
+          toast.error("Failed to delete category");
+        });
       }
-    }).then((res) => {
-      if (res.ok) {
-        fetchcategoryData();
-        toast.success("category deleted successfully");
-      } else {
-        throw new Error("Failed to delete category");
-      }
-    }).catch((err) => {
-      toast.error("Failed to delete category");
-    });
+    })
   }
 
   React.useEffect(() => {
@@ -131,7 +144,7 @@ export function CategoryPage(): React.JSX.Element {
                 </InputAdornment>
               }
               onChange={(e) => setSearch(e.target.value)}
-              sx={{ maxWidth: '300px' ,height: '40px'}}
+              sx={{ maxWidth: '300px', height: '40px' }}
             />
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchcategoryData}>
               refresh

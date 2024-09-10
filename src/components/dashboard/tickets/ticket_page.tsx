@@ -88,6 +88,11 @@ interface ticket {
   created_at: string;
   created_user: User;
   engineer: Engineer;
+  shop : {
+    id: number;
+    shop_name: string;
+    shop_number: string;
+  }
 }
 
 export function TicketPage(): React.JSX.Element {
@@ -245,6 +250,8 @@ export function TicketPage(): React.JSX.Element {
               <TableRow>
                 <TableCell>Ticket number</TableCell>
                 <TableCell>Incident number</TableCell>
+                <TableCell>Ticket title</TableCell>
+                <TableCell>Shop</TableCell>
                 <TableCell>Created by</TableCell>
                 <TableCell>Created at</TableCell>
                 <TableCell>Due date</TableCell>
@@ -260,6 +267,8 @@ export function TicketPage(): React.JSX.Element {
                     <TableRow hover key={row.id}>
                       <TableCell>{row.ticket_number}</TableCell>
                       <TableCell>{row.inc_number}</TableCell>
+                      <TableCell>{row.title}</TableCell>
+                      <TableCell>{row.shop.shop_number+' - ' + row.shop.shop_name}</TableCell>
                       <TableCell>{row.created_user.fullname}</TableCell>
                       <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                       <TableCell>{dayjs(row.due_by).format('MMM D, YYYY hh:mm:ss')}</TableCell>

@@ -20,6 +20,7 @@ import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import EngineerModalForm from './modal/engineer-form';
+import Swal from 'sweetalert2';
 
 interface engineer {
   id: number;
@@ -95,21 +96,33 @@ export function EngineerPage(): React.JSX.Element {
   }
 
   const handleDeleteengineer = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/engineer/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/engineer/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authClient.getToken()}`
+          }
+        }).then((res) => {
+          if (res.ok) {
+            fetchengineerData();
+            toast.success("engineer deleted successfully");
+          } else {
+            throw new Error("Failed to delete engineer");
+          }
+        }).catch((err) => {
+          toast.error("Failed to delete engineer");
+        });
       }
-    }).then((res) => {
-      if (res.ok) {
-        fetchengineerData();
-        toast.success("engineer deleted successfully");
-      } else {
-        throw new Error("Failed to delete engineer");
-      }
-    }).catch((err) => {
-      toast.error("Failed to delete engineer");
-    });
+    })
   }
 
   React.useEffect(() => {
