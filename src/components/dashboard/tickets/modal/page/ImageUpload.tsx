@@ -132,11 +132,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUpload, formdata, setFormDa
       >
         <input {...getInputProps()} ref={inputRef} style={{ display: 'none' }} />
         <Typography variant="h6" gutterBottom>
-          Drag 'n' drop some files here, or click the button to select files
+          Drag 'n' drop some files here, or click to select files
         </Typography>
-        <Button variant="contained" color="primary" onClick={openFileDialog}>
+        {/* <Button variant="contained" color="primary" onClick={openFileDialog}>
           <CloudUploadIcon sx={{ mr: 1 }} /> Upload Files
-        </Button>
+        </Button> */}
       </Box>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {thumbs}

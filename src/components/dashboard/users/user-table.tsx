@@ -20,9 +20,10 @@ import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
 import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import { toast } from 'react-toastify';
 import UserModalForm from './modal/user-form';
-import { Delete, Edit, Refresh } from '@mui/icons-material';
+import { Delete, Edit, Key, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import { bgcolor } from '@mui/system';
+import UserPasswordModalForm from './modal/change_password';
 
 function noop(): void {
   // do nothing
@@ -47,6 +48,13 @@ export function UserTable(): React.JSX.Element {
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
+
+  const [openModal, setOpenModal] = React.useState(false);
+  const handlePasswordModalOpen = () => setOpenModal(true);
+  const handlePasswordModalClose = () => {
+    setOpenModal(false)
+    setUserID(0)
+  }
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -89,6 +97,11 @@ export function UserTable(): React.JSX.Element {
     handleOpen()
   }
 
+  const handleEditUserPassword = (id: number) => {
+    setUserID(id)
+    handlePasswordModalOpen()
+  }
+
   const handleDeleteUser = (id: number) => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${id}`, {
       method: 'DELETE',
@@ -122,6 +135,7 @@ export function UserTable(): React.JSX.Element {
 
   return (
     <>
+      <UserPasswordModalForm open={openModal} handleClose={handlePasswordModalClose} userID={UserID} fetchUserData={fetchUserData} />
       <UserModalForm open={open} handleClose={handleModalClose} userID={UserID} fetchUserData={fetchUserData} />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
@@ -177,6 +191,9 @@ export function UserTable(): React.JSX.Element {
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEditUser(row.id)}>
                         <Edit />
+                      </IconButton>
+                      <IconButton color='success' onClick={() => handleEditUserPassword(row.id)}>
+                        <Key />
                       </IconButton>
                       <IconButton color='error' onClick={() => handleDeleteUser(row.id)}>
                         <Delete />

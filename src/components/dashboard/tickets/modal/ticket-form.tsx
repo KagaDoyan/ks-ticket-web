@@ -12,7 +12,14 @@ const style = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '60%',
+    width: {
+        xs: '90%', // Mobile
+        sm: '80%', // Tablet
+        md: '60%', // Small desktop
+        lg: '60%', // Large desktop
+    },
+    maxHeight: '90%',
+    overflow: "scroll",
     bgcolor: 'background.paper',
     boxShadow: 24,
     p: 4,
@@ -34,6 +41,7 @@ interface shop {
     }
     latitude: string
     longitude: string
+    phone: string
 }
 
 interface priority_group {
@@ -307,6 +315,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                         setFormData({
                                             ...formData,
                                             shop_id: 0,
+                                            contact_tel: "",
                                             sla_priority_level: ""
                                         })
                                         setpriorityOptions([]);
@@ -318,7 +327,8 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                     }
                                     setFormData({
                                         ...formData,
-                                        shop_id: selectedOption
+                                        shop_id: selectedOption,
+                                        contact_tel: shopOptions.find((shop) => shop.id === selectedOption)?.phone || "",
                                     });
                                     setpriorityOptions(shopOptions.find((shop) => shop.id === selectedOption)?.province.priority_group.priorities || []);
                                     HandleShopLatLngChange(shopOptions.find((shop) => shop.id === selectedOption)?.latitude || "", shopOptions.find((shop) => shop.id === selectedOption)?.longitude || "");
@@ -422,6 +432,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                 value={formData.contact_tel}
                                 onChange={handleChange}
                                 fullWidth
+                                inputProps={{ readOnly: true }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>

@@ -19,12 +19,24 @@ const MenuButton = ({ data }: { data: any }) => {
 
   const handleCreatePDF = (service_name: string) => {
     const html = CraeteKoonServiceForm(service_name, data);
-    const printWindow = window.open('', '', 'height=600,width=800');
-
-    printWindow?.document.write(html);
-    printWindow?.document.close(); // Ensure the content is fully loaded
-    printWindow?.focus();
-  }
+    const printWindow = window.open('', '_blank', 'height=600,width=800');
+  
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close(); // Ensure the content is fully loaded
+  
+      printWindow.onload = () => {
+        printWindow.focus(); // Focus the window only after it is fully loaded
+      };
+  
+      // Set up an event listener to prevent blanking out the page on interaction
+      printWindow.addEventListener('beforeunload', (event) => {
+        event.preventDefault();
+        printWindow.document.write(html);
+        printWindow.document.close();
+      });
+    }
+  };
 
   return (
     <div>

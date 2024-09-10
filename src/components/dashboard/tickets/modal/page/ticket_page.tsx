@@ -21,6 +21,7 @@ interface shop {
     }
     latitude: string
     longitude: string
+    phone: string
 }
 
 interface priority_group {
@@ -311,6 +312,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                                 setFormData({
                                     ...formData,
                                     shop_id: 0,
+                                    contact_tel: "",
                                     sla_priority_level: ""
                                 })
                                 setpriorityOptions([]);
@@ -322,7 +324,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                             }
                             setFormData({
                                 ...formData,
-                                shop_id: selectedOption
+                                shop_id: selectedOption,
+                                contact_tel: shopOptions.find((shop) => shop.id === selectedOption)?.phone || "",
                             });
                             setpriorityOptions(shopOptions.find((shop) => shop.id === selectedOption)?.province.priority_group.priorities || []);
                             HandleShopLatLngChange(shopOptions.find((shop) => shop.id === selectedOption)?.latitude || "", shopOptions.find((shop) => shop.id === selectedOption)?.longitude || "");
@@ -426,6 +429,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                         value={formData.contact_tel}
                         onChange={handleChange}
                         fullWidth
+                        inputProps={{ readOnly: true }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
