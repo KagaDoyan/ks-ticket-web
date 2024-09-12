@@ -26,33 +26,6 @@ export default function UserPasswordModalForm({ open, handleClose, userID, fetch
         role: ""
     });
 
-    const getUserData = () => {
-        if (userID) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/id/${userID}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${authClient.getToken()}`
-                }
-            })
-                .then((res) => {
-                    if (res.ok) {
-                        res.json().then((data) => {
-                            setFormData({
-                                fullname: data.data.fullname,
-                                email: data.data.email,
-                                password: data.data.password,
-                                role: data.data.role
-                            });
-                        })
-                    } else {
-                        throw new Error("Failed to fetch user data");
-                    }
-                }).catch((err) => {
-                    toast.error("Failed to fetch user data");
-                });
-        }
-    }
-
     const clearFormData = () => {
         setFormData({
             fullname: "",
@@ -62,25 +35,21 @@ export default function UserPasswordModalForm({ open, handleClose, userID, fetch
         });
     }
 
-    useEffect(() => {
-        getUserData();
-        if (userID == 0) {
-            clearFormData()
-        }
-    }, [userID]);
     const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (userID) {
             //update
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${userID}`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/password/${userID}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authClient.getToken()}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    password: formData.password
+                })
             })
                 .then((res) => {
                     if (res.ok) {
@@ -95,30 +64,7 @@ export default function UserPasswordModalForm({ open, handleClose, userID, fetch
                     toast.error("Failed to update user");
                 });
 
-        } else {
-            //create
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authClient.getToken()}`
-                },
-                body: JSON.stringify(formData)
-            })
-                .then((res) => {
-                    if (res.ok) {
-                        toast.success("User created successfully");
-                        fetchUserData();
-                        handleClose();
-                        clearFormData();
-                    } else {
-                        throw new Error("Failed to create user");
-                    }
-                })
-                .catch((err) => {
-                    toast.error("Failed to create user");
-                });
-        }
+        } 
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
