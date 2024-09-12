@@ -76,7 +76,8 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
         ticket_status: "open",
         appointment_date: "",
         appointment_time: "",
-        engineer_id: 0
+        engineer_id: 0,
+        priority_id: 0,
     });
 
     const [customerOptions, setCustomerOptions] = useState<customer[]>([]);
@@ -149,7 +150,8 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
             ticket_status: "open",
             appointment_date: "",
             appointment_time: "",
-            engineer_id: 0
+            engineer_id: 0,
+            priority_id: 0,
         });
     }
 
@@ -358,17 +360,20 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                     if (reason === "clear") {
                                         setFormData({
                                             ...formData,
-                                            sla_priority_level: ""
+                                            sla_priority_level: "",
+                                            priority_id: 0
                                         })
                                         setpriority_time(0)
                                     }
                                     const selectedOption = newValue ? newValue.name : "";
+                                    const selectedOptionID = newValue ? newValue.id : 0;
                                     if (!selectedOption) {
                                         return;
                                     }
                                     setFormData({
                                         ...formData,
-                                        sla_priority_level: selectedOption
+                                        sla_priority_level: selectedOption,
+                                        priority_id: selectedOptionID
                                     });
                                     setpriority_time(newValue?.time_sec ? newValue.time_sec : 0)
                                 }}
