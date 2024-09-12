@@ -1,5 +1,5 @@
 import { paths } from '@/paths';
-import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, MoveToInboxOutlined, Person2Outlined, ReportOffOutlined, StoreMallDirectoryOutlined, SummarizeOutlined } from "@mui/icons-material";
+import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, MoveToInboxOutlined, Person2Outlined, ReportOffOutlined, SpokeOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
 
 export const navItems = [
   {
@@ -19,6 +19,7 @@ export const navItems = [
       { key: 'shop', title: 'shop', href: paths.dashboard.shop, icon: StoreMallDirectoryOutlined },
       { key: 'engineer', title: 'engineer', href: paths.dashboard.engineer, icon: EngineeringOutlined },
       { key: 'users', title: 'users', href: paths.dashboard.users, icon: Person2Outlined },
+      { key: 'node', title: 'node', href: paths.dashboard.node, icon: SpokeOutlined },
       { key: 'provinces', title: 'provinces', href: paths.dashboard.province, icon: MapOutlined },
       { key: 'priority_group', title: 'priorities group', href: paths.dashboard.priorities, icon: LowPriorityOutlined },
     ]
@@ -32,6 +33,7 @@ export const navItems = [
       { key: 'brand', title: 'brand', href: paths.dashboard.brand, icon: LocalOfferOutlined },
       { key: 'category', title: 'category', href: paths.dashboard.category, icon: CategoryOutlined },
       { key: 'model', title: 'model', href: paths.dashboard.model, icon: ExtensionOutlined },
+      { key: 'storage', title: 'storage', href: paths.dashboard.storage, icon: WarehouseOutlined },
     ]
   }
 ];

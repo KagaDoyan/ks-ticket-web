@@ -2,6 +2,7 @@ import { authClient } from "@/lib/auth/client"
 import { Box, Modal, Button, TextField, Typography, Stack, Grid, Autocomplete, Tabs, Tab } from "@mui/material";
 import useOnMount from "@mui/utils/useOnMount"
 import dayjs from "dayjs"
+import { format } from "path";
 import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
 
@@ -16,16 +17,12 @@ interface shop {
     id: number
     shop_name: string
     shop_number: string
-    province: {
-        priority_group: priority_group
-    }
     latitude: string
     longitude: string
     phone: string
-}
-
-interface priority_group {
-    priorities: priority[]
+    province: {
+        id: number
+    }
 }
 
 interface priority {
@@ -57,7 +54,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
         ticket_status: "open",
         appointment_date: "",
         appointment_time: "",
-        engineer_id: 0
+        engineer_id: 0,
+        priority_id: 0
     });
 
     const [customerOptions, setCustomerOptions] = useState<customer[]>([]);
@@ -69,6 +67,24 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
 
     const HandleShopLatLngChange = (lat: string, lng: string) => {
         setShoplatlng({ lat: lat, lng: lng })
+    }
+
+    const getPriority = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/find/${formData.customer_id}/${shopOptions.find((shop) => shop.id === formData.shop_id)?.province.id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        }).then((res) => {
+            if (res.ok) {
+                res.json().then((data) => {
+                    setpriorityOptions(data.data);
+                    if (formData.shop_id) {
+                        setpriority_time(data.data.find((p: any) => p.id === formData.priority_id)?.time_sec);
+                    }
+                })
+            }
+        })
     }
 
     const fetchTicketDetails = (ticketID: number, setFormData: any, setShopOptions: any, setPriorityOptions: any, setPriorityTime: any, customerOptions: customer[], shopOptions: shop[]) => {
@@ -103,7 +119,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                         ticket_status: data.data.ticket_status,
                         appointment_date: data.data.appointment_date,
                         appointment_time: data.data.appointment_time,
-                        engineer_id: data.data.engineer_id
+                        engineer_id: data.data.engineer_id,
+                        priority_id: data.data.priority_id
                     });
                 })
                 .catch((err) => {
@@ -146,13 +163,6 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                 if (res.ok) {
                     res.json().then((data) => {
                         setshopOptions(data.data);
-                        if (formData.shop_id) {
-                            const priority: priority[] = data.data.filter((shop: shop) => shop.id === formData.shop_id)[0].province.priority_group.priorities;
-                            setpriorityOptions(priority);
-                            if (formData.sla_priority_level) {
-                                setpriority_time(priority.find((priority: priority) => priority.name === formData.sla_priority_level)!.time_sec);
-                            }
-                        }
                     })
                 }
             }).catch((err) => {
@@ -199,7 +209,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
             ticket_status: "open",
             appointment_date: "",
             appointment_time: "",
-            engineer_id: 0
+            engineer_id: 0,
+            priority_id: 0
         });
     }
 
@@ -248,6 +259,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
         fetchCustomer();
         fetchEngineer();
         fetchShop();
+        getPriority();
     }, [formData.shop_id])
 
 
@@ -327,7 +339,6 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                                 shop_id: selectedOption,
                                 contact_tel: shopOptions.find((shop) => shop.id === selectedOption)?.phone || "",
                             });
-                            setpriorityOptions(shopOptions.find((shop) => shop.id === selectedOption)?.province.priority_group.priorities || []);
                             HandleShopLatLngChange(shopOptions.find((shop) => shop.id === selectedOption)?.latitude || "", shopOptions.find((shop) => shop.id === selectedOption)?.longitude || "");
                         }}
                         renderInput={(params) => <TextField required {...params} label="Shop" />}
@@ -342,16 +353,19 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                             if (reason === "clear") {
                                 setFormData({
                                     ...formData,
+                                    priority_id: 0,
                                     sla_priority_level: ""
                                 })
                                 setpriority_time(0)
                             }
                             const selectedOption = newValue ? newValue.name : "";
+                            const selectedOptionID = newValue ? newValue.id : 0;
                             if (!selectedOption) {
                                 return;
                             }
                             setFormData({
                                 ...formData,
+                                priority_id: selectedOptionID,
                                 sla_priority_level: selectedOption
                             });
                             setpriority_time(newValue?.time_sec ? newValue.time_sec : 0)

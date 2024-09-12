@@ -3,41 +3,10 @@ import { IosShare, Refresh } from "@mui/icons-material";
 import { Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
+import * as XLSX from 'xlsx';
 const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
 };
-
-// Interface for Shop details
-interface Shop {
-    id: number;
-    deleted_at: string | null;
-    created_at: string;
-    created_by: number;
-    shop_number: string;
-    shop_name: string;
-    phone: string;
-    email: string;
-    latitude: string;
-    longitude: string;
-    province_id: number;
-    customers_id: number;
-}
-
-// Interface for Engineer details
-interface Engineer {
-    id: number;
-    name: string;
-    lastname: string;
-    phone: string;
-    line_name: string;
-    latitude: string;
-    longitude: string;
-    node: string;
-    password: string;
-    deleted_at: string | null;
-    created_at: string;
-    created_by: number;
-}
 
 // Main interface for Ticket data
 interface Ticket {
@@ -63,25 +32,24 @@ interface Ticket {
     appointment_date: string;
     appointment_time: string;
     engineer_id: number;
-    solution: string | null;
-    investigation: string | null;
+    solution: string;
+    investigation: string;
     close_description: string | null;
-    item_brand: string | null;
-    item_category: string | null;
-    item_model: string | null;
-    item_sn: string | null;
-    warranty_exp: string | null;
-    resolve_status: string | null;
+    item_brand: string;
+    item_category: string;
+    item_model: string;
+    item_sn: string;
+    warranty_exp: string;
+    resolve_status: boolean;
     resolve_remark: string | null;
-    action: string | null;
-    time_in: string | null;
-    time_out: string | null;
+    action: string;
+    time_in: string;
+    time_out: string;
     deleted_at: string | null;
     created_at: string;
-    shop: Shop;
-    engineer: Engineer;
-    store_item: any[]; // Assuming `store_item` and `spare_item` are arrays, replace `any` with specific type if known
-    spare_item: any[];
+    engineer: string;
+    engineer_node: string;
+    shop: string;
     SLA_overdue: string;
 }
 
@@ -129,6 +97,16 @@ export default function MAReportPage() {
             });
     };
 
+    const exportToExcel = () => {
+        console.log(rows);
+        
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "MA");
+    
+        // Export the file
+        XLSX.writeFile(workbook, `MA-${from}/${to}.xlsx`);
+    }
     useEffect(() => {
         fetchMAData();
     }, [from, to]);
@@ -161,38 +139,44 @@ export default function MAReportPage() {
                         value={to}
                     />
                     <Button variant="contained" startIcon={<Refresh />} onClick={fetchMAData}>Refresh</Button>
-                    <Button variant="contained" startIcon={<IosShare />} color="warning">Export</Button>
+                    <Button variant="contained" startIcon={<IosShare />} color="warning" onClick={() => exportToExcel()}>Export</Button>
                 </Stack>
 
                 <Box sx={{ overflowX: 'auto' }}>
-                    <Table sx={{ minWidth: 800 }}>
+                    <Table sx={{ minWidth: 800, }}>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Province Name</TableCell>
-                                <TableCell>Code</TableCell>
-                                <TableCell>Group</TableCell>
-                                <TableCell align="right">
-                                    <Button variant="contained">Export</Button>
-                                </TableCell>
+                                <TableCell>Incident Number</TableCell>
+                                <TableCell>Ticket Number</TableCell>
+                                <TableCell>Title</TableCell>
+                                <TableCell>Status</TableCell>
+                                <TableCell>Assigned To</TableCell>
+                                <TableCell>Engineer</TableCell>
+                                <TableCell>Shop</TableCell>
+                                <TableCell>Due By</TableCell>
+                                <TableCell>Action</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {rows.length > 0 ? rows.map((row) => (
-                                // Example Row: Uncomment and replace with your actual data structure
-                                // <TableRow key={row.id}>
-                                //     <TableCell>{row.province_name}</TableCell>
-                                //     <TableCell>{row.province_code}</TableCell>
-                                //     <TableCell>{row.group}</TableCell>
-                                //     <TableCell align="right">
-                                //         <Button>Edit</Button>
-                                //     </TableCell>
-                                // </TableRow>
-                                <></>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} align="center">No data</TableCell>
-                                </TableRow>
-                            )}
+                            {rows.length > 0 ?
+                                rows.map((ticket) => (
+                                    <TableRow key={ticket.id}>
+                                        <TableCell>{ticket.inc_number}</TableCell>
+                                        <TableCell>{ticket.ticket_number}</TableCell>
+                                        <TableCell>{ticket.title}</TableCell>
+                                        <TableCell>{ticket.ticket_status}</TableCell>
+                                        <TableCell>{ticket.assigned_to}</TableCell>
+                                        <TableCell>{ticket.engineer}</TableCell>
+                                        <TableCell>{ticket.shop}</TableCell>
+                                        <TableCell>{ticket.due_by}</TableCell>
+                                        <TableCell>{ticket.action}</TableCell>
+                                    </TableRow>
+
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} align="center">No data</TableCell>
+                                    </TableRow>
+                                )},
                         </TableBody>
                     </Table>
                 </Box>
@@ -206,7 +190,7 @@ export default function MAReportPage() {
                     rowsPerPage={rowsPerPage}
                     rowsPerPageOptions={[5, 10, 25]}
                 />
-            </Card>
-        </Box>
+            </Card >
+        </Box >
     );
 }

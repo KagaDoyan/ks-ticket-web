@@ -25,11 +25,24 @@ import Swal from 'sweetalert2';
 interface priority_group {
     id: number;
     group_name: string;
+    customer: Customer;
+    provinces: provinces[];
     priorities: [{
         id: number
         name: string
         time_sec: number
     }]
+}
+
+interface provinces {
+    id: number
+    name: string
+    code: string
+}
+interface Customer {
+    id : number
+    fullname: string
+    shortname: string
 }
 
 export function PriorityGroupPage(): React.JSX.Element {
@@ -172,6 +185,11 @@ export function PriorityGroupPage(): React.JSX.Element {
         setpriorityID(0)
     }
 
+    const handleEditprioritiesGroup = (id: number) => {
+        setpriorityGroupID(id)
+        handleOpen()
+    }
+
     function formatTime(seconds: number): string {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
@@ -186,7 +204,7 @@ export function PriorityGroupPage(): React.JSX.Element {
     return (
         <>
             <PriorityModalForm open={popen} handleClose={handlePModalClose} prioritiesID={priorityID} priority_group_id={priorityGroupID} fetchprioritiesData={fetchprioritiesData} />
-            <PriorityGroupModalForm open={open} handleClose={handleModalClose} prioritiesID={prioritiesID} fetchprioritiesData={fetchprioritiesData} />
+            <PriorityGroupModalForm open={open} handleClose={handleModalClose} prioritiesGroupID={priorityGroupID} fetchprioritiesData={fetchprioritiesData} />
             <Stack direction="row" spacing={3}>
                 <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
                     <Typography variant="h5">priorities</Typography>
@@ -222,6 +240,8 @@ export function PriorityGroupPage(): React.JSX.Element {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell>group name</TableCell>
+                                        <TableCell>customer</TableCell>
+                                        <TableCell>Provinces</TableCell>
                                         <TableCell>priorities count</TableCell>
                                         <TableCell>Action</TableCell>
                                     </TableRow>
@@ -231,9 +251,11 @@ export function PriorityGroupPage(): React.JSX.Element {
                                         return (
                                             <TableRow hover key={row.id}>
                                                 <TableCell>{row.group_name}</TableCell>
+                                                <TableCell>{row.customer.shortname}</TableCell>
+                                                <TableCell>  {row.provinces.map((province) => province.code).join(', ')}</TableCell>
                                                 <TableCell>{row.priorities.length}</TableCell>
                                                 <TableCell>
-                                                    <IconButton color='warning' onClick={() => handleEditpriorities(row.id)}>
+                                                    <IconButton color='warning' onClick={() => handleEditprioritiesGroup(row.id)}>
                                                         <Edit />
                                                     </IconButton>
                                                     <IconButton color='primary' onClick={() => setpriorityGroupID(row.id)}>
@@ -245,7 +267,7 @@ export function PriorityGroupPage(): React.JSX.Element {
                                                 </TableCell>
                                             </TableRow>
                                         );
-                                    }) : <TableCell colSpan={2} sx={{ textAlign: 'center' }}>No data</TableCell>}
+                                    }) : <TableCell colSpan={4} sx={{ textAlign: 'center' }}>No data</TableCell>}
                                 </TableBody>
                             </Table>
                         </Box>

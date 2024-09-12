@@ -33,17 +33,30 @@ interface category {
     name: string
 }
 
+interface Customer {
+    id: number
+    shortname: string
+    fullname: string
+}
+
 interface model {
     id: number
     name: string
     brand_id: number
+}
+
+interface Storage {
+    id: number
+    name: string
 }
 export default function ItemModalForm({ open, handleClose, itemID, fetchitemData }: { open: boolean, handleClose: () => void, itemID: number, fetchitemData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         serial_number: "",
         category_id: 0,
         brand_id: 0,
+        customer_id: 0,
         model_id: 0,
+        storage_id: 0,
         warranty_expiry_date: "",
         status: "in_stock"
     });
@@ -52,6 +65,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
     const [BrandOption, setBrandOption] = useState<brand[]>([])
     const [ModelOption, setModelOption] = useState<model[]>([])
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
+    const [CustomerOption, setCustomerOption] = useState<Customer[]>([])
+    const [storageOption, setStorageOption] = useState<Storage[]>([])
 
 
     const getStatusOption = () => {
@@ -134,6 +149,38 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             });
     }
 
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomerOption(data.data);
+                    })
+                }
+            })
+    }
+
+    const GetStorage = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/storage/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setStorageOption(data.data);
+                    })
+                }
+            })
+    }
+
     const getitemData = () => {
         if (itemID) {
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/${itemID}`, {
@@ -149,9 +196,11 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                 serial_number: data.data.serial_number,
                                 category_id: data.data.category_id,
                                 brand_id: data.data.brand_id,
+                                customer_id: data.data.customer_id || 0,
                                 model_id: data.data.model_id,
                                 warranty_expiry_date: dayjs(data.data.warranty_expiry_date).format('YYYY-MM-DD'),
-                                status: data.data.status
+                                status: data.data.status,
+                                storage_id: data.data.storage_id
                             });
                         })
                     } else {
@@ -169,8 +218,10 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             category_id: 0,
             brand_id: 0,
             model_id: 0,
+            customer_id: 0,
             warranty_expiry_date: "",
-            status: "in_stock"
+            status: "in_stock",
+            storage_id: 0
         });
     }
 
@@ -249,6 +300,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
         getBrandOption()
         getCategoryOption()
         getModelOption()
+        GetCustomer()
+        GetStorage()
     })
 
 
@@ -314,6 +367,30 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Autocomplete
+                                options={CustomerOption}
+                                getOptionLabel={(option) => option.shortname}
+                                value={CustomerOption.find((brand) => brand.id === formData.customer_id) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            customer_id: 0
+                                        })
+                                    }
+                                    const selectedOption = newValue ? newValue.id : null;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        customer_id: selectedOption || 0
+                                    });
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Customer Brand" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
                                 options={BrandOption}
                                 getOptionLabel={(option) => option.name}
                                 value={BrandOption.find((brand) => brand.id === formData.brand_id) || null}
@@ -333,7 +410,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         brand_id: selectedOption || 0
                                     });
                                 }}
-                                renderInput={(params) => <TextField required {...params} label="Brand" />}
+                                renderInput={(params) => <TextField required {...params} label="Item Brand" />}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -385,6 +462,32 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                     console.log(formData);
                                 }}
                                 renderInput={(params) => <TextField required name="status" {...params} label="Status" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={storageOption}
+                                getOptionLabel={(option) => option.name}
+                                value={storageOption.find((storage) => storage.id === formData.storage_id) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            storage_id: 0
+                                        })
+                                        return;
+                                    }
+                                    const selectedOption = newValue?.id;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        storage_id: selectedOption || 0
+                                    });
+                                    console.log(formData);
+                                }}
+                                renderInput={(params) => <TextField required name="status" {...params} label="Location" />}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>

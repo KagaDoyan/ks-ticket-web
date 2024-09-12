@@ -1,6 +1,9 @@
+import { authClient } from "@/lib/auth/client";
 import { EmailOutlined, SendAndArchiveOutlined } from "@mui/icons-material";
 import { Box, Button, Divider, Modal, Stack, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 export default function EmailPreviewPage({ open, handleClose, ticketData }: { open: boolean, handleClose: () => void, ticketData: any }): React.JSX.Element {
 
@@ -53,6 +56,41 @@ export default function EmailPreviewPage({ open, handleClose, ticketData }: { op
         )
     };
 
+    const handleSendMail = () => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, send it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // make a toast loading waiting for fetch reponse
+                toast.promise(
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/mail/${ticketData.id}`, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${authClient.getToken()}`,
+                        },
+                    }).then((response) => {
+                        // Check if the response is ok (status code in the range 200-299)
+                        if (!response.ok) {
+                            throw new Error('Failed to send mail');
+                        }
+                        return response.json(); // Or return response, based on your needs
+                    }),
+                    {
+                        pending: 'Sending mail, please wait...',  // Message shown while the promise is pending
+                        success: 'Mail sent successfully!',       // Message shown if the promise resolves
+                        error: 'Failed to send mail. Please try again.', // Message shown if the promise rejects
+                    }
+                );
+            }
+        })
+    }
+
     return (
         <Modal onClose={handleClose} open={open} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Box sx={{ width: { xs: '90%', md: '50%', lg: '40%', xl: '40%' }, bgcolor: 'background.paper', p: 3, borderRadius: 3 }}>
@@ -67,7 +105,7 @@ export default function EmailPreviewPage({ open, handleClose, ticketData }: { op
                     <Button onClick={handleClose} variant="contained" color="warning">
                         Close
                     </Button>
-                    <Button startIcon={<EmailOutlined />} variant="contained" color="error">
+                    <Button startIcon={<EmailOutlined />} variant="contained" color="error" onClick={handleSendMail}>
                         Send
                     </Button>
                 </Stack>

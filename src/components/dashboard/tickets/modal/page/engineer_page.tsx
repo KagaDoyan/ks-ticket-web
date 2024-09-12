@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth/client";
-import { Autocomplete, Box, Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material";
 import useOnMount from "@mui/utils/useOnMount";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -49,6 +49,8 @@ interface FormData {
     uploadedFiles?: File[];
     ticket_image?: image_url[];
     delete_images?: string[];
+    close_date: string;
+    close_time: string;
 }
 
 interface image_url {
@@ -80,6 +82,8 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         uploadedFiles: [],
         ticket_image: [],
         delete_images: [],
+        close_date: '',
+        close_time: ''
     });
 
     const [openEmailPreview, setOpenEmailPreview] = useState(false);
@@ -343,6 +347,8 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 time_in: dayjs(data.data.time_in).format('YYYY-MM-DD HH:mm'),
                                 time_out: dayjs(data.data.time_out).format('YYYY-MM-DD HH:mm'),
                                 ticket_image: [...data.data.ticket_image],
+                                close_date: data.data.close_date ? dayjs(data.data.close_date).format('YYYY-MM-DD') : '',
+                                close_time: data.data.close_time ? data.data.close_time : '',
                             });
 
                             if (data.data.spare_item?.length > 0) {
@@ -395,6 +401,25 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         });
     };
 
+    const handleActionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = event.target;
+        const actionsArray = formData.action ? formData.action.split(',') : [];
+
+        if (checked) {
+            // Add the action if it is checked
+            actionsArray.push(name);
+        } else {
+            // Remove the action if it is unchecked
+            const index = actionsArray.indexOf(name);
+            if (index > -1) {
+                actionsArray.splice(index, 1);
+            }
+        }
+
+        // Update the action string
+        setFormData({ ...formData, action: actionsArray.join(',') });
+    };
+
     const warranty_expiry = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         setFormData({
@@ -429,7 +454,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
     const handleSubmit = () => {
         // Show loading toast
         const toastId = toast.loading("Submitting...", { autoClose: false });
-    
+
         const payload = new FormData();
         payload.append('solution', formData.solution);
         payload.append('investigation', formData.investigation);
@@ -445,25 +470,31 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         payload.append('action', formData.action);
         payload.append('time_in', formData.time_in);
         payload.append('time_out', formData.time_out);
-    
+        if (formData.close_date) {
+            payload.append('close_date', formData.close_date);
+        }
+        if (formData.close_time) {
+            payload.append('close_time', formData.close_time);
+        }
+
         // Append uploaded files if present
         if (formData.uploadedFiles) {
             for (const file of formData.uploadedFiles) {
                 payload.append('images', file);
             }
         }
-    
+
         // Append images to delete if present
         if (formData.delete_images) {
             for (const image of formData.delete_images) {
                 payload.append('delete_images', image);
             }
         }
-    
+
         // Serialize and append store and spare items
         payload.append('store_item', JSON.stringify(shopitems));
         payload.append('spare_item', JSON.stringify(spareitems));
-    
+
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/close/${ticketID}`, {
             method: 'PUT',
             headers: {
@@ -504,8 +535,8 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             });
         });
     };
-    
-    
+
+
 
     const handleImageUpload = (files: ExtendedFile[]) => {
         setFormData({
@@ -513,14 +544,6 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             uploadedFiles: files
         });
     };
-
-    const handleActionChange = (event: SelectChangeEvent) => {
-        const { name, value } = event.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-    }
     return (
         <>
             <EmailPreviewPagefunction open={openEmailPreview} handleClose={() => setOpenEmailPreview(false)} ticketData={ticketData} />
@@ -573,16 +596,35 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                         renderInput={(params) => <TextField required {...params} label="Ticket Status" />}
                     />
                 </Grid>
-                <Grid item xs={12} sm={8}>
-                    {/* <TextField
-                        required
-                        label="ticket description"
-                        name="close_description"
-                        value={formData.close_description}
-                        onChange={handleChange}
-                        fullWidth
-                    /> */}
-                </Grid>
+
+                {formData.ticket_status == 'close' &&
+                    <>
+                        <Grid item xs={12} sm={4}>
+                            <TextField
+                                name="close_date"
+                                label="Close date"
+                                type="date"
+                                value={formData.close_date}
+                                onChange={handleChange}
+                                fullWidth
+                                required
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                            <TextField
+                                name="close_time"
+                                label="Close Time"
+                                type="time"
+                                value={formData.close_time}
+                                onChange={handleChange}
+                                fullWidth
+                                required
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Grid>
+                    </>
+                }
                 <Grid item xs={12} sm={6}>
                     <TextField
                         name="item_sn"
@@ -939,37 +981,50 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                 />
             </Grid>
             <Grid item xs={12} sm={3}>
-                <FormControl>
-                    <FormLabel id="demo-form-control-label-placement">Action</FormLabel>
-                    <RadioGroup
-                        row
-                        aria-labelledby="demo-form-control-label-placement"
-                        name="action"
-                        defaultValue="repair"
-                        value={formData.action}
-                        onChange={handleChange}
-                    >
+                <FormControl component="fieldset">
+                    <FormLabel component="legend">Action</FormLabel>
+                    <FormGroup row>
                         <FormControlLabel
-                            value="repair"
-                            control={<Radio />}
+                            control={
+                                <Checkbox
+                                    checked={formData.action?.includes('repair')}
+                                    onChange={handleActionChange}
+                                    name="repair"
+                                />
+                            }
                             label="Repair"
                         />
                         <FormControlLabel
-                            value="clean"
-                            control={<Radio />}
+                            control={
+                                <Checkbox
+                                    checked={formData.action?.includes('clean')}
+                                    onChange={handleActionChange}
+                                    name="clean"
+                                />
+                            }
                             label="Clean"
                         />
                         <FormControlLabel
-                            value="spare"
-                            control={<Radio />}
+                            control={
+                                <Checkbox
+                                    checked={formData.action?.includes('spare')}
+                                    onChange={handleActionChange}
+                                    name="spare"
+                                />
+                            }
                             label="Spare"
                         />
                         <FormControlLabel
-                            value="replace"
-                            control={<Radio />}
+                            control={
+                                <Checkbox
+                                    checked={formData.action?.includes('replace')}
+                                    onChange={handleActionChange}
+                                    name="replace"
+                                />
+                            }
                             label="Replace"
                         />
-                    </RadioGroup>
+                    </FormGroup>
                 </FormControl>
             </Grid>
             <Grid item xs={12} sm={9}>

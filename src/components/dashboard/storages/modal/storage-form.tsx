@@ -1,8 +1,7 @@
-import { Box, Modal, Button, TextField, Typography, Stack, Select, FormControl, InputLabel, MenuItem, SelectChangeEvent, Autocomplete } from "@mui/material";
-import { useEffect, useState} from "react";
+import { Box, Modal, Button, TextField, Typography, Stack } from "@mui/material";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
-import useOnMount from "@mui/utils/useOnMount";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -16,20 +15,15 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
-interface priorityGroup {
-    id: number
-    group_name: string
-}
-export default function ProvinceModalForm({ open, handleClose, provinceID, fetchprovinceData }: { open: boolean, handleClose: () => void, provinceID: number, fetchprovinceData: () => void }): React.JSX.Element {
+export default function StorageModalForm({ open, handleClose, storageID, fetchStorageData }: { open: boolean, handleClose: () => void, storageID: number, fetchStorageData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         name: "",
-        code: ""
+        location: ""
     });
-    const [priorityGroupOption, setPriorityGroupOption] = useState<priorityGroup[]>([]);
 
-    const getprovinceData = () => {
-        if (provinceID) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province/${provinceID}`, {
+    const getstorageData = () => {
+        if (storageID) {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/storage/${storageID}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${authClient.getToken()}`
@@ -40,60 +34,38 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
                         res.json().then((data) => {
                             setFormData({
                                 name: data.data.name,
-                                code: data.data.code
+                                location: data.data.location
                             });
                         })
                     } else {
-                        throw new Error("Failed to fetch province data");
+                        throw new Error("Failed to fetch storage data");
                     }
                 }).catch((err) => {
-                    toast.error("Failed to fetch province data");
+                    toast.error("Failed to fetch storage data");
                 });
         }
-    }
-
-    const getPriorityGroupOption = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/option`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${authClient.getToken()}`
-            }
-        })
-            .then((res) => {
-                if (res.ok) {
-                    res.json().then((data) => {
-                        setPriorityGroupOption(data.data);
-                        console.log(data.data);
-
-                    })
-                } else {
-                    throw new Error("Failed to fetch priority group data");
-                }
-            }).catch((err) => {
-                toast.error("Failed to fetch priority group data");
-            })
-
     }
 
     const clearFormData = () => {
         setFormData({
             name: "",
-            code: ""
+            location: "",
         });
     }
 
     useEffect(() => {
-        getprovinceData();
-        if (provinceID == 0) {
+        getstorageData();
+        if (storageID == 0) {
             clearFormData()
         }
-    }, [provinceID]);
+    }, [storageID]);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (provinceID) {
+        if (storageID) {
             //update
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province/${provinceID}`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/storage/${storageID}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -103,20 +75,20 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
             })
                 .then((res) => {
                     if (res.ok) {
-                        toast.success("province updated successfully");
-                        fetchprovinceData();
+                        toast.success("storage updated successfully");
+                        fetchStorageData();
                         handleClose();
                         clearFormData();
                     } else {
-                        throw new Error("Failed to update province");
+                        throw new Error("Failed to update storage");
                     }
                 }).catch((err) => {
-                    toast.error("Failed to update province");
+                    toast.error("Failed to update storage");
                 });
 
         } else {
             //create
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/storage`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -126,16 +98,16 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
             })
                 .then((res) => {
                     if (res.ok) {
-                        toast.success("province created successfully");
-                        fetchprovinceData();
+                        toast.success("storage created successfully");
+                        fetchStorageData();
                         handleClose();
                         clearFormData();
                     } else {
-                        throw new Error("Failed to create province");
+                        throw new Error("Failed to create storage");
                     }
                 })
                 .catch((err) => {
-                    toast.error("Failed to create province");
+                    toast.error("Failed to create storage");
                 });
         }
     };
@@ -147,9 +119,9 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
         });
     };
 
-    useOnMount(() => {
-        getPriorityGroupOption();
-    })
+    const togglePasswordVisibility = () => {
+        setShowPassword((prev) => !prev);
+    };
 
 
     return (
@@ -161,7 +133,7 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
         >
             <Box sx={style}>
                 <Typography id="modal-modal-title" variant="h6" component="h2">
-                    province Form
+                    storage Form
                 </Typography>
                 <Box
                     component="form"
@@ -176,16 +148,17 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
                     }}
                 >
                     <TextField
-                        label="province Name"
+                        label="Name"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
                         required
                     />
                     <TextField
-                        label="province Code"
-                        name="code"
-                        value={formData.code}
+                        label="Location"
+                        name="location"
+                        type="text"
+                        value={formData.location}
                         onChange={handleChange}
                         required
                     />
@@ -194,7 +167,7 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
                             Close
                         </Button>
                         <Button type="submit" variant="contained" color="success">
-                            {provinceID ? "Update" : "Add"}
+                            {storageID ? "Update" : "Add"}
                         </Button>
                     </Stack>
 

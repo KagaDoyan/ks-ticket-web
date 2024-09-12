@@ -1,5 +1,5 @@
-import { Box, Modal, Button, TextField, Typography, Stack, Select, FormControl, InputLabel, MenuItem, SelectChangeEvent, Autocomplete } from "@mui/material";
-import { useEffect, useState} from "react";
+import { Box, Modal, Button, TextField, Typography, Stack, Autocomplete } from "@mui/material";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
 import useOnMount from "@mui/utils/useOnMount";
@@ -16,44 +16,21 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
-interface priorityGroup {
-    id: number
-    group_name: string
+interface Province {
+    id: number;
+    name: string;
+    code: string;
 }
-export default function ProvinceModalForm({ open, handleClose, provinceID, fetchprovinceData }: { open: boolean, handleClose: () => void, provinceID: number, fetchprovinceData: () => void }): React.JSX.Element {
+export default function NodeModalForm({ open, handleClose, nodeID, fetchnodeData }: { open: boolean, handleClose: () => void, nodeID: number, fetchnodeData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         name: "",
-        code: ""
+        province_id: [] as number[]
     });
-    const [priorityGroupOption, setPriorityGroupOption] = useState<priorityGroup[]>([]);
+    const [provinceData, setProvinceData] = useState<Province[]>([]);
 
-    const getprovinceData = () => {
-        if (provinceID) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province/${provinceID}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${authClient.getToken()}`
-                }
-            })
-                .then((res) => {
-                    if (res.ok) {
-                        res.json().then((data) => {
-                            setFormData({
-                                name: data.data.name,
-                                code: data.data.code
-                            });
-                        })
-                    } else {
-                        throw new Error("Failed to fetch province data");
-                    }
-                }).catch((err) => {
-                    toast.error("Failed to fetch province data");
-                });
-        }
-    }
 
-    const getPriorityGroupOption = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/option`, {
+    const getProvinceData = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -62,38 +39,62 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
             .then((res) => {
                 if (res.ok) {
                     res.json().then((data) => {
-                        setPriorityGroupOption(data.data);
-                        console.log(data.data);
-
+                        setProvinceData(data);
                     })
                 } else {
-                    throw new Error("Failed to fetch priority group data");
+                    throw new Error("Failed to fetch province data");
                 }
             }).catch((err) => {
-                toast.error("Failed to fetch priority group data");
-            })
+                toast.error("Failed to fetch province data");
+            });
+    };
 
+    const getnodeData = () => {
+        if (nodeID) {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/node/${nodeID}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${authClient.getToken()}`
+                }
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        res.json().then((data) => {
+                            const array_of_provinceID = data.data.province.map((p: Province) => p.id);
+                            setFormData({
+                                name: data.data.fullname,
+                                province_id: array_of_provinceID
+                            });
+                        })
+                    } else {
+                        throw new Error("Failed to fetch node data");
+                    }
+                }).catch((err) => {
+                    toast.error("Failed to fetch node data");
+                });
+        }
     }
 
     const clearFormData = () => {
         setFormData({
             name: "",
-            code: ""
+            province_id: [],
         });
     }
 
     useEffect(() => {
-        getprovinceData();
-        if (provinceID == 0) {
+        getnodeData();
+        if (nodeID == 0) {
             clearFormData()
         }
-    }, [provinceID]);
+    }, [nodeID]);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (provinceID) {
+        if (nodeID) {
             //update
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province/${provinceID}`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/node/${nodeID}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -103,20 +104,20 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
             })
                 .then((res) => {
                     if (res.ok) {
-                        toast.success("province updated successfully");
-                        fetchprovinceData();
+                        toast.success("node updated successfully");
+                        fetchnodeData();
                         handleClose();
                         clearFormData();
                     } else {
-                        throw new Error("Failed to update province");
+                        throw new Error("Failed to update node");
                     }
                 }).catch((err) => {
-                    toast.error("Failed to update province");
+                    toast.error("Failed to update node");
                 });
 
         } else {
             //create
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/node`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -126,16 +127,16 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
             })
                 .then((res) => {
                     if (res.ok) {
-                        toast.success("province created successfully");
-                        fetchprovinceData();
+                        toast.success("node created successfully");
+                        fetchnodeData();
                         handleClose();
                         clearFormData();
                     } else {
-                        throw new Error("Failed to create province");
+                        throw new Error("Failed to create node");
                     }
                 })
                 .catch((err) => {
-                    toast.error("Failed to create province");
+                    toast.error("Failed to create node");
                 });
         }
     };
@@ -147,10 +148,16 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
         });
     };
 
-    useOnMount(() => {
-        getPriorityGroupOption();
-    })
+    const handleChangeProvince = (event: React.SyntheticEvent, value: Province[]) => {
+        setFormData({
+            ...formData,
+            province_id: value.map((province) => province.id)
+        });
+    };
 
+    useOnMount(() => {
+        getProvinceData();
+    })
 
     return (
         <Modal
@@ -161,7 +168,7 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
         >
             <Box sx={style}>
                 <Typography id="modal-modal-title" variant="h6" component="h2">
-                    province Form
+                    Node Form
                 </Typography>
                 <Box
                     component="form"
@@ -175,26 +182,33 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
                         mt: 2
                     }}
                 >
+
                     <TextField
-                        label="province Name"
                         name="name"
+                        label="Node Name"
+                        variant="outlined"
                         value={formData.name}
                         onChange={handleChange}
-                        required
                     />
-                    <TextField
-                        label="province Code"
-                        name="code"
-                        value={formData.code}
-                        onChange={handleChange}
-                        required
+                    <Autocomplete
+                        multiple
+                        id="province-select"
+                        options={provinceData}
+                        getOptionLabel={(option) => option.name}
+                        value={provinceData.filter(province => formData.province_id.includes(province.id))}
+                        onChange={handleChangeProvince}
+                        renderInput={(params) => (
+                            <TextField {...params} label="Province" variant="outlined" />
+                        )}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
                     />
+
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                         <Button onClick={handleClose} variant="contained" color="warning">
                             Close
                         </Button>
                         <Button type="submit" variant="contained" color="success">
-                            {provinceID ? "Update" : "Add"}
+                            {nodeID ? "Update" : "Add"}
                         </Button>
                     </Stack>
 

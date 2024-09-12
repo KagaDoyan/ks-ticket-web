@@ -37,19 +37,17 @@ interface shop {
     shop_name: string
     shop_number: string
     province: {
-        priority_group: priority_group
+        id: number
+        name: string
     }
     latitude: string
     longitude: string
     phone: string
 }
 
-interface priority_group {
-    priorities: priority[]
-}
-
 interface priority {
     id: number
+    group_name: string
     name: string
     time_sec: number
 }
@@ -86,9 +84,9 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
     const [priorityOptions, setpriorityOptions] = useState<priority[]>([]);
     const [enginnerOption, setEngineerOption] = useState<engineer[]>([]);
     const [priority_time, setpriority_time] = useState(0);
-    const [shoplatlng,  setShoplatlng] = useState({ lat: "", lng: ""});
+    const [shoplatlng, setShoplatlng] = useState({ lat: "", lng: "" });
 
-    const HandleShopLatLngChange = ( lat: string, lng: string) => {
+    const HandleShopLatLngChange = (lat: string, lng: string) => {
         setShoplatlng({ lat: lat, lng: lng })
     }
 
@@ -218,6 +216,21 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
         handleClose();
     };
 
+    const getPriority = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/find/${formData.customer_id}/${shopOptions.find((shop) => shop.id === formData.shop_id)?.province.id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        }).then((res) => {
+            if (res.ok) {
+                res.json().then((data) => {
+                    setpriorityOptions(data.data);
+                })
+            }
+        })
+    }
+
     useOnMount(() => {
         fetchCustomer();
         fetchEngineer()
@@ -226,6 +239,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
     useEffect(() => {
         fetchCustomer();
         fetchEngineer()
+        getPriority();
     }, [formData.shop_id])
 
     useEffect(() => {
@@ -330,7 +344,6 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                         shop_id: selectedOption,
                                         contact_tel: shopOptions.find((shop) => shop.id === selectedOption)?.phone || "",
                                     });
-                                    setpriorityOptions(shopOptions.find((shop) => shop.id === selectedOption)?.province.priority_group.priorities || []);
                                     HandleShopLatLngChange(shopOptions.find((shop) => shop.id === selectedOption)?.latitude || "", shopOptions.find((shop) => shop.id === selectedOption)?.longitude || "");
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Shop" />}
@@ -339,7 +352,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                         <Grid item xs={12} sm={3}>
                             <Autocomplete
                                 options={priorityOptions}
-                                getOptionLabel={(option) => option.name}
+                                getOptionLabel={(option) => option.group_name + ' ' + option.name}
                                 value={priorityOptions.find((priority) => priority.name === formData.sla_priority_level) || null}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
@@ -515,7 +528,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                             />
                         </Grid>
                     </Grid>
-                    <Divider/>
+                    <Divider />
                     <Stack justifyContent={"flex-end"} direction="row" spacing={4}>
                         <Button onClick={handleModalClose} variant="contained" color="warning">
                             Close

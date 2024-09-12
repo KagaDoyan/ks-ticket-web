@@ -1,7 +1,8 @@
-import { Box, Modal, Button, TextField, Typography, Stack } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack, Grid, Autocomplete } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
+import { custom } from "zod";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -15,14 +16,48 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
-export default function PriorityGroupModalForm({ open, handleClose, prioritiesID, fetchprioritiesData }: { open: boolean, handleClose: () => void, prioritiesID: number, fetchprioritiesData: () => void }): React.JSX.Element {
+interface Customer {
+    id: number
+    shortname: string
+    fullname: string
+}
+interface Province {
+    id: number;
+    name: string;
+    code: string;
+}
+export default function PriorityGroupModalForm({ open, handleClose, prioritiesGroupID, fetchprioritiesData }: { open: boolean, handleClose: () => void, prioritiesGroupID: number, fetchprioritiesData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         group_name: "",
+        customer_id: 0,
+        province_id: [] as number[],
     });
+    const [CustomerOption, setCustomerOption] = useState<Customer[]>([])
+    const [provinceData, setProvinceData] = useState<Province[]>([]);
 
+
+    const getProvinceData = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/province`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setProvinceData(data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch province data");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch province data");
+            });
+    };
     const GetPriorityGroupData = () => {
-        if (prioritiesID) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/${prioritiesID}`, {
+        if (prioritiesGroupID) {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/${prioritiesGroupID}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${authClient.getToken()}`
@@ -31,8 +66,11 @@ export default function PriorityGroupModalForm({ open, handleClose, prioritiesID
                 .then((res) => {
                     if (res.ok) {
                         res.json().then((data) => {
+                            const array_of_provinceID = data.data.provinces?.map((p: Province) => p.id);
                             setFormData({
                                 group_name: data.data.group_name,
+                                customer_id: data.data.customers_id,
+                                province_id: array_of_provinceID
                             });
                         })
                     } else {
@@ -44,25 +82,51 @@ export default function PriorityGroupModalForm({ open, handleClose, prioritiesID
         }
     }
 
+    const handleChangeProvince = (event: React.SyntheticEvent, value: Province[]) => {
+        setFormData({
+            ...formData,
+            province_id: value.map((province) => province.id)
+        });
+    };
+
     const clearFormData = () => {
         setFormData({
             group_name: "",
+            customer_id: 0,
+            province_id: [],
         });
     }
 
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomerOption(data.data);
+                    })
+                }
+            })
+    }
     useEffect(() => {
         GetPriorityGroupData();
-        if (prioritiesID == 0) {
+        getProvinceData();
+        GetCustomer();
+        if (prioritiesGroupID == 0) {
             clearFormData()
         }
-    }, [prioritiesID]);
+    }, [prioritiesGroupID]);
     const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (prioritiesID) {
+        if (prioritiesGroupID) {
             //update
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/${prioritiesID}`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/${prioritiesGroupID}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -144,19 +208,61 @@ export default function PriorityGroupModalForm({ open, handleClose, prioritiesID
                         mt: 2
                     }}
                 >
-                    <TextField
-                        label="priority group Name"
-                        name="group_name"
-                        value={formData.group_name}
-                        onChange={handleChange}
-                        required
-                    />
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="priority group Name"
+                                name="group_name"
+                                value={formData.group_name}
+                                onChange={handleChange}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={CustomerOption}
+                                getOptionLabel={(option) => option.shortname}
+                                value={CustomerOption.find((customer) => customer.id === formData.customer_id) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            customer_id: 0
+                                        })
+                                    }
+                                    const selectedOption = newValue ? newValue.id : null;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        customer_id: selectedOption || 0
+                                    });
+                                }}
+                                renderInput={(params) => <TextField required {...params} label="Customer" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                            <Autocomplete
+                                multiple
+                                id="province-select"
+                                options={provinceData}
+                                getOptionLabel={(option) => option.name}
+                                value={provinceData.filter(province => formData.province_id.includes(province.id))}
+                                onChange={handleChangeProvince}
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Province" variant="outlined" />
+                                )}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                            />
+                        </Grid>
+                    </Grid>
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                         <Button onClick={handleClose} variant="contained" color="warning">
                             Close
                         </Button>
                         <Button type="submit" variant="contained" color="success">
-                            {prioritiesID ? "Update" : "Add"}
+                            {prioritiesGroupID ? "Update" : "Add"}
                         </Button>
                     </Stack>
 

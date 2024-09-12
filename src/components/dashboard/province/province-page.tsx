@@ -24,10 +24,7 @@ import Swal from 'sweetalert2';
 interface province {
     id: number;
     name: string;
-    code: string,
-    priority_group: {
-        group_name: string
-    }
+    code: string
 }
 
 export function ProvincePage(): React.JSX.Element {
@@ -162,7 +159,6 @@ export function ProvincePage(): React.JSX.Element {
                             <TableRow>
                                 <TableCell>province name</TableCell>
                                 <TableCell>code</TableCell>
-                                <TableCell>group</TableCell>
                                 <TableCell>Action</TableCell>
                             </TableRow>
                         </TableHead>
@@ -172,7 +168,6 @@ export function ProvincePage(): React.JSX.Element {
                                     <TableRow hover key={row.id}>
                                         <TableCell>{row.name}</TableCell>
                                         <TableCell>{row.code}</TableCell>
-                                        <TableCell>{row.priority_group.group_name}</TableCell>
                                         <TableCell>
                                             <IconButton color='warning' onClick={() => handleEditprovince(row.id)}>
                                                 <Edit />
@@ -183,7 +178,7 @@ export function ProvincePage(): React.JSX.Element {
                                         </TableCell>
                                     </TableRow>
                                 );
-                            }) : <TableCell colSpan={5} sx={{ textAlign: 'center' }}>No data</TableCell>}
+                            }) : <TableCell colSpan={3} sx={{ textAlign: 'center' }}>No data</TableCell>}
                         </TableBody>
                     </Table>
                 </Box>

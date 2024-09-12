@@ -290,45 +290,41 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                     </script>
                 </tr>
                 <tr>
-                    <td colspan="4" style="vertical-align: top;">วิธีดำเนินการ/Action:</td>
-                    <td colspan="4" style="vertical-align: top;">
-                        <input type="checkbox" id="action1" name="action" value="repair" onclick="return false;">
-                        <label for="action1">ซ่อม / Repair</label>
-                    </td>
-                    <td colspan="6" style="vertical-align: top;">
-                        <input type="checkbox" id="action2" name="action" value="clean" onclick="return false;">
-                        <label for="action2">ทำความสะอาด / Clean </label>
-                    </td>
-                    <td colspan="6" style="vertical-align: top;">
-                        <input type="checkbox" id="action3" name="action" value="spare" onclick="return false;">
-                        <label for="action3">เปลี่ยนชั่วคราว / Temporary</label>
-                    </td>
-                    <td colspan="4" style="vertical-align: top;">
-                        <input type="checkbox" id="action4" name="action" value="replace" onclick="return false;">
-                        <label for="action4">เปลี่ยนถาวร / Permanent</label>
-                    </td>
+                    <tr>
+                        <td colspan="4" style="vertical-align: top;">วิธีดำเนินการ/Action:</td>
+                        <td colspan="4" style="vertical-align: top;">
+                            <input type="checkbox" id="action1" name="action" value="repair" onclick="return false;">
+                            <label for="action1">ซ่อม / Repair</label>
+                        </td>
+                        <td colspan="6" style="vertical-align: top;">
+                            <input type="checkbox" id="action2" name="action" value="clean" onclick="return false;">
+                            <label for="action2">ทำความสะอาด / Clean </label>
+                        </td>
+                        <td colspan="6" style="vertical-align: top;">
+                            <input type="checkbox" id="action3" name="action" value="spare" onclick="return false;">
+                            <label for="action3">เปลี่ยนชั่วคราว / Temporary</label>
+                        </td>
+                        <td colspan="4" style="vertical-align: top;">
+                            <input type="checkbox" id="action4" name="action" value="replace" onclick="return false;">
+                            <label for="action4">เปลี่ยนถาวร / Permanent</label>
+                        </td>
+                    </tr>
+
                     <script>
-                          const action1 = document.getElementById('action1');
-                          const action2 = document.getElementById('action2');
-                          const action3 = document.getElementById('action3');
-                          const action4 = document.getElementById('action4');
-                          // Compare the values
-                          switch ("${data.action}") {
-                            case "repair":
-                              action1.checked = true;
-                              break;
-                            case "clean":
-                              action2.checked = true;
-                              break;
-                            case "spare":
-                              action3.checked = true;
-                              break;
-                            case "replace":
-                              action4.checked = true;
-                              break;
-                            default:
-                              break;
-                          }
+                            const actions = "${data.action}".split(',').map(action => action.trim());
+                            alert(actions);
+                            // Reference the checkboxes
+                            const action1 = document.getElementById('action1');
+                            const action2 = document.getElementById('action2');
+                            const action3 = document.getElementById('action3');
+                            const action4 = document.getElementById('action4');
+                            const isChecked = (action) => actions.includes(action);
+
+                            // Set the checked state based on the action values
+                            if (action1) action1.checked = isChecked("repair");
+                            if (action2) action2.checked = isChecked("clean");
+                            if (action3) action3.checked = isChecked("spare");
+                            if (action4) action4.checked = isChecked("replace");
                     </script>
                 </tr>
                 <!-- Spare Parts -->

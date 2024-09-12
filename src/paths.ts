@@ -18,6 +18,8 @@ export const paths = {
     move_item: '/page/move-item',
     province: '/page/province',
     priorities: '/page/priorities',
+    storage : '/page/storage',
+    node: '/page/node',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;

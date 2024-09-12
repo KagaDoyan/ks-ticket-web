@@ -22,6 +22,7 @@ import { authClient } from '@/lib/auth/client';
 import ItemModalForm from './modal/item-form';
 import EngineerSelectionModal from './modal/engineer_select';
 import Swal from 'sweetalert2';
+import useOnMount from '@mui/utils/useOnMount';
 
 export interface item {
   id: number;
@@ -48,6 +49,16 @@ export interface item {
     id: number;
     name: string;
   } | null;
+  storage_id: number;
+  storage: {
+    id: number;
+    name: string;
+  }
+}
+
+interface storage {
+  id: number;
+  name: string;
 }
 
 export function ItemPage(): React.JSX.Element {
@@ -57,6 +68,7 @@ export function ItemPage(): React.JSX.Element {
   const [search, setSearch] = React.useState<string>('');
   const [count, setCount] = React.useState(0);
   const [itemID, setitemID] = React.useState(0);
+  const [storage, setStorage] = React.useState<storage[]>([]);
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -81,6 +93,22 @@ export function ItemPage(): React.JSX.Element {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  const GetStorage = () => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/storage/option`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${authClient.getToken()}`
+        }
+    })
+        .then((res) => {
+            if (res.ok) {
+                res.json().then((data) => {
+                    setStorage(data.data);
+                })
+            }
+        })
+}
 
   const fetchitemData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
@@ -143,13 +171,33 @@ export function ItemPage(): React.JSX.Element {
     Swal.fire({
       title: 'please confirm',
       text: 'Are you sure you want to return the item?',
-      icon: 'warning',
+      input: 'select',
+      inputPlaceholder: "Select where to return the item",
+      inputOptions: storage.reduce<Record<string, string>>((acc, { id, name }) => {
+        acc[id] = name;
+        return acc;
+      }, {}),
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes'
+      confirmButtonText: 'Yes',
+      inputValidator: (value) => {
+        return new Promise((resolve) => {
+          if (value != "") {
+            resolve();
+          } else {
+            resolve("You need to select where to return the item");
+          }
+        });
+      },
+      preConfirm: () => {
+        // Get the selected value from the select element
+        const selectedOption = Swal.getInput()?.value as string;
+        return selectedOption;
+      },
     }).then((result) => {
       if (result.isConfirmed) {
+        const selectedOption = result.value as string;
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/engineer/${id}`, {
           method: 'PUT',
           headers: {
@@ -157,7 +205,8 @@ export function ItemPage(): React.JSX.Element {
             'Authorization': `Bearer ${authClient.getToken()}`
           },
           body: JSON.stringify({
-            engineer_id: null
+            engineer_id: null,
+            storage_id: parseInt(selectedOption)
           })
         }).then((res) => {
           if (res.ok) {
@@ -170,13 +219,16 @@ export function ItemPage(): React.JSX.Element {
           toast.error("Failed to remove engineer");
         });
       }
-    })
+    });
   }
 
   React.useEffect(() => {
     fetchitemData();
   }, [page, rowsPerPage, search])
 
+  useOnMount(() => {
+    GetStorage()
+  })
   const HandleModalAddData = () => {
     handleOpen()
   }
@@ -241,7 +293,7 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.category.name}</TableCell>
                     <TableCell>{row.brand.name}</TableCell>
                     <TableCell>{row.model.name}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.engineer?.name ? row.engineer.name : 'WareHouse'} color={row.engineer?.name ? 'primary' : 'warning'} /></TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.engineer?.name ? row.engineer.name : row.storage?.name || 'unknown'} color={row.engineer?.name ? 'primary' : 'warning'} /></TableCell>
                     <TableCell>{dayjs(row.waranty_expiry_date).format('MMM D, YYYY')}</TableCell>
                     <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
                     {/* <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell> */}

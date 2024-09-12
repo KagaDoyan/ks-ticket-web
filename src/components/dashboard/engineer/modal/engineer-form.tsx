@@ -24,6 +24,11 @@ interface Province {
     code: string;
 }
 
+interface node {
+    id: number;
+    name: string;
+}
+
 export default function EngineerModalForm({ open, handleClose, engineerID, fetchengineerData }: { open: boolean, handleClose: () => void, engineerID: number, fetchengineerData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         name: "",
@@ -34,9 +39,12 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
         longitude: "",
         province_id: [] as number[],
         node: "",
+        node_id: 0,
         email: "",
         password: ""
     });
+
+    const [nodes, setNodes] = useState<node[]>([]);
 
     const [showPassword, setShowPassword] = useState(false);
     const [provinceData, setProvinceData] = useState<Province[]>([]);
@@ -68,6 +76,26 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
             });
     };
 
+    const getNodedata = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/node/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setNodes(data.data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch node data");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch node data");
+            });
+    };
+
     const getEngineerData = () => {
         if (engineerID) {
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/engineer/${engineerID}`, {
@@ -90,6 +118,7 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
                                 province_id: array_of_provinceID,
                                 node: data.data.node,
                                 email: data.data.email,
+                                node_id: data.data.node_id,
                                 password: ""
                             });
                         })
@@ -112,6 +141,7 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
             longitude: "",
             province_id: [],
             node: "",
+            node_id: 0,
             email: "",
             password: ""
         });
@@ -188,6 +218,7 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
 
     useOnMount(() => {
         getProvinceData();
+        getNodedata();
     });
 
     return (
@@ -289,13 +320,18 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Node"
-                                name="node"
-                                value={formData.node}
-                                onChange={handleChange}
-                                required
-                                fullWidth
+                            <Autocomplete
+                                options={nodes}
+                                getOptionLabel={(option) => option.name}
+                                value={nodes.find((node) => node.id === formData.node_id) || null}
+                                onChange={(event, newValue) => {
+                                    const selectedId = newValue ? newValue.id : 0;
+                                    setFormData({
+                                        ...formData,
+                                        node_id: selectedId
+                                    })
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Node" />}
                             />
                         </Grid>
                         {
