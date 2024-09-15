@@ -62,7 +62,7 @@ export default function NodeModalForm({ open, handleClose, nodeID, fetchnodeData
                         res.json().then((data) => {
                             const array_of_provinceID = data.data.province.map((p: Province) => p.id);
                             setFormData({
-                                name: data.data.fullname,
+                                name: data.data.name,
                                 province_id: array_of_provinceID
                             });
                         })

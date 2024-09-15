@@ -287,10 +287,10 @@ export function PriorityGroupPage(): React.JSX.Element {
                     {priorityGroupID > 0 ?
                         <Card sx={{ height: '100%' }}>
                             <Typography variant="h6" sx={{ p: 2 }}>
-                                {rows.filter((row) => row.id == priorityGroupID)[0].group_name} Priorities
+                                {rows.filter((row) => row.id == priorityGroupID)[0]?.group_name} Priorities
                             </Typography>
                             <Divider />
-                            {rows.filter((row) => row.id == priorityGroupID)[0].priorities.length > 0 ?
+                            {rows.filter((row) => row.id == priorityGroupID)[0]?.priorities.length > 0 ?
                                 <Box sx={{ overflowX: 'auto' }}>
                                     <Table>
                                         <TableHead>
@@ -301,7 +301,7 @@ export function PriorityGroupPage(): React.JSX.Element {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {rows.filter((row) => row.id == priorityGroupID)[0].priorities.map((row) => {
+                                            {rows.filter((row) => row.id == priorityGroupID)[0]?.priorities.map((row) => {
                                                 return (
                                                     <TableRow hover key={row.id}>
                                                         <TableCell>{row.name}</TableCell>

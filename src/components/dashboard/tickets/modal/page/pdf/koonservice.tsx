@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export default function CraeteKoonServiceForm(form: string, data: any) {
     var spareParts = ''
     var FormName = ''
@@ -156,7 +158,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                         <table class="nested-table">
                             <tbody>
                                 <tr>
-                                    <td colspan="2"><b>Ticket No:</b> ${data.ticket_number}</td>
+                                    ${form != 'tcc' ? `<td colspan="2"><b>Ticket No:</b> ${data?.ticket_number}</td>` : `<td colspan="2"><b>Incident No:</b> ${data?.inc_number}</td>`}
                                 </tr>
                                 <tr>
                                     <td colspan="2"><b>Report Date:</b> 12/12/2022 <b>Time:</b> 15:00</td>
@@ -175,7 +177,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                 </tr>` : ''}
                 <tr>
                     <td colspan="12"><b>สาขา / shop:</b>
-                        <underline>${data.shop.shop_name}</underline>
+                        <underline>${data.shop.shop_number + data.shop.shop_name}</underline>
                     </td>
                     <td colspan="12"><b>โทรศัพท์ / phone:</b>
                         <underline>${data.shop.phone}</underline>
@@ -312,7 +314,6 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
 
                     <script>
                             const actions = "${data.action}".split(',').map(action => action.trim());
-                            alert(actions);
                             // Reference the checkboxes
                             const action1 = document.getElementById('action1');
                             const action2 = document.getElementById('action2');
@@ -370,7 +371,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                             </tr style="border: none;">
                             <tr style="border: none;">
                                 <td style="text-align: right;" colspan="2">วันที่ / Date:</td>
-                                <td colspan="2"></td>
+                                <td colspan="2">${dayjs(data.time_in).format('DD/MM/YYYY')}</td>
                             </tr>
                             <tr>
                             <tr style="border-top: 1px solid #000;">

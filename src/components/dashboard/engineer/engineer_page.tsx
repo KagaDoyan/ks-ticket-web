@@ -30,7 +30,10 @@ interface engineer {
   line_name: string;
   latitude: string;
   longitude: string;
-  node: string;
+  node: {
+    id: number;
+    name: string
+  };
   province: provinces[]
   deleted_at: Date;
   created_at: Date;
@@ -190,7 +193,7 @@ export function EngineerPage(): React.JSX.Element {
                     <TableCell>{row.lastname}</TableCell>
                     <TableCell>{row.phone}</TableCell>
                     <TableCell>{row.line_name}</TableCell>
-                    <TableCell>{row.node}</TableCell>
+                    <TableCell>{row.node.name}</TableCell>
                     <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEditengineer(row.id)}>

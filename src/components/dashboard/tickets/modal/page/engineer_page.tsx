@@ -201,6 +201,30 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             updatedItems[index] = { ...updatedItems[index], [field]: Intvalue };
             setSpareItem(updatedItems);
             console.log(spareitems);
+        } else if (field === 'serial_number') {
+            const updatedItems = [...spareitems];
+            updatedItems[index] = { ...updatedItems[index], [field]: value };
+            await setSpareItem(updatedItems);
+            getitembyserial(value).then((response) => {
+                if (response.ok) {
+                    response.json().then((data) => {
+                        if (data.data) {
+                            setSpareItem((prevItems) => {
+                                const newItems = [...prevItems];
+                                newItems[index] = {
+                                    ...newItems[index],
+                                    serial_number: value,
+                                    category: data.data.category.name,
+                                    brand: data.data.brand.name,
+                                    model: data.data.model.name,
+                                    warranty_expire_date: formatDate(data.data.warranty_expiry_date)
+                                };
+                                return newItems;
+                            });
+                        }
+                    });
+                }
+            });
         } else {
             const updatedItems = [...spareitems];
             updatedItems[index] = { ...updatedItems[index], [field]: value };
@@ -433,8 +457,8 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
     }
 
     const handleEmail = () => {
-        if (formData.ticket_status != 'close') {
-            toast.error("Please close the ticket first before sending email");
+        if (formData.ticket_status == 'open') {
+            toast.error("Please update the ticket status first before sending email");
         } else {
             handleEmailPreview()
         }
