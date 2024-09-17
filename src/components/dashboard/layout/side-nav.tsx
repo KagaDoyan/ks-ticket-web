@@ -79,6 +79,8 @@ const styles = {
   }),
 };
 
+const userData = JSON.parse(localStorage.getItem('user_info') || '{}');
+
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
 
@@ -112,7 +114,9 @@ export function SideNav(): React.JSX.Element {
 function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pathname: string }): React.JSX.Element {
   return (
     <Stack component="ul" spacing={1} sx={styles.navList}>
-      {items.map((item) => (
+      {items
+        .filter(item => item.role?.includes(userData.role)) // Filter by role
+        .map((item) => (
         <NavItem pathname={pathname} {...item} />
       ))}
     </Stack>

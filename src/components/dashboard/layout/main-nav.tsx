@@ -67,6 +67,7 @@ export function MainNav(): React.JSX.Element {
           setOpenNav(false);
         }}
         open={openNav}
+        userRole={userData.role}
       />
     </React.Fragment>
   );

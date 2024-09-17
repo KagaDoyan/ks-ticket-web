@@ -18,8 +18,9 @@ export const paths = {
     move_item: '/page/move-item',
     province: '/page/province',
     priorities: '/page/priorities',
-    storage : '/page/storage',
+    storage: '/page/storage',
     node: '/page/node',
+    sell: '/page/sell',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;

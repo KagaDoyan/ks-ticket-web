@@ -4,27 +4,26 @@ import * as React from 'react';
 import RouterLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { ArrowSquareUpRight as ArrowSquareUpRightIcon } from '@phosphor-icons/react/dist/ssr/ArrowSquareUpRight';
 
 import type { NavItemConfig } from '@/types/nav';
 import { paths } from '@/paths';
 import { isNavItemActive } from '@/lib/is-nav-item-active';
 
 import { navItems } from '../../../sidenav-item';
-import { navIcons } from './nav-icons';
 
+// Example: assume the role is passed as a prop
 export interface MobileNavProps {
   onClose?: () => void;
   open?: boolean;
   items?: NavItemConfig[];
+  userRole: string;  // Add the user's role here
 }
 
-export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element {
+export function MobileNav({ open, onClose, userRole }: MobileNavProps): React.JSX.Element {
   const pathname = usePathname();
 
   return (
@@ -69,10 +68,9 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
                 <Typography sx={{ padding: 1, fontSize: '14px', color: 'var(--mui-palette-neutral-500)' }}>
                   {item.group}
                 </Typography>
-                {/* <Divider sx={{ borderColor: 'var(--mui-palette-divider)' }} /> */}
               </>
             )}
-            {renderNavItems({ items: item.items, pathname })}
+            {renderNavItems({ items: item.items, pathname, userRole })}
           </React.Fragment>
         ))}
       </Box>
@@ -81,11 +79,14 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
   );
 }
 
-function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pathname: string }): React.JSX.Element {
+function renderNavItems({ items = [], pathname, userRole }: { items?: NavItemConfig[]; pathname: string; userRole: string }): React.JSX.Element {
   const children = items.reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
-    const { key, ...item } = curr;
+    const { key, role, ...item } = curr;
 
-    acc.push(<NavItem key={key} pathname={pathname} {...item} />);
+    // Check if the user has access to this item based on role
+    if (role?.includes(userRole)) {
+      acc.push(<NavItem key={key} pathname={pathname} {...item} />);
+    }
 
     return acc;
   }, []);

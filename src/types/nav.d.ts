@@ -9,4 +9,5 @@ export interface NavItemConfig {
   items?: NavItemConfig[];
   matcher?: { type: 'startsWith' | 'equals'; href: string };
   group?: string; // Added property for grouping
+  role?: string[];
 }
