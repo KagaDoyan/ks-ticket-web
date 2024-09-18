@@ -161,7 +161,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                                     ${form != 'tcc' ? `<td colspan="2"><b>Ticket No:</b> ${data?.ticket_number}</td>` : `<td colspan="2"><b>Incident No:</b> ${data?.inc_number}</td>`}
                                 </tr>
                                 <tr>
-                                    <td colspan="2"><b>Report Date:</b> 12/12/2022 <b>Time:</b> 15:00</td>
+                                    <td colspan="2"><b>Report Date:</b> ${dayjs(new Date()).format("DD-MM-YYYY")} <b>Time:</b> ${dayjs(new Date()).format("HH:MM")} </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -254,10 +254,10 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="7" style="text-align: left;">
+                    <td colspan="7" style="text-align: left; vertical-align: top;">
                       ปัญหาได้รับการแก้ไข / Resolved:
                     </td>
-                    <td colspan="3" style="text-align: left;">
+                    <td colspan="3" style="text-align: left; vertical-align: top;">
                       <input 
                         onclick="return false;"
                         type="checkbox" 
@@ -266,7 +266,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                         value="resolved" 
                       <label for="resolved1">แก้ไขจบ</label>
                     </td>
-                    <td colspan="14" style="text-align: left;">
+                    <td colspan="14" style="text-align: left; vertical-align: top;">
                       <input 
                         onclick="return false;"
                         type="checkbox" 
@@ -276,7 +276,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                       <label for="resolved2">
                         ยังไม่เสร็จ เนื่องจาก (ระบุสาเหตุ):
                       </label>
-                      <u>${data.resolve_status ? '' : data.resolve_remark}</u>
+                      <u style="overflow-wrap: break-word;">${data.resolve_status ? '' : data.resolve_remark}</u>
                     </td>
                     <script>
                           const checkbox1 = document.getElementById('resolved1');
@@ -371,7 +371,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                             </tr style="border: none;">
                             <tr style="border: none;">
                                 <td style="text-align: right;" colspan="2">วันที่ / Date:</td>
-                                <td colspan="2">${dayjs(data.time_in).format('DD/MM/YYYY')}</td>
+                                <td colspan="2">${dayjs(data.time_in).format('DD-MM-YYYY')}</td>
                             </tr>
                             <tr>
                             <tr style="border-top: 1px solid #000;">

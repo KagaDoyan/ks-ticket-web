@@ -239,6 +239,19 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        var payload: any = {
+            serial_number: formData.serial_number,
+            category_id: formData.category_id,
+            brand_id: formData.brand_id,
+            model_id: formData.model_id,
+            customer_id: formData.customer_id,
+            status: formData.status,
+            storage_id: formData.storage_id
+        };
+        if (formData.warranty_expiry_date) {
+            payload['warranty_expiry_date'] = formData.warranty_expiry_date;
+        }
+
         if (itemID) {
             //update
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/${itemID}`, {
@@ -247,7 +260,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authClient.getToken()}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             })
                 .then((res) => {
                     if (res.ok) {
@@ -270,7 +283,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authClient.getToken()}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             })
                 .then((res) => {
                     if (res.ok) {
@@ -498,7 +511,6 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
-                                required
                                 value={formData.warranty_expiry_date}
                                 onChange={handleChange}
                                 fullWidth
