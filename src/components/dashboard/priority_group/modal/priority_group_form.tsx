@@ -2,7 +2,6 @@ import { Box, Modal, Button, TextField, Typography, Stack, Grid, Autocomplete } 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
-import { custom } from "zod";
 
 const style = {
     position: 'absolute' as 'absolute',
