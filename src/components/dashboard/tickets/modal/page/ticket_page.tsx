@@ -39,6 +39,14 @@ interface engineer {
     distance: number
 }
 export default function TicketPage({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
+    const Teams = [
+        {
+            name: "Advice Team"
+        },
+        {
+            name: "OnSite"
+        }
+    ]
     const [formData, setFormData] = useState({
         inc_number: "",
         customer_id: 0,
@@ -483,13 +491,27 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField
-                        required
-                        label="Assigned To"
-                        name="assigned_to"
-                        value={formData.assigned_to}
-                        onChange={handleChange}
-                        fullWidth
+                    <Autocomplete
+                        options={Teams}
+                        getOptionLabel={(option) => option.name}
+                        value={Teams.find((team) => team.name === formData.assigned_to) || null}
+                        onChange={(event, newValue, reason) => {
+                            if (reason === "clear") {
+                                setFormData({
+                                    ...formData,
+                                    assigned_to: "",
+                                })
+                            }
+                            const selectedOption = newValue ? newValue.name : "";
+                            if (!selectedOption) {
+                                return;
+                            }
+                            setFormData({
+                                ...formData,
+                                assigned_to: selectedOption
+                            });
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Assgin to" />}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
