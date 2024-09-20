@@ -598,9 +598,9 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <Autocomplete
-                        options={['open', 'pending', 'spare', 'close']}
+                        options={['open', 'oncall', 'pending', 'spare', 'close']}
                         getOptionLabel={(option) => option}
-                        value={['open', 'pending', 'spare', 'close'].find((option) => option === formData.ticket_status) || null}
+                        value={['open', 'oncall', 'pending', 'spare', 'close'].find((option) => option === formData.ticket_status) || null}
                         onChange={(event, newValue, reason) => {
                             if (reason === "clear") {
                                 setFormData({
