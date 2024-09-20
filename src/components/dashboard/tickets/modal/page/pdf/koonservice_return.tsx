@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-export default function CraeteKoonServiceForm(form: string, data: any) {
+export default function CraeteKoonServiceReturnForm(form: string, data: any) {
     var spareParts = ''
     var FormName = ''
     var logo = ''
@@ -29,24 +29,28 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
             FormName = 'Koon Service'
     }
     if (data.spare_item != null && data.store_item != null) {
+        // const unmatchedReturnItems = data.return_item.filter(
+        //     (returnItem: any) => !data.store_item.some((item: any) => item.serial_number === returnItem.serial_number)
+        // );
+        // data.store_item.push(...unmatchedReturnItems)
         for (var i = 0; i < 5; i++) {
             spareParts += `
             <tr>
                 <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.spare_item[i] ? data.spare_item[i].category || "" : "_"}
+                ${data.store_item[i] ? data.store_item[i].category || "" : "_"}
                 </td>
                 <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.store_item[i] ? data.store_item[i].brand || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.store_item[i] ? data.store_item[i].serial_number || "" : "_"}
-                </td>
                 <td style="word-wrap: break-word; overflow-wrap: break-word;">
                 ${data.spare_item[i] ? data.spare_item[i].brand || "" : "_"}
                 </td>
                 <td style="word-wrap: break-word; overflow-wrap: break-word;">
                 ${data.spare_item[i] ? data.spare_item[i].serial_number || "" : "_"}
+                </td>
+                <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${data.store_item[i] ? data.store_item[i].brand || "" : "_"}
+                </td>
+                <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${data.store_item[i] ? data.store_item[i].serial_number || "" : "_"}
                 </td>
             </tr>`
         }
@@ -213,23 +217,23 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
             <tbody style="border: 1px solid black;">
                 <tr>
                     <td colspan="12"><b>สินค้า/Brand :</b>
-                        <underline>${data.item_brand}</underline>
+                        <underline>${data.return_ticket.item_brand}</underline>
                     </td>
                     <td colspan="12"><b>รุ่น / Model :</b>
-                        <underline>${data.item_model}</underline>
+                        <underline>${data.return_ticket.item_model}</underline>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="12"><b>อุปกรณ์ที่แจ้งเสีย/Equipment :</b>
-                        <underline>${data.item_category}</underline>
+                        <underline>${data.return_ticket.item_category}</underline>
                     </td>
                     <td colspan="12"><b>หมายเลขเครื่อง S/N :</b>
-                        <underline>${data.item_sn}</underline>
+                        <underline>${data.return_ticket.item_sn}</underline>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="12"><b>วันที่หมดประกัน/Expired :</b>
-                        <underline>${data.warranty_exp}</underline>
+                        <underline>${data.return_ticket.warranty_exp}</underline>
                     </td>
                     <td colspan="12"><b>เงื่อนไข / SLA :</b>
                         <underline>${data.sla_priority_level}</underline>
@@ -245,12 +249,12 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
             <tbody style="border: 1px solid black;">
                 <tr>
                     <td colspan="24">
-                        ปัญหาที่ตรวจพบ / Ticket Description: <underline>${data.investigation}</underline>
+                        ปัญหาที่ตรวจพบ / Ticket Description: <underline>${data.return_ticket.investigation}</underline>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="24">
-                        วิธีแก้ปัญหา / Solution: <underline>${data.solution}</underline>
+                        วิธีแก้ปัญหา / Solution: <underline>${data.return_ticket.solution}</underline>
                     </td>
                 </tr>
                 <tr>
@@ -276,14 +280,14 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                       <label for="resolved2">
                         ยังไม่เสร็จ เนื่องจาก (ระบุสาเหตุ):
                       </label>
-                      <u style="overflow-wrap: break-word;">${data.resolve_status ? '' : data.resolve_remark}</u>
+                      <u style="overflow-wrap: break-word;">${data.return_ticket.resolve_status ? '' : data.return_ticket.resolve_remark}</u>
                     </td>
                     <script>
                           const checkbox1 = document.getElementById('resolved1');
                           const checkbox2 = document.getElementById('resolved2');
 
                           // Compare the values
-                          if ("${data.resolve_status}" === "true") {
+                          if ("${data.return_ticket.resolve_status}" === "true") {
                             checkbox1.checked = true;
                           } else {
                             // If values don't match, you can choose to uncheck or leave as is
@@ -313,7 +317,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                     </tr>
 
                     <script>
-                            const actions = "${data.action}".split(',').map(action => action.trim());
+                            const actions = "${data.return_ticket.action}".split(',').map(action => action.trim());
                             // Reference the checkboxes
                             const action1 = document.getElementById('action1');
                             const action2 = document.getElementById('action2');
@@ -371,7 +375,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                             </tr style="border: none;">
                             <tr style="border: none;">
                                 <td style="text-align: right;" colspan="2">วันที่ / Date:</td>
-                                <td colspan="2">${dayjs(data.time_in).format('DD-MM-YYYY')}</td>
+                                <td colspan="2">${dayjs(data.return_ticket.time_in).format('DD-MM-YYYY')}</td>
                             </tr>
                             <tr>
                             <tr style="border-top: 1px solid #000;">
@@ -379,8 +383,8 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                                 <td style="text-align: center;" colspan="2">เวลาออกงาน / Time Out:</td>
                             </tr>
                             <tr style="border: none;">
-                                <td style="text-align: center; border-right: 1px solid #000;" colspan="2">${data.time_in}</td>
-                                <td style="text-align: center;" colspan="2">${data.time_out}</td>
+                                <td style="text-align: center; border-right: 1px solid #000;" colspan="2">${data.return_ticket.time_in}</td>
+                                <td style="text-align: center;" colspan="2">${data.return_ticket.time_out}</td>
                             </tr>
                         </table>
                     </td>

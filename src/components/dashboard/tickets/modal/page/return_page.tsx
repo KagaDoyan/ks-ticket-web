@@ -1,11 +1,13 @@
 import { authClient } from "@/lib/auth/client";
-import { Autocomplete, Button, Grid, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, Menu, Stack, TextField, Typography } from "@mui/material";
 import useOnMount from "@mui/utils/useOnMount";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import formatDate from "@/lib/dateformat";
 import CraeteKoonServiceForm from "./pdf/koonservice";
 import Swal from "sweetalert2";
+import dayjs from "dayjs";
+import MenuReturnButton from "./menu_button_reuturn";
 
 interface brand {
     id: number
@@ -49,6 +51,8 @@ interface FormData {
     uploadedFiles?: File[];
     ticket_image?: image_url[];
     delete_images?: string[];
+    close_date: string;
+    close_time: string;
 }
 
 interface image_url {
@@ -65,6 +69,7 @@ const spare_status: spare_status[] = [
 const store_status: store_status[] = [
     { name: 'repair' },
     { name: 'return' },
+    { name: 'replace' },
 ]
 
 export default function ReturnPage({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
@@ -86,6 +91,8 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         uploadedFiles: [],
         ticket_image: [],
         delete_images: [],
+        close_date: '',
+        close_time: '',
     });
     const [incident_number, setIncidentNumber] = useState<string>('');
 
@@ -104,6 +111,51 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             toast.error("You can only add up to 5 items.");
         }
     };
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value, checked } = event.target;
+        if (name === 'item_sn') {
+            getitembyserial(value).then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setFormData({
+                            ...formData,
+                            item_sn: value,
+                            item_brand: data.data.brand.name,
+                            item_category: data.data.category.name,
+                            item_model: data.data.model.name,
+                            warranty_exp: dayjs(data.data.warranty_exp).format('YYYY-MM-DD')
+
+                        })
+                    })
+                }
+            })
+        }
+        setFormData({
+            ...formData,
+            [name]: name === 'resolve_status' ? checked : value
+        });
+    };
+
+    const handleActionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = event.target;
+        const actionsArray = formData.action ? formData.action.split(',') : [];
+
+        if (checked) {
+            // Add the action if it is checked
+            actionsArray.push(name);
+        } else {
+            // Remove the action if it is unchecked
+            const index = actionsArray.indexOf(name);
+            if (index > -1) {
+                actionsArray.splice(index, 1);
+            }
+        }
+
+        // Update the action string
+        setFormData({ ...formData, action: actionsArray.join(',') });
+    };
+
 
     const handleShopItemChange = (index: number, field: string, value: string) => {
         const updatedItems = [...shopitems];
@@ -296,6 +348,23 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     if (res.ok) {
                         res.json().then((data) => {
                             setTicketData(data.data);
+                            setFormData({
+                                ...formData,
+                                solution: data.data.return_ticket.solution,
+                                investigation: data.data.return_ticket.investigation,
+                                item_brand: data.data.return_ticket.item_brand,
+                                item_category: data.data.return_ticket.item_category,
+                                item_model: data.data.return_ticket.item_model,
+                                item_sn: data.data.return_ticket.item_sn,
+                                resolve_status: data.data.return_ticket.resolve_status ? true : false,
+                                resolve_remark: data.data.return_ticket.resolve_remark,
+                                action: data.data.return_ticket.action, // assuming action_status is an array of strings
+                                time_in: dayjs(data.data.return_ticket.time_in).format('YYYY-MM-DD HH:mm'),
+                                time_out: dayjs(data.data.return_ticket.time_out).format('YYYY-MM-DD HH:mm'),
+                                close_date: data.data.close_date ? dayjs(data.data.close_date).format('YYYY-MM-DD') : '',
+                                close_time: data.data.close_time ? data.data.close_time : '',
+                                warranty_exp: dayjs(data.data.return_ticket.warranty_exp).format('YYYY-MM-DD'),
+                            });
                             setIncidentNumber(data.data.inc_number)
                             if (data.data.spare_item?.length > 0) {
                                 setSpareItem([...data.data.spare_item]);
@@ -337,6 +406,10 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     }, [shopitems, spareitems])
 
     const handleSubmit = () => {
+        if (!formData.close_date || !formData.close_time) {
+            toast.error("Please select close date and time");
+            return;
+        }
         const shopItemsWithType = shopitems.map(item => ({
             ...item,
             ticket_type: 'store',
@@ -373,7 +446,9 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                 'Authorization': `Bearer ${authClient.getToken()}`
             },
             body: JSON.stringify({
-                items: formattedItems
+                ...formData,
+                warranty_exp: new Date(formData.warranty_exp),
+                items: formattedItems,
             })
         })
             .then((res) => {
@@ -393,14 +468,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     }
 
     const handleCreatePDF = () => {
-        console.log(ticketData);
-
-        const html = CraeteKoonServiceForm('koon', ticketData);
-        const printWindow = window.open('', '', 'height=600,width=800');
-
-        printWindow?.document.write(html);
-        printWindow?.document.close(); // Ensure the content is fully loaded
-        printWindow?.focus();
+ 
     }
 
     const isItemSaved = (serial_number: string) => {
@@ -457,6 +525,157 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     }, [returnitems]);
     return (
         <>
+            <Grid container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        required
+                        multiline
+                        label="investigation"
+                        name="investigation"
+                        value={formData.investigation}
+                        onChange={handleChange}
+                        fullWidth
+                        rows={2}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        required
+                        multiline
+                        label="solution"
+                        name="solution"
+                        value={formData.solution}
+                        onChange={handleChange}
+                        fullWidth
+                        rows={2}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        required
+                        type="date"
+                        label="close date"
+                        name="close_date"
+                        value={formData.close_date}
+                        onChange={handleChange}
+                        InputLabelProps={
+                            { shrink: true }
+                        }
+                        fullWidth
+                        rows={2}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        required
+                        type="time"
+                        label="close time"
+                        name="close_time"
+                        InputLabelProps={
+                            { shrink: true }
+                        }
+                        value={formData.close_time}
+                        onChange={handleChange}
+                        fullWidth
+                        rows={2}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        name="item_sn"
+                        label="Serial Number"
+                        type="text"
+                        value={formData.item_sn}
+                        onChange={handleChange}
+                        fullWidth
+                        required
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Autocomplete
+                        options={CategoryOption}
+                        getOptionLabel={(option) => option.name}
+                        value={CategoryOption.find((category) => category.name === formData.item_category) || null}
+                        onChange={(event, newValue, reason) => {
+                            if (reason === "clear") {
+                                setFormData({
+                                    ...formData,
+                                    item_category: ""
+                                })
+                            }
+                            const selectedOption = newValue ? newValue.name : null;
+                            if (!selectedOption) {
+                                return;
+                            }
+                            setFormData({
+                                ...formData,
+                                item_category: selectedOption
+                            });
+                            console.log(formData);
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Category" />}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                    <Autocomplete
+                        options={BrandOption}
+                        getOptionLabel={(option) => option.name}
+                        value={BrandOption.find((brand) => brand.name === formData.item_brand) || null}
+                        onChange={(event, newValue, reason) => {
+                            if (reason === "clear") {
+                                setFormData({
+                                    ...formData,
+                                    item_brand: ""
+                                })
+                            }
+                            const selectedOption = newValue ? newValue.name : null;
+                            if (!selectedOption) {
+                                return;
+                            }
+                            setFormData({
+                                ...formData,
+                                item_brand: selectedOption
+                            });
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Brand" />}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                    <Autocomplete
+                        options={ModelOption}
+                        getOptionLabel={(option) => option.name}
+                        value={ModelOption.find((model) => model.name === formData.item_model) || null}
+                        onChange={(event, newValue, reason) => {
+                            if (reason === "clear") {
+                                setFormData({
+                                    ...formData,
+                                    item_model: "",
+                                })
+                            }
+                            const selectedOption = newValue ? newValue.name : null;
+                            if (!selectedOption) {
+                                return;
+                            }
+                            setFormData({
+                                ...formData,
+                                item_model: selectedOption
+                            });
+                            console.log(formData);
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Model" />}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <TextField
+                        label="Warranty Expiry Date"
+                        type="date"
+                        InputLabelProps={{ shrink: true }}
+                        value={formData.warranty_exp}
+                        onChange={e => setFormData({ ...formData, warranty_exp: dayjs(e.target.value).format('YYYY-MM-DD') })}
+                        fullWidth
+                    />
+                </Grid>
+            </Grid>
             <Stack justifyContent={"flex-start"} direction="row" spacing={2}>
                 <Typography sx={{ fontSize: 17, color: 'grey', paddingBottom: 1, paddingTop: 1 }}>
                     Shop Item
@@ -728,10 +947,103 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     </Grid>
                 ))}
             </Grid>
+            <Grid item xs={12} sm={3}>
+                <FormControlLabel
+                    control={<Checkbox checked={formData.resolve_status} onChange={handleChange} />}
+                    value={formData.resolve_status}
+                    label="Resolved"
+                    name="resolve_status"
+                />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+                <FormControl component="fieldset">
+                    <FormLabel component="legend">Action</FormLabel>
+                    <FormGroup row>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={formData.action?.includes('repair')}
+                                    onChange={handleActionChange}
+                                    name="repair"
+                                />
+                            }
+                            label="Repair"
+                        />
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={formData.action?.includes('clean')}
+                                    onChange={handleActionChange}
+                                    name="clean"
+                                />
+                            }
+                            label="Clean"
+                        />
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={formData.action?.includes('spare')}
+                                    onChange={handleActionChange}
+                                    name="spare"
+                                />
+                            }
+                            label="Spare"
+                        />
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={formData.action?.includes('replace')}
+                                    onChange={handleActionChange}
+                                    name="replace"
+                                />
+                            }
+                            label="Replace"
+                        />
+                    </FormGroup>
+                </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={9}>
+                <TextField
+                    disabled={formData.resolve_status}
+                    multiline
+                    rows={2}
+                    required
+                    label="Resolve Remark"
+                    name="resolve_remark"
+                    value={formData.resolve_remark}
+                    onChange={handleChange}
+                    fullWidth
+                />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+                <TextField
+                    name="time_in"
+                    label="Time in"
+                    type="datetime-local"
+                    value={formData.time_in}
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+                <TextField
+                    name="time_out"
+                    label="Time out"
+                    type="datetime-local"
+                    value={formData.time_out}
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                />
+            </Grid>
             <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
                 </Button>
+                <MenuReturnButton data={ticketData} />
                 <Button onClick={handleCreatePDF} variant="contained" color="warning">
                     PDF
                 </Button>
