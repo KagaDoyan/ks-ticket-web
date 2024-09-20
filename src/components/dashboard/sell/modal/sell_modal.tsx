@@ -1,9 +1,7 @@
-import { Box, Modal, Button, TextField, MenuItem, Typography, Stack, InputAdornment, IconButton } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
-import { User } from "@phosphor-icons/react/dist/ssr";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -17,19 +15,20 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
-const roles = ["Admin", "User", "Engineer", "Customer"];
-export default function UserModalForm({ open, handleClose, userID, fetchUserData }: { open: boolean, handleClose: () => void, userID: number, fetchUserData: () => void }): React.JSX.Element {
+export default function SellModalForm({ open, handleClose, SellID, fetchsellData }: { open: boolean, handleClose: () => void, SellID: number, fetchsellData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
-        fullname: "",
-        email: "",
-        password: "",
-        role: ""
+        brand: "",
+        model: "",
+        serial: "",
+        warranty: "",
+        sell_date: "",
+        buyer_name: "",
+        sell_price: null,
     });
 
-
-    const getUserData = () => {
-        if (userID) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/id/${userID}`, {
+    const getInventoryData = () => {
+        if (SellID) {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory/${SellID}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${authClient.getToken()}`
@@ -39,10 +38,13 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
                     if (res.ok) {
                         res.json().then((data) => {
                             setFormData({
-                                fullname: data.data.fullname,
-                                email: data.data.email,
-                                password: data.data.password,
-                                role: data.data.role
+                                brand: data.data.brand,
+                                model: data.data.model,
+                                serial: data.data.serial,
+                                warranty: data.data.warranty,
+                                sell_date: data.data.sell_date,
+                                buyer_name: data.data.buyer_name,
+                                sell_price: data.data.sell_price
                             });
                         })
                     } else {
@@ -56,26 +58,28 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
 
     const clearFormData = () => {
         setFormData({
-            fullname: "",
-            email: "",
-            password: "",
-            role: ""
+            brand: "",
+            model: "",
+            serial: "",
+            warranty: "",
+            sell_date: "",
+            buyer_name: "",
+            sell_price: null,
         });
     }
 
     useEffect(() => {
-        getUserData();
-        if (userID == 0) {
+        getInventoryData();
+        if (SellID == 0) {
             clearFormData()
         }
-    }, [userID]);
-    const [showPassword, setShowPassword] = useState(false);
+    }, [SellID]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (userID) {
+        if (SellID) {
             //update
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${userID}`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory/${SellID}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,20 +89,20 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
             })
                 .then((res) => {
                     if (res.ok) {
-                        toast.success("User updated successfully");
-                        fetchUserData();
+                        toast.success("sell updated successfully");
+                        fetchsellData();
                         handleClose();
                         clearFormData();
                     } else {
-                        throw new Error("Failed to update user");
+                        throw new Error("Failed to update sell");
                     }
                 }).catch((err) => {
-                    toast.error("Failed to update user");
+                    toast.error("Failed to update sell");
                 });
 
         } else {
             //create
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -108,16 +112,16 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
             })
                 .then((res) => {
                     if (res.ok) {
-                        toast.success("User created successfully");
-                        fetchUserData();
+                        toast.success("sell created successfully");
+                        fetchsellData();
                         handleClose();
                         clearFormData();
                     } else {
-                        throw new Error("Failed to create user");
+                        throw new Error("Failed to create sell");
                     }
                 })
                 .catch((err) => {
-                    toast.error("Failed to create user");
+                    toast.error("Failed to create sell");
                 });
         }
     };
@@ -129,11 +133,6 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
         });
     };
 
-    const togglePasswordVisibility = () => {
-        setShowPassword((prev) => !prev);
-    };
-
-
     return (
         <Modal
             open={open}
@@ -143,7 +142,7 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
         >
             <Box sx={style}>
                 <Typography id="modal-modal-title" variant="h6" component="h2">
-                    User Form
+                    sell Form
                 </Typography>
                 <Box
                     component="form"
@@ -158,62 +157,71 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
                     }}
                 >
                     <TextField
-                        label="Full Name"
-                        name="fullname"
-                        value={formData.fullname}
+                        label="serial"
+                        name="serial"
+                        value={formData.serial}
                         onChange={handleChange}
                         required
                     />
                     <TextField
-                        label="Email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
+                        label="brand"
+                        name="brand"
+                        value={formData.brand}
                         onChange={handleChange}
                         required
                     />
-                    {userID ? "" : <TextField
-
-                        label="Password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        value={formData.password}
-                        onChange={handleChange}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={togglePasswordVisibility}
-                                        edge="end"
-                                    >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            )
-                        }}
-                        required
-                    />}
                     <TextField
-                        label="Role"
-                        name="role"
-                        select
-                        value={formData.role}
+                        label="model"
+                        name="model"
+                        value={formData.model}
                         onChange={handleChange}
                         required
-                    >
-                        {roles.map((role) => (
-                            <MenuItem key={role} value={role}>
-                                {role}
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                    />
+                    <TextField
+                        label="warranty"
+                        name="warranty"
+                        type="date"
+                        InputLabelProps={
+                            {
+                                shrink: true
+                            }
+                        }
+                        value={formData.warranty}
+                        onChange={handleChange}
+                        required
+                    />
+                    <TextField
+                        label="sell_date"
+                        name="sell_date"
+                        type="date"
+                        value={formData.sell_date}
+                        InputLabelProps={
+                            {
+                                shrink: true
+                            }
+                        }
+                        onChange={handleChange}
+                        required
+                    />
+                    <TextField
+                        label="buyer_name"
+                        name="buyer_name"
+                        value={formData.buyer_name}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        label="sell_price"
+                        name="sell_price"
+                        type="number"
+                        value={formData.sell_price}
+                        onChange={handleChange}
+                    />
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                         <Button onClick={handleClose} variant="contained" color="warning">
                             Close
                         </Button>
                         <Button type="submit" variant="contained" color="success">
-                            {userID ? "Update" : "Add"}
+                            {SellID ? "Update" : "Add"}
                         </Button>
                     </Stack>
 

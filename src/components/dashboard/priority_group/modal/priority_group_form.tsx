@@ -25,7 +25,7 @@ interface Province {
     name: string;
     code: string;
 }
-export default function PriorityGroupModalForm({ open, handleClose, prioritiesGroupID, fetchprioritiesData }: { open: boolean, handleClose: () => void, prioritiesGroupID: number, fetchprioritiesData: () => void }): React.JSX.Element {
+export default function PriorityGroupModalForm({ open, handleClose, prioritiesGroupID, setPrioritiesGroupID, fetchprioritiesData }: { open: boolean, handleClose: () => void, prioritiesGroupID: number, setPrioritiesGroupID: () => void, fetchprioritiesData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         group_name: "",
         customer_id: 0,
@@ -121,6 +121,11 @@ export default function PriorityGroupModalForm({ open, handleClose, prioritiesGr
     }, [prioritiesGroupID]);
     const [showPassword, setShowPassword] = useState(false);
 
+    const HandleModalClose = () => {
+        clearFormData();
+        setPrioritiesGroupID();
+        handleClose();
+    }
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (prioritiesGroupID) {
@@ -137,8 +142,9 @@ export default function PriorityGroupModalForm({ open, handleClose, prioritiesGr
                     if (res.ok) {
                         toast.success("priority group updated successfully");
                         fetchprioritiesData();
-                        handleClose();
+                        HandleModalClose();
                         clearFormData();
+                        setPrioritiesGroupID();
                     } else {
                         throw new Error("Failed to update priority group");
                     }
@@ -160,8 +166,7 @@ export default function PriorityGroupModalForm({ open, handleClose, prioritiesGr
                     if (res.ok) {
                         toast.success("priority group created successfully");
                         fetchprioritiesData();
-                        handleClose();
-                        clearFormData();
+                        HandleModalClose();
                     } else {
                         throw new Error("Failed to create priority group");
                     }
@@ -187,7 +192,7 @@ export default function PriorityGroupModalForm({ open, handleClose, prioritiesGr
     return (
         <Modal
             open={open}
-            onClose={handleClose}
+            onClose={HandleModalClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
@@ -257,7 +262,7 @@ export default function PriorityGroupModalForm({ open, handleClose, prioritiesGr
                         </Grid>
                     </Grid>
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
-                        <Button onClick={handleClose} variant="contained" color="warning">
+                        <Button onClick={HandleModalClose} variant="contained" color="warning">
                             Close
                         </Button>
                         <Button type="submit" variant="contained" color="success">

@@ -5,6 +5,7 @@ import dayjs from "dayjs"
 import { format } from "path";
 import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
+import EmailAppointmentPage from "./email_appointment_page";
 
 interface customer {
     id: number
@@ -64,6 +65,11 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     const [enginnerOption, setEngineerOption] = useState<engineer[]>([]);
     const [priority_time, setpriority_time] = useState(0);
     const [shoplatlng, setShoplatlng] = useState({ lat: "", lng: "" });
+    const [mailopen, setmailopen] = useState(false);
+
+    const handleMailClose = () => {
+        setmailopen(false);
+    }
 
     const HandleShopLatLngChange = (lat: string, lng: string) => {
         setShoplatlng({ lat: lat, lng: lng })
@@ -128,6 +134,11 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                 });
         }
     }
+
+    const handleSendAppointment = () => {
+        setmailopen(true);
+    }
+
     useEffect(() => {
         fetchTicketDetails(ticketID, setFormData, setshopOptions, setpriorityOptions, setpriority_time, customerOptions, shopOptions);
     }, [ticketID]);
@@ -275,6 +286,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     }, [formData.open_date, formData.open_time, priority_time])
     return (
         <>
+            <EmailAppointmentPage open={mailopen} handleClose={handleMailClose} ticketID={ticketID} />
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={3}>
                     <TextField
@@ -529,6 +541,9 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
             <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
+                </Button>
+                <Button variant="contained" color="error" onClick={handleSendAppointment}>
+                    Send Appointment
                 </Button>
                 <Button type="submit" variant="contained" color="success" onClick={handleSubmit}>
                     Update

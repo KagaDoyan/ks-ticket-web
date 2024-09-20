@@ -52,6 +52,7 @@ export function PriorityGroupPage(): React.JSX.Element {
     const [search, setSearch] = React.useState<string>('');
     const [count, setCount] = React.useState(0);
     const [prioritiesID, setprioritiesID] = React.useState(0);
+    const [priorityGroupIDShow, setpriorityGroupIDShow] = React.useState(0);
     const [priorityGroupID, setpriorityGroupID] = React.useState(0);
     const [priorityID, setpriorityID] = React.useState(0);
 
@@ -201,10 +202,14 @@ export function PriorityGroupPage(): React.JSX.Element {
         return `${hours}h ${minutesDisplay}${secondsDisplay}`.trim();
     }
 
+    const handleclearpriorityGroupID = () => {
+        setpriorityGroupID(0)
+    }
+
     return (
         <>
-            <PriorityModalForm open={popen} handleClose={handlePModalClose} prioritiesID={priorityID} priority_group_id={priorityGroupID} fetchprioritiesData={fetchprioritiesData} />
-            <PriorityGroupModalForm open={open} handleClose={handleModalClose} prioritiesGroupID={priorityGroupID} fetchprioritiesData={fetchprioritiesData} />
+            <PriorityModalForm open={popen} handleClose={handlePModalClose} prioritiesID={priorityID} priority_group_id={priorityGroupIDShow} fetchprioritiesData={fetchprioritiesData} />
+            <PriorityGroupModalForm open={open} handleClose={handleModalClose} prioritiesGroupID={priorityGroupID} setPrioritiesGroupID={handleclearpriorityGroupID} fetchprioritiesData={fetchprioritiesData} />
             <Stack direction="row" spacing={3}>
                 <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
                     <Typography variant="h5">priorities</Typography>
@@ -258,7 +263,7 @@ export function PriorityGroupPage(): React.JSX.Element {
                                                     <IconButton color='warning' onClick={() => handleEditprioritiesGroup(row.id)}>
                                                         <Edit />
                                                     </IconButton>
-                                                    <IconButton color='primary' onClick={() => setpriorityGroupID(row.id)}>
+                                                    <IconButton color='primary' onClick={() => setpriorityGroupIDShow(row.id)}>
                                                         <List />
                                                     </IconButton>
                                                     <IconButton color='error' onClick={() => handleDeleteprioritiesGroup(row.id)}>
@@ -284,13 +289,13 @@ export function PriorityGroupPage(): React.JSX.Element {
                     </Card>
                 </Grid>
                 <Grid item xs={6}>
-                    {priorityGroupID > 0 ?
+                    {priorityGroupIDShow > 0 ?
                         <Card sx={{ height: '100%' }}>
                             <Typography variant="h6" sx={{ p: 2 }}>
-                                {rows.filter((row) => row.id == priorityGroupID)[0]?.group_name} Priorities
+                                {rows.filter((row) => row.id == priorityGroupIDShow)[0]?.group_name} Priorities
                             </Typography>
                             <Divider />
-                            {rows.filter((row) => row.id == priorityGroupID)[0]?.priorities.length > 0 ?
+                            {rows.filter((row) => row.id == priorityGroupIDShow)[0]?.priorities.length > 0 ?
                                 <Box sx={{ overflowX: 'auto' }}>
                                     <Table>
                                         <TableHead>
@@ -301,7 +306,7 @@ export function PriorityGroupPage(): React.JSX.Element {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {rows.filter((row) => row.id == priorityGroupID)[0]?.priorities.map((row) => {
+                                            {rows.filter((row) => row.id == priorityGroupIDShow)[0]?.priorities.map((row) => {
                                                 return (
                                                     <TableRow hover key={row.id}>
                                                         <TableCell>{row.name}</TableCell>

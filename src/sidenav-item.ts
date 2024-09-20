@@ -1,14 +1,14 @@
 import { paths } from '@/paths';
-import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, MoveToInboxOutlined, Person2Outlined, ReportOffOutlined, SpokeOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
+import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, Person2Outlined, SpokeOutlined, StorefrontOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
 
 export const navItems = [
   {
     group: 'Main',
     key: 'Main',
     items: [
-      { key: 'dashboard', title: 'Dashboard', href: paths.dashboard.overview, icon: AssessmentOutlined, role: ["Admin", "Engineer", "User", "Customer"] },
-      { key: 'ticket', title: 'ticket', href: paths.dashboard.ticket, icon: ConfirmationNumberOutlined, role: ["Admin", "Engineer", "User", "Customer"] },
-      { key: 'report', title: 'report', href: paths.dashboard.report, icon: SummarizeOutlined, role: ["Admin", "User", "Customer"] },
+      { key: 'dashboard', title: 'Dashboard', href: paths.dashboard.overview, icon: AssessmentOutlined, role: ["SuperAdmin", "Admin", "Engineer", "User", "Customer"] },
+      { key: 'ticket', title: 'ticket', href: paths.dashboard.ticket, icon: ConfirmationNumberOutlined, role: ["SuperAdmin", "Admin", "Engineer", "User", "Customer"] },
+      { key: 'report', title: 'report', href: paths.dashboard.report, icon: SummarizeOutlined, role: ["SuperAdmin", "Admin", "User", "Customer"] },
     ]
   },
   {
@@ -40,7 +40,7 @@ export const navItems = [
     group: 'Sell',
     key: 'sell',
     items: [
-      { key: 'sell', title: 'sell', href: paths.dashboard.sell, icon: ReportOffOutlined, role: ["SuperAdmin"] },
+      { key: 'sell', title: 'sell', href: paths.dashboard.sell, icon: StorefrontOutlined, role: ["SuperAdmin"] },
     ]
   }
 ];
