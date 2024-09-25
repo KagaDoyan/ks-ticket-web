@@ -383,8 +383,8 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
                                 <td style="text-align: center;" colspan="2">เวลาออกงาน / Time Out:</td>
                             </tr>
                             <tr style="border: none;">
-                                <td style="text-align: center; border-right: 1px solid #000;" colspan="2">${data.return_ticket.time_in}</td>
-                                <td style="text-align: center;" colspan="2">${data.return_ticket.time_out}</td>
+                                <td style="text-align: center; border-right: 1px solid #000;" colspan="2">${dayjs(data.return_ticket.time_in).format('DD-MM-YYYY HH:mm')}</td>
+                                <td style="text-align: center;" colspan="2">${dayjs(data.return_ticket.time_out).format('DD-MM-YYYY HH:mm')}</td>
                             </tr>
                         </table>
                     </td>
