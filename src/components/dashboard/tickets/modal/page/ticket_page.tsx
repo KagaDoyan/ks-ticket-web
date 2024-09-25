@@ -36,7 +36,8 @@ interface engineer {
     id: number
     name: string,
     lastname: string,
-    distance: number
+    distance: number,
+    open_ticket: number
 }
 
 interface team {
@@ -486,28 +487,39 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <Autocomplete
-                        options={enginnerOption}
-                        getOptionLabel={(option) => option.name + ' ' + option.lastname + ' ' + option.distance + " km"}
-                        value={enginnerOption.find((engineer) => engineer.id === formData.engineer_id) || null}
-                        onChange={(event, newValue, reason) => {
-                            if (reason === "clear") {
-                                setFormData({
-                                    ...formData,
-                                    engineer_id: 0,
-                                })
-                            }
-                            const selectedOption = newValue ? newValue.id : 0;
-                            if (!selectedOption) {
-                                return;
-                            }
-                            setFormData({
-                                ...formData,
-                                engineer_id: selectedOption
-                            });
-                        }}
-                        renderInput={(params) => <TextField required {...params} label="Engineer" />}
-                    />
+                <Autocomplete
+                                options={enginnerOption}
+                                getOptionLabel={(option) => `(${option.open_ticket}) ${option.name} ${option.lastname} ${option.distance ?? 'na'} km`}
+                                value={enginnerOption.find((engineer) => engineer.id === formData.engineer_id) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            engineer_id: 0,
+                                        });
+                                    }
+                                    const selectedOption = newValue ? newValue.id : 0;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        engineer_id: selectedOption,
+                                    });
+                                }}
+                                renderInput={(params) => <TextField required {...params} label="Engineer" />}
+                                renderOption={(props, option) => (
+                                    <li {...props}>
+                                        <span
+                                            style={{
+                                                color: option.open_ticket > 0 ? 'orange' : 'inherit', // Apply orange color if open_ticket > 0
+                                            }}
+                                        >
+                                            ({option.open_ticket}) {option.name} {option.lastname} {option.distance ?? 'na'} km
+                                        </span>
+                                    </li>
+                                )}
+                            />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Autocomplete

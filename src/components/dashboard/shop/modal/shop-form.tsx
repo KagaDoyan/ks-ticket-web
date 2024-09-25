@@ -268,6 +268,7 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                             <TextField
                                 label="Latitude"
                                 name="latitude"
+                                type="number"
                                 value={formData.latitude}
                                 onChange={handleChange}
                                 required
@@ -278,6 +279,7 @@ export default function ShopModalForm({ open, handleClose, shopID, fetchshopData
                             <TextField
                                 label="Longitude"
                                 name="longitude"
+                                type="number"
                                 value={formData.longitude}
                                 onChange={handleChange}
                                 required

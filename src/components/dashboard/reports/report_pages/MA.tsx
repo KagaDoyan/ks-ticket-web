@@ -1,6 +1,7 @@
 import { authClient } from "@/lib/auth/client";
 import { IosShare, Refresh } from "@mui/icons-material";
-import { Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
+import useOnMount from "@mui/utils/useOnMount";
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
@@ -66,7 +67,15 @@ interface MA {
     spareDeviceSerial5?: string;
 }
 
+interface Customer {
+    id: number;
+    fullname: string;
+    shortname: string;
+}
+
+
 export default function MAReportPage() {
+    const [customers, setCustomers] = React.useState<Customer[]>([]);
     const currentDate = new Date();
     const sevenDaysBefore = new Date(currentDate);
     sevenDaysBefore.setDate(currentDate.getDate() - 7);
@@ -77,6 +86,7 @@ export default function MAReportPage() {
     const [count, setCount] = React.useState(0);
     const [from, setFrom] = React.useState(formatDate(sevenDaysBefore));
     const [to, setTo] = React.useState(formatDate(currentDate));
+    const [customer_name, setCustomer] = React.useState("");
 
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
@@ -92,9 +102,26 @@ export default function MAReportPage() {
         setPage(0);
     };
 
+
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomers(data.data);
+                    })
+                }
+            })
+    }
+
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/report/ma?from=${from}&to=${to}`, {
+        fetch(`${baseUrl}/api/report/ma?from=${from}&to=${to}&brand_name=${customer_name}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -112,17 +139,21 @@ export default function MAReportPage() {
 
     const exportToExcel = () => {
         console.log(rows);
-        
+
         const worksheet = XLSX.utils.json_to_sheet(rows);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "MA");
-    
+
         // Export the file
         XLSX.writeFile(workbook, `MA-${from}/${to}.xlsx`);
     }
     useEffect(() => {
         fetchMAData();
-    }, [from, to]);
+    }, [from, to, customer_name]);
+
+    useOnMount(() => {
+        GetCustomer();
+    });
 
     return (
         <Box sx={{ mt: 2 }}>
@@ -150,6 +181,18 @@ export default function MAReportPage() {
                         size="small"
                         onChange={(e) => setTo(e.target.value)}
                         value={to}
+                    />
+                    <Autocomplete
+                        options={customers}
+                        size="small"
+                        sx={{ width: 150 }}
+                        getOptionLabel={(option) => option.shortname}
+                        value={customers.find((customer) => customer.fullname === customer_name) || null}
+                        onChange={(event, newValue) => {
+                            const selected = newValue ? newValue.fullname : "";
+                            setCustomer(selected)
+                        }}
+                        renderInput={(params) => <TextField {...params} label="brand" />}
                     />
                     <Button variant="contained" startIcon={<Refresh />} onClick={fetchMAData}>Refresh</Button>
                     <Button variant="contained" startIcon={<IosShare />} color="warning" onClick={() => exportToExcel()}>Export</Button>

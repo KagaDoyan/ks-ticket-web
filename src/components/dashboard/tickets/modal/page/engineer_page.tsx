@@ -364,7 +364,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 item_model: data.data.item_model,
                                 item_sn: data.data.item_sn,
                                 ticket_status: data.data.ticket_status,
-                                warranty_exp: dayjs(data.data.warranty_exp).format('YYYY-MM-DD'),
+                                warranty_exp: data.data.warranty_exp ? dayjs(data.data.warranty_exp).format('YYYY-MM-DD') : '',
                                 resolve_status: data.data.resolve_status ? true : false,
                                 resolve_remark: data.data.resolve_remark,
                                 action: data.data.action, // assuming action_status is an array of strings
@@ -487,7 +487,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         payload.append('item_category', formData.item_category);
         payload.append('item_model', formData.item_model);
         payload.append('item_sn', formData.item_sn);
-        payload.append('warranty_exp', new Date(formData.warranty_exp).toISOString());
+        payload.append('warranty_exp', formData.warranty_exp);
         payload.append('ticket_status', formData.ticket_status);
         payload.append('resolve_status', formData.resolve_status ? 'true' : 'false');
         payload.append('resolve_remark', formData.resolve_remark);

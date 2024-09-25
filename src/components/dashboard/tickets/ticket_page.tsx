@@ -118,6 +118,8 @@ export function TicketPage(): React.JSX.Element {
         return 'rgb(255, 204, 153)';
       case 'close':
         return 'rgb(153, 255, 153)';
+      case 'oncall':
+        return 'rgb(255, 153, 153)';
       default:
         return 'info';
     }
