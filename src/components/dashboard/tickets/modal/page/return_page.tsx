@@ -350,20 +350,20 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                             setTicketData(data.data);
                             setFormData({
                                 ...formData,
-                                solution: data.data.return_ticket.solution,
-                                investigation: data.data.return_ticket.investigation,
-                                item_brand: data.data.return_ticket.item_brand,
-                                item_category: data.data.return_ticket.item_category,
-                                item_model: data.data.return_ticket.item_model,
-                                item_sn: data.data.return_ticket.item_sn,
-                                resolve_status: data.data.return_ticket.resolve_status ? true : false,
-                                resolve_remark: data.data.return_ticket.resolve_remark,
-                                action: data.data.return_ticket.action, // assuming action_status is an array of strings
-                                time_in: dayjs(data.data.return_ticket.time_in).format('YYYY-MM-DD HH:mm'),
-                                time_out: dayjs(data.data.return_ticket.time_out).format('YYYY-MM-DD HH:mm'),
+                                solution: data.data.return_ticket?.solution,
+                                investigation: data.data.return_ticket?.investigation,
+                                item_brand: data.data.return_ticket?.item_brand,
+                                item_category: data.data.return_ticket?.item_category,
+                                item_model: data.data.return_ticket?.item_model,
+                                item_sn: data.data.return_ticket?.item_sn,
+                                resolve_status: data.data.return_ticket?.resolve_status ? true : false,
+                                resolve_remark: data.data.return_ticket?.resolve_remark,
+                                action: data.data.return_ticket?.action, // assuming action_status is an array of strings
+                                time_in: dayjs(data.data.return_ticket?.time_in).format('YYYY-MM-DD HH:mm'),
+                                time_out: dayjs(data.data.return_ticket?.time_out).format('YYYY-MM-DD HH:mm'),
                                 close_date: data.data.close_date ? dayjs(data.data.close_date).format('YYYY-MM-DD') : '',
                                 close_time: data.data.close_time ? data.data.close_time : '',
-                                warranty_exp: dayjs(data.data.return_ticket.warranty_exp).format('YYYY-MM-DD'),
+                                warranty_exp: dayjs(data.data.return_ticket?.warranty_exp).format('YYYY-MM-DD'),
                             });
                             setIncidentNumber(data.data.inc_number)
                             if (data.data.spare_item?.length > 0) {
@@ -1044,9 +1044,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     Close
                 </Button>
                 <MenuReturnButton data={ticketData} />
-                <Button onClick={handleCreatePDF} variant="contained" color="warning">
-                    PDF
-                </Button>
                 <Button variant="contained" color="success" onClick={handleSubmit}>
                     Update
                 </Button>

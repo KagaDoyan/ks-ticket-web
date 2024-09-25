@@ -93,7 +93,7 @@ export default function EmailPreviewPage({ open, handleClose, ticketData }: { op
 
     return (
         <Modal onClose={handleClose} open={open} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Box sx={{ width: { xs: '90%', md: '50%', lg: '40%', xl: '40%' }, bgcolor: 'background.paper', p: 3, borderRadius: 3 }}>
+            <Box sx={{ width: { xs: '90%', md: '50%', lg: '40%', xl: '40%' }, maxHeight: '90%',overflow: "scroll", bgcolor: 'background.paper', p: 3, borderRadius: 3 }}>
                 <Stack spacing={3}>
                     <Typography variant="h6">Email Preview</Typography>
                 </Stack>

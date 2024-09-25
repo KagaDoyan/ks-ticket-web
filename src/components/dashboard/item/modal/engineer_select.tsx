@@ -73,6 +73,8 @@ function EngineerSelectionModal({ open, handleClose, itemID,fetchitemData }: { o
                     setengineers(data.data.data);                    
                 })
             }
+        }).catch((err) => {
+            toast.error("Failed to fetch engineer data");
         })
     }
 

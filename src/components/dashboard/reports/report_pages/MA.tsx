@@ -9,48 +9,61 @@ const formatDate = (date: Date) => {
 };
 
 // Main interface for Ticket data
-interface Ticket {
-    id: number;
-    inc_number: string;
-    ticket_number: string;
-    customer_id: number;
-    shop_id: number;
-    open_date: string;
-    open_time: string;
-    close_date: string | null;
-    close_time: string | null;
-    title: string;
-    description: string;
-    due_by: string;
-    sla_priority_level: string;
-    contact_name: string;
-    contact_tel: string;
-    assigned_to: string;
-    created_by: number;
-    updated_by: number;
-    ticket_status: string;
-    appointment_date: string;
-    appointment_time: string;
-    engineer_id: number;
-    solution: string;
-    investigation: string;
-    close_description: string | null;
-    item_brand: string;
-    item_category: string;
-    item_model: string;
-    item_sn: string;
-    warranty_exp: string;
-    resolve_status: boolean;
-    resolve_remark: string | null;
+interface MA {
+    brand: string;
+    ticketTitle: string;
+    ticketDescription: string;
+    incNo: string; // Incident Number
+    ticketNumber: string;
+    assignedTo: string;
+    ticketDate: string; // Consider using Date type if you're handling date objects
+    ticketTime: string; // Consider using Date type if you're handling time objects
+    storeName: string;
+    storeContactPhone: string;
+    ticketStatus: string;
+    ticketStatusDetail?: string; // Optional field, only for pending status
+    ticketCloseTime?: string; // Optional if the ticket is not yet closed
+    ticketCloseDate?: string; // Optional if the ticket is not yet closed
+    engineerName: string;
+    engineerNote?: string; // Optional if no notes are provided
+    appointmentTime?: string; // Optional if no appointment is scheduled
+    appointmentDate?: string; // Optional if no appointment is scheduled
+    solution?: string | null; // Optional if no solution is provided yet
+    slaPriority: string; // SLA Priority
+    recoveryTime: string; // Deadline for SLA (could also be Date if preferred)
+    slaOverdue: string; // Whether it was closed within SLA (Yes/No as boolean)
     action: string;
-    time_in: string;
-    time_out: string;
-    deleted_at: string | null;
-    created_at: string;
-    engineer: string;
-    engineer_node: string;
-    shop: string;
-    SLA_overdue: string;
+    lastUpdated?: string; // Date when the ticket was last updated
+    storeDeviceBrand1?: string;
+    storeDeviceModel1?: string;
+    storeDeviceSerial1?: string;
+    storeDeviceBrand2?: string;
+    storeDeviceModel2?: string;
+    storeDeviceSerial2?: string;
+    storeDeviceBrand3?: string;
+    storeDeviceModel3?: string;
+    storeDeviceSerial3?: string;
+    storeDeviceBrand4?: string;
+    storeDeviceModel4?: string;
+    storeDeviceSerial4?: string;
+    storeDeviceBrand5?: string;
+    storeDeviceModel5?: string;
+    storeDeviceSerial5?: string;
+    spareDeviceBrand1?: string;
+    spareDeviceModel1?: string;
+    spareDeviceSerial1?: string;
+    spareDeviceBrand2?: string;
+    spareDeviceModel2?: string;
+    spareDeviceSerial2?: string;
+    spareDeviceBrand3?: string;
+    spareDeviceModel3?: string;
+    spareDeviceSerial3?: string;
+    spareDeviceBrand4?: string;
+    spareDeviceModel4?: string;
+    spareDeviceSerial4?: string;
+    spareDeviceBrand5?: string;
+    spareDeviceModel5?: string;
+    spareDeviceSerial5?: string;
 }
 
 export default function MAReportPage() {
@@ -60,7 +73,7 @@ export default function MAReportPage() {
 
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    const [rows, setRows] = React.useState<Ticket[]>([]);
+    const [rows, setRows] = React.useState<MA[]>([]);
     const [count, setCount] = React.useState(0);
     const [from, setFrom] = React.useState(formatDate(sevenDaysBefore));
     const [to, setTo] = React.useState(formatDate(currentDate));
@@ -160,15 +173,15 @@ export default function MAReportPage() {
                         <TableBody>
                             {rows.length > 0 ?
                                 rows.map((ticket) => (
-                                    <TableRow key={ticket.id}>
-                                        <TableCell>{ticket.inc_number}</TableCell>
-                                        <TableCell>{ticket.ticket_number}</TableCell>
-                                        <TableCell>{ticket.title}</TableCell>
-                                        <TableCell>{ticket.ticket_status}</TableCell>
-                                        <TableCell>{ticket.assigned_to}</TableCell>
-                                        <TableCell>{ticket.engineer}</TableCell>
-                                        <TableCell>{ticket.shop}</TableCell>
-                                        <TableCell>{ticket.due_by}</TableCell>
+                                    <TableRow>
+                                        <TableCell>{ticket.incNo}</TableCell>
+                                        <TableCell>{ticket.ticketNumber}</TableCell>
+                                        <TableCell>{ticket.ticketTitle}</TableCell>
+                                        <TableCell>{ticket.ticketStatus}</TableCell>
+                                        <TableCell>{ticket.assignedTo}</TableCell>
+                                        <TableCell>{ticket.engineerName}</TableCell>
+                                        <TableCell>{ticket.storeName}</TableCell>
+                                        <TableCell>{ticket.recoveryTime}</TableCell>
                                         <TableCell>{ticket.action}</TableCell>
                                     </TableRow>
 

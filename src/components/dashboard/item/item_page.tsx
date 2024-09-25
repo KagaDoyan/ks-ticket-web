@@ -293,7 +293,7 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.category.name}</TableCell>
                     <TableCell>{row.brand.name}</TableCell>
                     <TableCell>{row.model.name}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.engineer?.name ? row.engineer.name : row.storage?.name || 'unknown'} color={row.engineer?.name ? 'primary' : 'warning'} /></TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.engineer?.name ? row.engineer.name : row.storage?.name} color={row.engineer?.name ? 'primary' : 'warning'} /></TableCell>
                     <TableCell>{row.waranty_expiry_date ? dayjs(row.waranty_expiry_date).format('MMM D, YYYY') : 'ไม่ระบุ'}</TableCell>
                     <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
                     {/* <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell> */}

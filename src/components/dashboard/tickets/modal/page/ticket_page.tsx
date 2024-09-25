@@ -38,15 +38,13 @@ interface engineer {
     lastname: string,
     distance: number
 }
+
+interface team {
+    id: number,
+    team_name: string
+}
 export default function TicketPage({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
-    const Teams = [
-        {
-            name: "Advice Team"
-        },
-        {
-            name: "OnSite"
-        }
-    ]
+    const [Teams, setTeams] = useState<team[]>([])
     const [formData, setFormData] = useState({
         inc_number: "",
         customer_id: 0,
@@ -99,6 +97,26 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                 })
             }
         })
+    }
+
+    const fetchTeams = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setTeams(data.data);
+                    })
+                } else {
+                    toast.error("Failed to fetch team options");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch team options");
+            });
     }
 
     const fetchTicketDetails = (ticketID: number, setFormData: any, setShopOptions: any, setPriorityOptions: any, setPriorityTime: any, customerOptions: customer[], shopOptions: shop[]) => {
@@ -269,6 +287,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     };
 
     useOnMount(() => {
+        fetchTeams();
         fetchCustomer();
         fetchEngineer();
         fetchShop();
@@ -493,8 +512,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                 <Grid item xs={12} sm={6}>
                     <Autocomplete
                         options={Teams}
-                        getOptionLabel={(option) => option.name}
-                        value={Teams.find((team) => team.name === formData.assigned_to) || null}
+                        getOptionLabel={(option) => option.team_name}
+                        value={Teams.find((team) => team.team_name === formData.assigned_to) || null}
                         onChange={(event, newValue, reason) => {
                             if (reason === "clear") {
                                 setFormData({
@@ -502,7 +521,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                                     assigned_to: "",
                                 })
                             }
-                            const selectedOption = newValue ? newValue.name : "";
+                            const selectedOption = newValue ? newValue.team_name : "";
                             if (!selectedOption) {
                                 return;
                             }

@@ -44,6 +44,12 @@ export default function DashboardPage(): React.JSX.Element {
     }, [dateRange]);
 
     useEffect(() => {
+        if (chart_table_data.length > 0) {
+            handleTableModalOpen();
+        }
+    }, [chart_table_data]);
+
+    useEffect(() => {
         const initialSeries: { name: string, data: number[] }[] = ["open", "pending", "spare", "close"].map(status => (
             {
                 name: status.charAt(0).toUpperCase() + status.slice(1),
@@ -126,22 +132,22 @@ export default function DashboardPage(): React.JSX.Element {
                 }
                 : { days: 0, hours: 0, minutes: 0, seconds: 0 };
         };
-    
+
         const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-    
+
         useEffect(() => {
             const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
             return () => clearInterval(timer);
         }, [dueDate]);
-    
+
         useEffect(() => {
             const showAlert = () => setModalOpen(true);
             const intervalId = setInterval(showAlert, 100000000);
             return () => clearInterval(intervalId);
         }, []);
-    
+
         const isOverdue = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
-    
+
         return (
             <p style={{ color: 'red' }}>
                 {isOverdue
@@ -153,7 +159,7 @@ export default function DashboardPage(): React.JSX.Element {
 
     return (
         <>
-            <TableModal open={table_modal_open} handleClose={handleTableModalClose} data={chart_table_data}/>
+            <TableModal open={table_modal_open} handleClose={handleTableModalClose} data={chart_table_data} />
             <AlertModal modal_open={modal_open} handleModalClose={handleModalClose} />
             <Grid container spacing={2}>
                 <Grid item lg={12} md={12} xs={12}>
@@ -161,7 +167,7 @@ export default function DashboardPage(): React.JSX.Element {
                         <Typography variant="h6" color={'text.secondary'}>
                             Dashboard
                         </Typography>
-                        
+
                     </Stack>
                 </Grid>
 
@@ -270,10 +276,14 @@ export default function DashboardPage(): React.JSX.Element {
                                                 const selectedSeriesName = config.w.config.series[seriesIndex].name;
                                                 const selectedCategory = config.w.config.xaxis.categories[dataPointIndex];
 
-                                                // Alert the category and series name
-                                                setChartTableData(ticketData.filter((ticket) => ticket.customer.shortname === selectedCategory && ticket.ticket_status === selectedSeriesName.toLowerCase()));
-                                                handleTableModalOpen();
-                                                // console.log(ticketData);
+                                                const filteredData = ticketData.filter(
+                                                    (ticket) =>
+                                                        ticket.customer.shortname === selectedCategory &&
+                                                        ticket.ticket_status.toLowerCase() === selectedSeriesName.toLowerCase()
+                                                );
+
+                                                // Set chart table data first, then the modal will open via the useEffect
+                                                setChartTableData(filteredData);
                                             },
                                         },
                                     },
@@ -337,9 +347,9 @@ export default function DashboardPage(): React.JSX.Element {
                                                     {row.ticket_number}
                                                 </StyledTableCell>
                                                 <StyledTableCell align="right">{row.inc_number}</StyledTableCell>
-                                                <StyledTableCell align="right"><Badge color={row.ticket_status === 'Closed' ? 'success' : 'error'} badgeContent={row.ticket_status}/></StyledTableCell>
+                                                <StyledTableCell align="right"><Badge color={row.ticket_status === 'Closed' ? 'success' : 'error'} badgeContent={row.ticket_status} /></StyledTableCell>
                                                 <StyledTableCell align="right">{row.due_by}</StyledTableCell>
-                                                <StyledTableCell sx={{maxWidth: "100px"}} align="right"><Countdown dueDate={row.due_by} /></StyledTableCell>
+                                                <StyledTableCell sx={{ maxWidth: "100px" }} align="right"><Countdown dueDate={row.due_by} /></StyledTableCell>
                                             </StyledTableRow>
                                         ))}
                                     </TableBody>

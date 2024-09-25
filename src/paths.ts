@@ -21,6 +21,7 @@ export const paths = {
     storage: '/page/storage',
     node: '/page/node',
     sell: '/page/sell',
+    team:'/page/team',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;

@@ -79,10 +79,27 @@ const styles = {
   }),
 };
 
-const userData = JSON.parse(localStorage.getItem('user_info') || '{}');
-
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
+  const [userData, setUserData] = React.useState<{ role?: string }>({});
+
+  // UseEffect to update userData when localStorage changes
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(storedUserData);
+    };
+
+    // Call on initial render
+    handleStorageChange();
+
+    // Listen for localStorage changes (if triggered from other parts of the app)
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   return (
     <Box sx={styles.sideNav}>
@@ -102,7 +119,7 @@ export function SideNav(): React.JSX.Element {
                 </Typography>
               </>
             )}
-            {renderNavItems({ items: item.items, pathname })}
+            {renderNavItems({ items: item.items, pathname, userData })}
           </React.Fragment>
         ))}
       </Box>
@@ -111,11 +128,11 @@ export function SideNav(): React.JSX.Element {
   );
 }
 
-function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pathname: string }): React.JSX.Element {
+function renderNavItems({ items = [], pathname, userData }: { items?: NavItemConfig[]; pathname: string; userData: { role?: string } }): React.JSX.Element {
   return (
     <Stack component="ul" spacing={1} sx={styles.navList}>
       {items
-        .filter(item => item.role?.includes(userData.role)) // Filter by role
+        .filter(item => item.role?.includes(userData.role ?? '')) // Filter by role
         .map((item) => (
         <NavItem pathname={pathname} {...item} />
       ))}

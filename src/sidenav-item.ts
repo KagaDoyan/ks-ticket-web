@@ -1,12 +1,12 @@
 import { paths } from '@/paths';
-import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, Person2Outlined, SpokeOutlined, StorefrontOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
+import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, Groups2Outlined, GroupsOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, Person2Outlined, SpokeOutlined, StorefrontOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
 
 export const navItems = [
   {
     group: 'Main',
     key: 'Main',
     items: [
-      { key: 'dashboard', title: 'Dashboard', href: paths.dashboard.overview, icon: AssessmentOutlined, role: ["SuperAdmin", "Admin", "Engineer", "User", "Customer"] },
+      { key: 'dashboard', title: 'Dashboard', href: paths.dashboard.overview, icon: AssessmentOutlined, role: ["SuperAdmin", "Admin", "User", "Customer"] },
       { key: 'ticket', title: 'ticket', href: paths.dashboard.ticket, icon: ConfirmationNumberOutlined, role: ["SuperAdmin", "Admin", "Engineer", "User", "Customer"] },
       { key: 'report', title: 'report', href: paths.dashboard.report, icon: SummarizeOutlined, role: ["SuperAdmin", "Admin", "User"] },
     ]
@@ -22,6 +22,7 @@ export const navItems = [
       { key: 'node', title: 'node', href: paths.dashboard.node, icon: SpokeOutlined, role: ["SuperAdmin", "Admin", "User", "Customer"] },
       { key: 'provinces', title: 'provinces', href: paths.dashboard.province, icon: MapOutlined, role: ["SuperAdmin", "Admin", "User"] },
       { key: 'priority_group', title: 'priorities group', href: paths.dashboard.priorities, icon: LowPriorityOutlined, role: ["SuperAdmin", "Admin", "User"] },
+      { key: 'teams', title: 'teams', href: paths.dashboard.team, icon: Groups2Outlined, role: ["SuperAdmin", "Admin"] },
     ]
   },
   {

@@ -1,9 +1,9 @@
-import { Box, Modal, Button, TextField, Typography, Stack, Grid, Select, MenuItem, SelectChangeEvent, InputLabel, Autocomplete } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack, Grid, Autocomplete } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
 import useOnMount from "@mui/utils/useOnMount";
-import dayjs from "dayjs";
+import formatDate from "@/lib/dateformat";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -198,7 +198,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                 brand_id: data.data.brand_id,
                                 customer_id: data.data.customer_id || 0,
                                 model_id: data.data.model_id,
-                                warranty_expiry_date: dayjs(data.data.warranty_expiry_date).format('YYYY-MM-DD'),
+                                warranty_expiry_date: data.data.warranty_expiry_date ? formatDate(data.data.warranty_expiry_date) : "",
                                 status: data.data.status,
                                 storage_id: data.data.storage_id
                             });
@@ -249,7 +249,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             storage_id: formData.storage_id
         };
         if (formData.warranty_expiry_date) {
-            payload['warranty_expiry_date'] = formData.warranty_expiry_date;
+            payload['warranty_expiry_date'] = new Date(formData.warranty_expiry_date);
         }
 
         if (itemID) {

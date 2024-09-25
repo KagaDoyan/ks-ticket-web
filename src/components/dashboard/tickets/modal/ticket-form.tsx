@@ -59,15 +59,13 @@ interface engineer {
     distance: number
 }
 
+interface team {
+    id: number,
+    team_name: string
+}
+
 export default function CreateTicketModalForm({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
-    const Teams = [
-        {
-            name: "Advice Team"
-        },
-        {
-            name: "OnSite"
-        }
-    ]
+    const [Teams, setTeams] = useState<team[]>([])
     const [formData, setFormData] = useState({
         inc_number: "n/a",
         customer_id: 0,
@@ -98,6 +96,27 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
     const HandleShopLatLngChange = (lat: string, lng: string) => {
         setShoplatlng({ lat: lat, lng: lng })
     }
+
+    const fetchTeams = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setTeams(data.data);
+                    })
+                } else {
+                    toast.error("Failed to fetch team options");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch team options");
+            });
+    }
+
 
     const fetchCustomer = () => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/option?shop_id=${formData.shop_id}`, {
@@ -238,12 +257,15 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                     setpriorityOptions(data.data);
                 })
             }
+        }).catch((err) => {
+            toast.error("Failed to fetch priority options");
         })
     }
 
     useOnMount(() => {
         fetchCustomer();
-        fetchEngineer()
+        fetchTeams();
+        fetchEngineer();
     })
 
     useEffect(() => {
@@ -488,8 +510,8 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                         <Grid item xs={12} sm={6}>
                             <Autocomplete
                                 options={Teams}
-                                getOptionLabel={(option) => option.name}
-                                value={Teams.find((team) => team.name === formData.assigned_to) || null}
+                                getOptionLabel={(option) => option.team_name}
+                                value={Teams.find((team) => team.team_name === formData.assigned_to) || null}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
                                         setFormData({
@@ -497,7 +519,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                             assigned_to: "",
                                         })
                                     }
-                                    const selectedOption = newValue ? newValue.name : "";
+                                    const selectedOption = newValue ? newValue.team_name : "";
                                     if (!selectedOption) {
                                         return;
                                     }

@@ -487,7 +487,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         payload.append('item_category', formData.item_category);
         payload.append('item_model', formData.item_model);
         payload.append('item_sn', formData.item_sn);
-        payload.append('warranty_exp', formatDate(formData.warranty_exp));
+        payload.append('warranty_exp', new Date(formData.warranty_exp).toISOString());
         payload.append('ticket_status', formData.ticket_status);
         payload.append('resolve_status', formData.resolve_status ? 'true' : 'false');
         payload.append('resolve_remark', formData.resolve_remark);
@@ -761,7 +761,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                     <Grid item xs={12} sm={6} key={index}>
                         <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
                             <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                Item {index + 1}
+                                Item {index + 1} {item.id ? <p style={{ color: 'green' }}>Saved</p> : ""}
                             </Typography>
                             <TextField
                                 label="Id"
@@ -873,7 +873,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                     <Grid item xs={12} sm={6} key={index}>
                         <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
                             <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                Item {index + 1}
+                                Item {index + 1} {item.id ? <p style={{ color: 'green' }}>Saved</p> : ""}
                             </Typography>
                             <TextField
                                 label="Id"
