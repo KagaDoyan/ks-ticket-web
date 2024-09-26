@@ -10,18 +10,21 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
         case 'koon':
             FormName = 'Koon Service'
             logo = `<img
+            id="logo"
             src="${process.env.NEXT_PUBLIC_API_URL}/assets/ks.png"
             alt="Logo" width="150" height="70">`
             break
         case 'advice':
             FormName = 'Advice Service'
             logo = `<img
+              id="logo"
               src="${process.env.NEXT_PUBLIC_API_URL}/assets/av.png"
               alt="Logo" width="70" height="70" style="top: 2px; left: 2px; right: 2px; bottom: 2px">`
             break
         case 'tcc':
             FormName = 'TCCtech Service'
             logo = `<img
+            id="logo"
             src="${process.env.NEXT_PUBLIC_API_URL}/assets/tcc.png"
             alt="Logo" width="130" height="70" style="top: 2px; left: 2px; right: 2px; bottom: 2px">`
             break
@@ -393,7 +396,19 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
         </table>
     </div>
     <script>
-        window.print();
+        // Wait for the logo image to load
+        const logoImage = document.getElementById('logo');
+
+        logoImage.onload = function () {
+            // Open the print window after the image is loaded
+            window.print();
+        };
+
+        logoImage.onerror = function () {
+            console.error("Logo failed to load.");
+            // Proceed with print even if logo fails to load
+            window.print();
+        };
     </script>
 </body>
 
