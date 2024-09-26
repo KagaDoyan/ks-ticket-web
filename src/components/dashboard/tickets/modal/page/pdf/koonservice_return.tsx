@@ -181,7 +181,7 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
                 </tr>` : ''}
                 <tr>
                     <td colspan="12"><b>สาขา / shop:</b>
-                        <underline>${data.shop.shop_number + data.shop.shop_name}</underline>
+                        <underline>${data.shop.shop_number + ' ' + data.shop.shop_name}</underline>
                     </td>
                     <td colspan="12"><b>โทรศัพท์ / phone:</b>
                         <underline>${data.shop.phone}</underline>
