@@ -81,25 +81,27 @@ const styles = {
 
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
-  const [userData, setUserData] = React.useState<{ role?: string }>({});
+  const [userData, setUserData] = React.useState<{ role?: string } | null>(null); // Set initial state as null
 
-  // UseEffect to update userData when localStorage changes
   React.useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+    setUserData(storedUserData);
+
     const handleStorageChange = () => {
-      const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
-      setUserData(storedUserData);
+      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(updatedUserData);
     };
 
-    // Call on initial render
-    handleStorageChange();
-
-    // Listen for localStorage changes (if triggered from other parts of the app)
     window.addEventListener('storage', handleStorageChange);
-
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
+
+  // Avoid rendering until userData is available
+  if (!userData) {
+    return <></>;
+  }
 
   return (
     <Box sx={styles.sideNav}>
@@ -134,8 +136,8 @@ function renderNavItems({ items = [], pathname, userData }: { items?: NavItemCon
       {items
         .filter(item => item.role?.includes(userData.role ?? '')) // Filter by role
         .map((item) => (
-        <NavItem pathname={pathname} {...item} />
-      ))}
+          <NavItem pathname={pathname} {...item} />
+        ))}
     </Stack>
   );
 }

@@ -284,6 +284,7 @@ export default function DashboardPage(): React.JSX.Element {
 
                                                 // Set chart table data first, then the modal will open via the useEffect
                                                 setChartTableData(filteredData);
+                                                handleTableModalOpen();
                                             },
                                         },
                                     },
@@ -327,7 +328,7 @@ export default function DashboardPage(): React.JSX.Element {
                     <Card>
                         <CardContent>
                             <Typography variant="h6" color={'text.secondary'} component="div">
-                                Tickets
+                                Open Tickets
                             </Typography>
                             <Box overflow="auto">
                                 <Table sx={{ minWidth: 700 }} aria-label="customized table">

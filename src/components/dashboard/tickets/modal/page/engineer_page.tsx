@@ -444,14 +444,6 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
         setFormData({ ...formData, action: actionsArray.join(',') });
     };
 
-    const warranty_expiry = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        })
-    }
-
     const handleEmailPreview = () => {
         setOpenEmailPreview(true);
     }

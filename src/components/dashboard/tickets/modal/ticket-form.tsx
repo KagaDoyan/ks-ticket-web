@@ -65,6 +65,11 @@ interface team {
     team_name: string
 }
 
+interface category {
+    id: number
+    name: string
+}
+
 export default function CreateTicketModalForm({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
     const [Teams, setTeams] = useState<team[]>([])
     const [formData, setFormData] = useState({
@@ -85,6 +90,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
         appointment_time: "",
         engineer_id: 0,
         priority_id: 0,
+        item_category: "",
     });
 
     const [customerOptions, setCustomerOptions] = useState<customer[]>([]);
@@ -92,10 +98,31 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
     const [priorityOptions, setpriorityOptions] = useState<priority[]>([]);
     const [enginnerOption, setEngineerOption] = useState<engineer[]>([]);
     const [priority_time, setpriority_time] = useState(0);
+    const [CategoryOption, setCategoryOption] = useState<category[]>([])
     const [shoplatlng, setShoplatlng] = useState({ lat: "", lng: "" });
 
     const HandleShopLatLngChange = (lat: string, lng: string) => {
         setShoplatlng({ lat: lat, lng: lng })
+    }
+
+    const getCategoryOption = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCategoryOption(data.data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch category option");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch category option");
+            });
     }
 
     const fetchTeams = () => {
@@ -180,6 +207,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
             appointment_time: "",
             engineer_id: 0,
             priority_id: 0,
+            item_category: ""
         });
     }
 
@@ -267,6 +295,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
         fetchCustomer();
         fetchTeams();
         fetchEngineer();
+        getCategoryOption();
     })
 
     useEffect(() => {
@@ -572,8 +601,32 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                 fullWidth
                             />
                         </Grid>
-
-                        <Grid item xs={12} sm={12}>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={CategoryOption}
+                                getOptionLabel={(option) => option.name}
+                                value={CategoryOption.find((category) => category.name === formData.item_category) || null}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            item_category: ""
+                                        })
+                                    }
+                                    const selectedOption = newValue ? newValue.name : "";
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        item_category: selectedOption || ""
+                                    });
+                                    console.log(formData);
+                                }}
+                                renderInput={(params) => <TextField required {...params} label="Equipment" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                                 error
                                 required

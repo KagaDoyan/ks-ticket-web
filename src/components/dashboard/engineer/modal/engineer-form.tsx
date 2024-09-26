@@ -289,6 +289,7 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
                             <TextField
                                 label="Latitude"
                                 name="latitude"
+                                type="number"
                                 value={formData.latitude}
                                 onChange={handleChange}
                                 required
@@ -299,6 +300,7 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
                             <TextField
                                 label="Longitude"
                                 name="longitude"
+                                type="number"
                                 value={formData.longitude}
                                 onChange={handleChange}
                                 required
