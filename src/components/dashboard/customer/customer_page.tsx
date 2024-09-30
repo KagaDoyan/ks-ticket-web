@@ -22,15 +22,13 @@ import { authClient } from '@/lib/auth/client';
 import CustomerModalForm from './modal/customer-form';
 import Swal from 'sweetalert2';
 
-function noop(): void {
-  // do nothing
-}
-
 export interface Customer {
   id: number;
   fullname: string;
   shortname: string;
   created_at: Date;
+  line_id: string;
+  line_engineer_id: string;
 }
 
 export function CustomerPage(): React.JSX.Element {
@@ -165,6 +163,7 @@ export function CustomerPage(): React.JSX.Element {
               <TableRow>
                 <TableCell>Full name</TableCell>
                 <TableCell>Short name</TableCell>
+                <TableCell>Line</TableCell>
                 <TableCell>Created at</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -175,6 +174,7 @@ export function CustomerPage(): React.JSX.Element {
                   <TableRow hover key={row.id}>
                     <TableCell>{row.fullname}</TableCell>
                     <TableCell>{row.shortname}</TableCell>
+                    <TableCell>{row.line_id && row.line_id ? 'active' : 'inactive'}</TableCell>
                     <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEditcustomer(row.id)}>

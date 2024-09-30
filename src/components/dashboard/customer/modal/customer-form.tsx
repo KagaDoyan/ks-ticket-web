@@ -1,4 +1,4 @@
-import { Box, Modal, Button, TextField, Typography, Stack } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
@@ -20,6 +20,8 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
     const [formData, setFormData] = useState({
         fullname: "",
         shortname: "",
+        line_id: "",
+        line_engineer_id: "",
     });
 
     const getcustomerData = () => {
@@ -36,6 +38,8 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
                             setFormData({
                                 fullname: data.data.fullname,
                                 shortname: data.data.shortname,
+                                line_id: data.data.line_id,
+                                line_engineer_id: data.data.line_engineer_id
                             });
                         })
                     } else {
@@ -51,6 +55,8 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
         setFormData({
             fullname: "",
             shortname: "",
+            line_id: "",
+            line_engineer_id: "",
         });
     }
 
@@ -148,20 +154,42 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
                         mt: 2
                     }}
                 >
-                    <TextField
-                        label="Full Name"
-                        name="fullname"
-                        value={formData.fullname}
-                        onChange={handleChange}
-                        required
-                    />
-                    <TextField
-                        label="Short Name"
-                        name="shortname"
-                        value={formData.shortname}
-                        onChange={handleChange}
-                        required
-                    />
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Full Name"
+                                name="fullname"
+                                value={formData.fullname}
+                                onChange={handleChange}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Short Name"
+                                name="shortname"
+                                value={formData.shortname}
+                                onChange={handleChange}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Line ID"
+                                name="line_id"
+                                value={formData.line_id}
+                                onChange={handleChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Line Engineer ID"
+                                name="line_engineer_id"
+                                value={formData.line_engineer_id}
+                                onChange={handleChange}                        
+                            />
+                        </Grid>
+                    </Grid>
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                         <Button onClick={handleClose} variant="contained" color="warning">
                             Close

@@ -24,7 +24,7 @@ export default function EmailPreviewPage({ open, handleClose, ticketData }: { op
                         </tr>
                         <tr>
                             <th style={{ verticalAlign: 'top' }}>Equipment</th>
-                            <td style={{ verticalAlign: 'top' }} id="equipment">{ticketData.item_category + " " + ticketData.brand + " " + ticketData.model}</td>
+                            <td style={{ verticalAlign: 'top' }} id="equipment">{ticketData.item_category}</td>
                         </tr>
                         <tr>
                             <th style={{ verticalAlign: 'top' }}>Investigation</th>

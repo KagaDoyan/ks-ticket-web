@@ -102,6 +102,23 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             toast.error("You can only add up to 5 items.");
         }
     };
+    const clearShopItem = (index: number) => {
+        const updatedItems = [...shopitems];
+        updatedItems[index] = {
+            ...updatedItems[index],
+            serial_number: updatedItems[index].serial_number, // keep the serial number
+            category: '',
+            category_id: 0,
+            brand: '',
+            brand_id: 0,
+            model_id: 0,
+            model: '',
+            warranty_expire_date: '',
+            status: '',
+        };
+        setShopItem(updatedItems)
+    }
+
 
     const handleShopItemChange = (index: number, field: string, value: string) => {
         const updatedItems = [...shopitems];
@@ -126,6 +143,19 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 return newItems;
                             });
                         }
+                    });
+                } else {
+                    setShopItem((prevItems) => {
+                        const newItems = [...prevItems];
+                        newItems[index] = {
+                            ...newItems[index],
+                            serial_number: value,
+                            category: '',
+                            brand: '',
+                            model: '',
+                            warranty_expire_date: '',
+                        };
+                        return newItems;
                     });
                 }
             });
@@ -222,6 +252,19 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 return newItems;
                             });
                         }
+                    });
+                } else {
+                    setSpareItem((prevItems) => {
+                        const newItems = [...prevItems];
+                        newItems[index] = {
+                            ...newItems[index],
+                            serial_number: value,
+                            category: '',
+                            brand: '',
+                            model: '',
+                            warranty_expire_date: '',
+                        };
+                        return newItems;
                     });
                 }
             });
@@ -782,6 +825,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                     if (!selectedOption) {
                                         return;
                                     }
+                                    handleShopItemChange(index, 'category_id', newValue?.id.toString() || "0");
                                     handleShopCategoryChange(index, selectedOption);
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Category" />}

@@ -1,6 +1,6 @@
 'use client'
 
-import { Avatar, Badge, Box, Card, CardContent, Grid, Stack, Table, TableBody, TableHead, TableRow, Typography, useTheme } from "@mui/material";
+import { Autocomplete, Avatar, Badge, Box, Card, CardContent, Grid, Stack, Table, TableBody, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { Receipt } from "@mui/icons-material";
 import Chart from "react-apexcharts";
 import { useEffect, useState } from "react";
@@ -9,8 +9,8 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import AlertModal from "./modal/alert_modal";
 import { authClient } from "@/lib/auth/client";
 import dayjs from "dayjs";
-import TextField from '@mui/material/TextField';
 import TableModal from "./modal/data_modal";
+import { shrink } from "bun";
 
 interface TicketData {
     id: number;
@@ -19,9 +19,21 @@ interface TicketData {
     due_by: string;
     inc_number: string;
     ticket_number: string;
+    title: string;
+    shop: {
+        shop_number: string;
+        shop_name: string;
+    }
+}
+interface Customer {
+    id: number;
+    fullname: string;
+    shortname: string;
 }
 
 export default function DashboardPage(): React.JSX.Element {
+    const [customersOption, setCustomersOption] = useState<Customer[]>([]);
+    const [customer_name, setCustomerName] = useState('');
     const [ticketData, setTickets] = useState<TicketData[]>([]);
     const [series, setSeries] = useState<any[]>([]);
     const [dateRange, setDateRange] = useState<[string, string]>([
@@ -35,19 +47,38 @@ export default function DashboardPage(): React.JSX.Element {
 
     const [customers, setCustomers] = useState<string[]>([]);
     const [modal_open, setModalOpen] = useState(false);
+    const [start_date, setStart] = useState(dayjs(Date.now() - 7 * 24 * 60 * 60 * 1000).format('YYYY-MM-DD'))
+    const [end_date, setEnd] = useState(dayjs(Date.now()).format('YYYY-MM-DD'))
 
     const handleModalClose = () => setModalOpen(false);
 
     useEffect(() => {
         fetchCustomer();
+        GetCustomerOption();
         fetchTicketByDate();
-    }, [dateRange]);
+    }, [start_date, end_date, customer_name]);
 
     useEffect(() => {
         if (chart_table_data.length > 0) {
             handleTableModalOpen();
         }
     }, [chart_table_data]);
+
+    const GetCustomerOption = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomersOption(data.data);
+                    })
+                }
+            })
+    }
 
     useEffect(() => {
         const initialSeries: { name: string, data: number[] }[] = ["open", "pending", "spare", "close"].map(status => (
@@ -88,8 +119,7 @@ export default function DashboardPage(): React.JSX.Element {
     };
 
     const fetchTicketByDate = () => {
-        const [start, end] = dateRange;
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${start}&end=${end}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${start_date}&end=${end_date}&brand_name=${customer_name}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -162,16 +192,57 @@ export default function DashboardPage(): React.JSX.Element {
             <TableModal open={table_modal_open} handleClose={handleTableModalClose} data={chart_table_data} />
             <AlertModal modal_open={modal_open} handleModalClose={handleModalClose} />
             <Grid container spacing={2}>
-                <Grid item lg={12} md={12} xs={12}>
+                <Grid item lg={12} md={6} xs={6}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography variant="h6" color={'text.secondary'}>
                             Dashboard
                         </Typography>
-
                     </Stack>
                 </Grid>
+                <Grid item lg={12} md={12} xs={12}>
+                    <Box>
+                        <Card sx={{ p: 2 }}>
+                            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                                <TextField
+                                    label="Start Date"
+                                    type="date"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    variant="outlined"
+                                    size="small"
+                                    onChange={(e) => setStart(e.target.value)}
+                                    value={start_date}
+                                />
+                                <TextField
+                                    label="End Date"
+                                    type="date"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    variant="outlined"
+                                    size="small"
+                                    onChange={(e) => setEnd(e.target.value)}
+                                    value={end_date}
+                                />
+                                <Autocomplete
+                                    options={customersOption}
+                                    size="small"
+                                    sx={{ width: 150 }}
+                                    getOptionLabel={(option) => option.shortname}
+                                    value={customersOption.find((customer) => customer.fullname === customer_name) || null}
+                                    onChange={(event, newValue) => {
+                                        const selected = newValue ? newValue.fullname : "";
+                                        setCustomerName(selected)
+                                    }}
+                                    renderInput={(params) => <TextField {...params} label="brand" />}
+                                />
+                            </Stack>
+                        </Card>
+                    </Box>
+                </Grid>
 
-                <Grid item lg={3} md={6} xs={12}>
+                <Grid item lg={3} md={6} xs={3}>
                     <Card sx={{
                         width: '100%',
                         height: '100%',
@@ -336,6 +407,8 @@ export default function DashboardPage(): React.JSX.Element {
                                         <TableRow>
                                             <StyledTableCell>Ticket ID</StyledTableCell>
                                             <StyledTableCell align="right">Incident No</StyledTableCell>
+                                            <StyledTableCell align="right">Title</StyledTableCell>
+                                            <StyledTableCell align="right">Shop</StyledTableCell>
                                             <StyledTableCell align="right">Status</StyledTableCell>
                                             <StyledTableCell align="right">Due By</StyledTableCell>
                                             <StyledTableCell align="right">Time Left</StyledTableCell>
@@ -348,6 +421,8 @@ export default function DashboardPage(): React.JSX.Element {
                                                     {row.ticket_number}
                                                 </StyledTableCell>
                                                 <StyledTableCell align="right">{row.inc_number}</StyledTableCell>
+                                                <StyledTableCell align="right">{row.title}</StyledTableCell>
+                                                <StyledTableCell align="right">{row.shop.shop_number} - {row.shop.shop_name}</StyledTableCell>
                                                 <StyledTableCell align="right"><Badge color={row.ticket_status === 'Closed' ? 'success' : 'error'} badgeContent={row.ticket_status} /></StyledTableCell>
                                                 <StyledTableCell align="right">{row.due_by}</StyledTableCell>
                                                 <StyledTableCell sx={{ maxWidth: "100px" }} align="right"><Countdown dueDate={row.due_by} /></StyledTableCell>
