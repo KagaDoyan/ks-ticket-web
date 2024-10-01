@@ -10,7 +10,7 @@ import AlertModal from "./modal/alert_modal";
 import { authClient } from "@/lib/auth/client";
 import dayjs from "dayjs";
 import TableModal from "./modal/data_modal";
-import { shrink } from "bun";
+import React from "react";
 
 interface TicketData {
     id: number;
@@ -33,9 +33,11 @@ interface Customer {
 
 export default function DashboardPage(): React.JSX.Element {
     const [customersOption, setCustomersOption] = useState<Customer[]>([]);
-    const [customer_name, setCustomerName] = useState('');
+    const [customer_name, setCustomerName] = useState(0);
     const [ticketData, setTickets] = useState<TicketData[]>([]);
     const [series, setSeries] = useState<any[]>([]);
+    const [select_customer, setSelectCustomer] = useState("");
+    const [select_status, setSelectStatus] = useState("");
     const [dateRange, setDateRange] = useState<[string, string]>([
         dayjs(Date.now() - 7 * 24 * 60 * 60 * 1000).format('YYYY-MM-DD'),
         dayjs(Date.now()).format('YYYY-MM-DD')
@@ -189,7 +191,7 @@ export default function DashboardPage(): React.JSX.Element {
 
     return (
         <>
-            <TableModal open={table_modal_open} handleClose={handleTableModalClose} data={chart_table_data} />
+            <TableModal open={table_modal_open} handleClose={handleTableModalClose} data={ticketData} customer={select_customer} status={select_status} />
             <AlertModal modal_open={modal_open} handleModalClose={handleModalClose} />
             <Grid container spacing={2}>
                 <Grid item lg={12} md={6} xs={6}>
@@ -230,9 +232,9 @@ export default function DashboardPage(): React.JSX.Element {
                                     size="small"
                                     sx={{ width: 150 }}
                                     getOptionLabel={(option) => option.shortname}
-                                    value={customersOption.find((customer) => customer.fullname === customer_name) || null}
+                                    value={customersOption.find((customer) => customer.id === customer_name) || null}
                                     onChange={(event, newValue) => {
-                                        const selected = newValue ? newValue.fullname : "";
+                                        const selected = newValue ? newValue.id : 0;
                                         setCustomerName(selected)
                                     }}
                                     renderInput={(params) => <TextField {...params} label="brand" />}
@@ -346,15 +348,9 @@ export default function DashboardPage(): React.JSX.Element {
                                                 const { seriesIndex, dataPointIndex } = config;
                                                 const selectedSeriesName = config.w.config.series[seriesIndex].name;
                                                 const selectedCategory = config.w.config.xaxis.categories[dataPointIndex];
-
-                                                const filteredData = ticketData.filter(
-                                                    (ticket) =>
-                                                        ticket.customer.shortname === selectedCategory &&
-                                                        ticket.ticket_status.toLowerCase() === selectedSeriesName.toLowerCase()
-                                                );
-
+                                                setSelectCustomer(selectedCategory);
+                                                setSelectStatus(selectedSeriesName.toLowerCase());
                                                 // Set chart table data first, then the modal will open via the useEffect
-                                                setChartTableData(filteredData);
                                                 handleTableModalOpen();
                                             },
                                         },

@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Card, Badge } from '@mui/material';
 
 interface DynamicTableModalProps {
     open: boolean;
     handleClose: () => void;
     data: any[];
+    customer: string;
+    status: string;
 }
 
-const TableModal: React.FC<DynamicTableModalProps> = ({ open, handleClose, data }) => {
+const TableModal: React.FC<DynamicTableModalProps> = ({ open, handleClose, customer, status, data }) => {
+    const [show_data,setShowData] = useState<any[]>([]);
     const modalStyle = {
         position: 'absolute' as 'absolute',
         top: '50%',
@@ -25,6 +28,12 @@ const TableModal: React.FC<DynamicTableModalProps> = ({ open, handleClose, data 
         p: 4,
         outline: 'none'
     };
+
+    useEffect(() => {
+        if (open) {
+            setShowData(data.filter((ticket) => ticket.customer.shortname === customer && ticket.ticket_status.toLowerCase() === status.toLowerCase()));
+        }
+    }, [customer, status]);
 
     return (
         <Modal
@@ -45,7 +54,7 @@ const TableModal: React.FC<DynamicTableModalProps> = ({ open, handleClose, data 
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {data.map((row) => (
+                            {show_data.map((row) => (
                                 <TableRow key={row.id}>
                                     <TableCell>{row.ticket_number}</TableCell>
                                     <TableCell>{row.inc_number}</TableCell>

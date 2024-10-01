@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import MenuButton from "./menu_button";
 import { EmailOutlined } from "@mui/icons-material";
 import EmailPreviewPagefunction from "./email_preview_page";
+import React from "react";
 
 interface brand {
     id: number

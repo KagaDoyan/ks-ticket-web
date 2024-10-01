@@ -8,6 +8,8 @@ import CraeteKoonServiceForm from "./pdf/koonservice";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import MenuReturnButton from "./menu_button_reuturn";
+import React from "react";
+import { EmailOutlined } from "@mui/icons-material";
 
 interface brand {
     id: number
@@ -401,9 +403,39 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         getModelOption()
     })
 
-    useEffect(() => {
-
-    }, [shopitems, spareitems])
+    const handleEmail = () => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, send it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                toast.promise(
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/return_mail/${ticketData.id}`, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${authClient.getToken()}`,
+                        },
+                    }).then((response) => {
+                        // Check if the response is ok (status code in the range 200-299)
+                        if (!response.ok) {
+                            throw new Error('Failed to send mail');
+                        }
+                        return response.json(); // Or return response, based on your needs
+                    }),
+                    {
+                        pending: 'Sending mail, please wait...',  // Message shown while the promise is pending
+                        success: 'Mail sent successfully!',       // Message shown if the promise resolves
+                        error: 'Failed to send mail. Please try again.', // Message shown if the promise rejects
+                    }
+                );
+            }
+        })
+    }
 
     const handleSubmit = () => {
         if (!formData.close_date || !formData.close_time) {
@@ -468,7 +500,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     }
 
     const handleCreatePDF = () => {
- 
+
     }
 
     const isItemSaved = (serial_number: string) => {
@@ -1042,6 +1074,9 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
+                </Button>
+                <Button startIcon={<EmailOutlined />} onClick={handleEmail} variant="contained" color="error">
+                    Email
                 </Button>
                 <MenuReturnButton data={ticketData} />
                 <Button variant="contained" color="success" onClick={handleSubmit}>

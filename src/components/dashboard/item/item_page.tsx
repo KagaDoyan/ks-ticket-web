@@ -25,6 +25,7 @@ import Swal from 'sweetalert2';
 import useOnMount from '@mui/utils/useOnMount';
 
 export interface item {
+  shop_number: string;
   id: number;
   model_id: string;
   created_at: Date;
@@ -96,19 +97,19 @@ export function ItemPage(): React.JSX.Element {
 
   const GetStorage = () => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/storage/option`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${authClient.getToken()}`
-        }
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
     })
-        .then((res) => {
-            if (res.ok) {
-                res.json().then((data) => {
-                    setStorage(data.data);
-                })
-            }
-        })
-}
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            setStorage(data.data);
+          })
+        }
+      })
+  }
 
   const fetchitemData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
@@ -238,6 +239,12 @@ export function ItemPage(): React.JSX.Element {
     setitemID(0)
   }
 
+  const location = (row: item) => {
+    var location = row.status == "return" ? row.shop_number : row.engineer?.name ? row.engineer.name : row.storage?.name
+    return location
+  }
+
+
   return (
     <>
       <EngineerSelectionModal open={eopen} handleClose={handleEClose} itemID={itemID} fetchitemData={fetchitemData} />
@@ -293,7 +300,20 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.category.name}</TableCell>
                     <TableCell>{row.brand.name}</TableCell>
                     <TableCell>{row.model.name}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.engineer?.name ? row.engineer.name : row.storage?.name} color={row.engineer?.name ? 'primary' : 'warning'} /></TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{
+                          border: '1px solid',
+                          borderColor: 'primary.main',
+                          borderRadius: '8px',
+                          padding: '4px 8px',
+                          display: 'inline-block',
+                          backgroundColor: 'background.paper'
+                        }}
+                      >
+                        {location(row)}
+                      </Box>
+                    </TableCell>
                     <TableCell>{row.waranty_expiry_date ? dayjs(row.waranty_expiry_date).format('MMM D, YYYY') : 'ไม่ระบุ'}</TableCell>
                     <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
                     {/* <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell> */}
