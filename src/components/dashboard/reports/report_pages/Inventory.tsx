@@ -3,86 +3,25 @@ import { IosShare, Refresh } from "@mui/icons-material";
 import { Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
+import * as XLSX from 'xlsx';
 const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
 };
 
 // Interface for Shop details
-interface Shop {
-    id: number;
-    deleted_at: string | null;
-    created_at: string;
-    created_by: number;
-    shop_number: string;
-    shop_name: string;
-    phone: string;
-    email: string;
-    latitude: string;
-    longitude: string;
-    province_id: number;
-    customers_id: number;
-}
-
-// Interface for Engineer details
-interface Engineer {
-    id: number;
-    name: string;
-    lastname: string;
-    phone: string;
-    line_name: string;
-    latitude: string;
-    longitude: string;
-    node: string;
-    password: string;
-    deleted_at: string | null;
-    created_at: string;
-    created_by: number;
-}
-
-// Main interface for Ticket data
-interface Ticket {
-    id: number;
-    inc_number: string;
-    ticket_number: string;
-    customer_id: number;
-    shop_id: number;
-    open_date: string;
-    open_time: string;
-    close_date: string | null;
-    close_time: string | null;
-    title: string;
-    description: string;
-    due_by: string;
-    sla_priority_level: string;
-    contact_name: string;
-    contact_tel: string;
-    assigned_to: string;
-    created_by: number;
-    updated_by: number;
-    ticket_status: string;
-    appointment_date: string;
-    appointment_time: string;
-    engineer_id: number;
-    solution: string | null;
-    investigation: string | null;
-    close_description: string | null;
-    item_brand: string | null;
-    item_category: string | null;
-    item_model: string | null;
-    item_sn: string | null;
-    warranty_exp: string | null;
-    resolve_status: string | null;
-    resolve_remark: string | null;
-    action: string | null;
-    time_in: string | null;
-    time_out: string | null;
-    deleted_at: string | null;
-    created_at: string;
-    shop: Shop;
-    engineer: Engineer;
-    store_item: any[]; // Assuming `store_item` and `spare_item` are arrays, replace `any` with specific type if known
-    spare_item: any[];
-    SLA_overdue: string;
+interface inventory {
+    category: string
+    brand: string
+    model: string
+    serial: string
+    owner: string
+    condition: string
+    usage: string
+    status: string
+    used_by: string
+    inc_no: string
+    ticket_no: string
+    remark: string
 }
 
 export default function InventoryReportPage() {
@@ -92,7 +31,7 @@ export default function InventoryReportPage() {
 
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    const [rows, setRows] = React.useState<Ticket[]>([]);
+    const [rows, setRows] = React.useState<inventory[]>([]);
     const [count, setCount] = React.useState(0);
     const [from, setFrom] = React.useState(formatDate(sevenDaysBefore));
     const [to, setTo] = React.useState(formatDate(currentDate));
@@ -113,7 +52,7 @@ export default function InventoryReportPage() {
 
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/report/ma?from=${from}&to=${to}`, {
+        fetch(`${baseUrl}/api/report/inventory?from=${from}&to=${to}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -128,6 +67,17 @@ export default function InventoryReportPage() {
                 toast.error(error.message);
             });
     };
+
+    const exportToExcel = () => {
+        console.log(rows);
+
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "MA");
+
+        // Export the file
+        XLSX.writeFile(workbook, `Inventory-Report.xlsx`);
+    }
 
     useEffect(() => {
         fetchMAData();
@@ -161,33 +111,38 @@ export default function InventoryReportPage() {
                         value={to}
                     /> */}
                     <Button variant="contained" startIcon={<Refresh />} onClick={fetchMAData}>Refresh</Button>
-                    <Button variant="contained" startIcon={<IosShare />} color="warning">Export</Button>
+                    <Button variant="contained" startIcon={<IosShare />} color="warning" onClick={exportToExcel}>Export</Button>
                 </Stack>
 
                 <Box sx={{ overflowX: 'auto' }}>
                     <Table sx={{ minWidth: 800 }}>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Province Name</TableCell>
-                                <TableCell>Code</TableCell>
-                                <TableCell>Group</TableCell>
-                                <TableCell align="right">
-                                    <Button variant="contained">Export</Button>
-                                </TableCell>
+                                <TableCell>item</TableCell>
+                                <TableCell>serial</TableCell>
+                                <TableCell>owner</TableCell>
+                                <TableCell>condition</TableCell>
+                                <TableCell>usage</TableCell>
+                                <TableCell>status</TableCell>
+                                <TableCell>use_by</TableCell>
+                                <TableCell>inc_no</TableCell>
+                                <TableCell>ticket_no</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {rows.length > 0 ? rows.map((row) => (
                                 // Example Row: Uncomment and replace with your actual data structure
-                                // <TableRow key={row.id}>
-                                //     <TableCell>{row.province_name}</TableCell>
-                                //     <TableCell>{row.province_code}</TableCell>
-                                //     <TableCell>{row.group}</TableCell>
-                                //     <TableCell align="right">
-                                //         <Button>Edit</Button>
-                                //     </TableCell>
-                                // </TableRow>
-                                <></>
+                                <TableRow>
+                                    <TableCell>{row.category} {row.brand} {row.model}</TableCell>
+                                    <TableCell>{row.serial}</TableCell>
+                                    <TableCell>{row.owner}</TableCell>
+                                    <TableCell>{row.condition}</TableCell>
+                                    <TableCell>{row.usage}</TableCell>
+                                    <TableCell>{row.status}</TableCell>
+                                    <TableCell>{row.used_by}</TableCell>
+                                    <TableCell>{row.inc_no}</TableCell>
+                                    <TableCell>{row.ticket_no}</TableCell>
+                                </TableRow>
                             )) : (
                                 <TableRow>
                                     <TableCell colSpan={4} align="center">No data</TableCell>

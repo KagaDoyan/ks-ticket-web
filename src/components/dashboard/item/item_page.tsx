@@ -63,6 +63,22 @@ interface storage {
 }
 
 export function ItemPage(): React.JSX.Element {
+  const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
+  React.useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+    setUserData(storedUserData);
+
+    const handleStorageChange = () => {
+      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(updatedUserData);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState<item[]>([]);
@@ -326,9 +342,7 @@ export function ItemPage(): React.JSX.Element {
                       </IconButton> : <IconButton color='error' onClick={() => handleRemoveEngineer(row.id)}>
                         <PersonRemoveAlt1Outlined />
                       </IconButton>}
-                      <IconButton color='error' onClick={() => handleDeleteitem(row.id)}>
-                        <Delete />
-                      </IconButton>
+                      {userData?.role === "Admin" || userData?.role === "SuperAdmin" ? <IconButton color='error' onClick={() => handleDeleteitem(row.id)}> <Delete /> </IconButton> : null}
                     </TableCell>
                   </TableRow>
                 );

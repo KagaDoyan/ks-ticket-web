@@ -22,6 +22,7 @@ export const paths = {
     node: '/page/node',
     sell: '/page/sell',
     team:'/page/team',
+    email: '/page/email',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;

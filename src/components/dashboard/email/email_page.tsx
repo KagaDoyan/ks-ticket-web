@@ -19,36 +19,26 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
-import ModelModalForm from './modal/model-form';
+import BrandModalForm from './modal/email-form';
+import Swal from 'sweetalert2';
+import EmailModalForm from './modal/email-form';
 
-export interface Model {
-  id: number;
-  name: string;
-  created_at: Date;
+function noop(): void {
+  // do nothing
 }
 
-export function ModelPage(): React.JSX.Element {
-  const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
-  React.useEffect(() => {
-    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
-    setUserData(storedUserData);
+export interface email {
+  id: number;
+  email: string;
+}
 
-    const handleStorageChange = () => {
-      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
-      setUserData(updatedUserData);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+export function EmailPage(): React.JSX.Element {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [rows, setRows] = React.useState<Model[]>([]);
+  const [rows, setRows] = React.useState<email[]>([]);
   const [search, setSearch] = React.useState<string>('');
   const [count, setCount] = React.useState(0);
-  const [ModelID, setModelID] = React.useState(0);
+  const [emailID, setemailID] = React.useState(0);
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -67,9 +57,9 @@ export function ModelPage(): React.JSX.Element {
     setPage(0);
   };
 
-  const fetchModelData = async () => {
+  const fetchbrandData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-    fetch(`${baseUrl}/api/model?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
+    fetch(`${baseUrl}/api/mail_recipient?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
       {
         method: 'GET',
         headers: {
@@ -85,35 +75,47 @@ export function ModelPage(): React.JSX.Element {
         }
       }).catch((err) => {
         // throw new Error(err);
-        toast.error("Failed to fetch Model data");
+        toast.error("Failed to fetch brand data");
       });
   }
 
-  const handleEditModel = (id: number) => {
-    setModelID(id)
+  const handleEditbrand = (id: number) => {
+    setemailID(id)
     handleOpen()
   }
 
-  const handleDeleteModel = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/model/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
+  const handleDeletebrand = (id: number) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/mail_recipient/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authClient.getToken()}`
+          }
+        }).then((res) => {
+          if (res.ok) {
+            fetchbrandData();
+            toast.success("email recipient deleted successfully");
+          } else {
+            throw new Error("Failed to delete email recipient");
+          }
+        }).catch((err) => {
+          toast.error("Failed to delete email recipient");
+        });
       }
-    }).then((res) => {
-      if (res.ok) {
-        fetchModelData();
-        toast.success("Model deleted successfully");
-      } else {
-        throw new Error("Failed to delete Model");
-      }
-    }).catch((err) => {
-      toast.error("Failed to delete Model");
-    });
+    })
   }
 
   React.useEffect(() => {
-    fetchModelData();
+    fetchbrandData();
   }, [page, rowsPerPage, search])
 
   const HandleModalAddData = () => {
@@ -122,20 +124,20 @@ export function ModelPage(): React.JSX.Element {
 
   const handleModalClose = () => {
     setOpen(false)
-    setModelID(0)
+    setemailID(0)
   }
 
   return (
     <>
-      <ModelModalForm open={open} handleClose={handleModalClose} ModelID={ModelID} fetchModelData={fetchModelData} />
+      <EmailModalForm open={open} handleClose={handleModalClose} emailID={emailID} fetchbrandData={fetchbrandData} />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
-          <Typography variant="h5">Model</Typography>
+          <Typography variant="h5">Email</Typography>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <OutlinedInput
               defaultValue=""
               fullWidth
-              placeholder="Search Model"
+              placeholder="Search brand"
               startAdornment={
                 <InputAdornment position="start">
                   <MagnifyingGlassIcon fontSize="12px" />
@@ -144,7 +146,7 @@ export function ModelPage(): React.JSX.Element {
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: '300px', height: '40px' }}
             />
-            <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchModelData}>
+            <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchbrandData}>
               refresh
             </Button>
           </Stack>
@@ -160,8 +162,7 @@ export function ModelPage(): React.JSX.Element {
           <Table sx={{ minWidth: '800px' }}>
             <TableHead>
               <TableRow>
-                <TableCell>Model name</TableCell>
-                <TableCell>Created at</TableCell>
+                <TableCell>Email</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -169,13 +170,14 @@ export function ModelPage(): React.JSX.Element {
               {rows.length > 0 ? rows.map((row) => {
                 return (
                   <TableRow hover key={row.id}>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
+                    <TableCell>{row.email}</TableCell>
                     <TableCell>
-                      <IconButton color='warning' onClick={() => handleEditModel(row.id)}>
+                      <IconButton color='warning' onClick={() => handleEditbrand(row.id)}>
                         <Edit />
                       </IconButton>
-                      {userData?.role === "Admin" || userData?.role === "SuperAdmin" ? <IconButton color='error' onClick={() => handleDeleteModel(row.id)}> <Delete /> </IconButton> : null}
+                      <IconButton color='error' onClick={() => handleDeletebrand(row.id)}>
+                        <Delete />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 );

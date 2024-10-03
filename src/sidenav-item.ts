@@ -1,5 +1,5 @@
 import { paths } from '@/paths';
-import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, Groups2Outlined, GroupsOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, Person2Outlined, SpokeOutlined, StorefrontOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
+import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, EmailOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, Groups2Outlined, GroupsOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, Person2Outlined, SpokeOutlined, StorefrontOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
 
 export const navItems = [
   {
@@ -23,6 +23,7 @@ export const navItems = [
       { key: 'provinces', title: 'provinces', href: paths.dashboard.province, icon: MapOutlined, role: ["SuperAdmin", "Admin"] },
       { key: 'priority_group', title: 'priorities group', href: paths.dashboard.priorities, icon: LowPriorityOutlined, role: ["SuperAdmin", "Admin"] },
       { key: 'teams', title: 'teams', href: paths.dashboard.team, icon: Groups2Outlined, role: ["SuperAdmin", "Admin"] },
+      { key: 'email', title: 'email', href: paths.dashboard.email, icon: EmailOutlined, role: ["SuperAdmin", "Admin"] },
     ]
   },
   {
@@ -34,7 +35,7 @@ export const navItems = [
       { key: 'brand', title: 'brand', href: paths.dashboard.brand, icon: LocalOfferOutlined, role: ["SuperAdmin", "Admin", "User"] },
       { key: 'category', title: 'category', href: paths.dashboard.category, icon: CategoryOutlined, role: ["SuperAdmin", "Admin", "User"] },
       { key: 'model', title: 'model', href: paths.dashboard.model, icon: ExtensionOutlined, role: ["SuperAdmin", "Admin", "User"] },
-      { key: 'storage', title: 'storage', href: paths.dashboard.storage, icon: WarehouseOutlined, role: ["SuperAdmin", "Admin", "User"] },
+      { key: 'storage', title: 'storage', href: paths.dashboard.storage, icon: WarehouseOutlined, role: ["SuperAdmin", "Admin"] },
     ]
   },
   {

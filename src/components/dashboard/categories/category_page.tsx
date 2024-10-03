@@ -33,6 +33,21 @@ export interface category {
 }
 
 export function CategoryPage(): React.JSX.Element {
+  const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
+  React.useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+    setUserData(storedUserData);
+
+    const handleStorageChange = () => {
+      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(updatedUserData);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState<category[]>([]);
@@ -177,9 +192,7 @@ export function CategoryPage(): React.JSX.Element {
                       <IconButton color='warning' onClick={() => handleEditcategory(row.id)}>
                         <Edit />
                       </IconButton>
-                      <IconButton color='error' onClick={() => handleDeletecategory(row.id)}>
-                        <Delete />
-                      </IconButton>
+                      {userData?.role === "Admin" || userData?.role === "SuperAdmin" ? <IconButton color='error' onClick={() => handleDeletecategory(row.id)}> <Delete /> </IconButton> : null}
                     </TableCell>
                   </TableRow>
                 );

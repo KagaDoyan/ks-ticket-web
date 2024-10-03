@@ -499,10 +499,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
 
     }
 
-    const handleCreatePDF = () => {
-
-    }
-
     const isItemSaved = (serial_number: string) => {
         return returnitems.some((returnItem) => returnItem.serial_number === serial_number);
     };
