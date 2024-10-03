@@ -1,4 +1,4 @@
-import { Box, Modal, Button, TextField, MenuItem, Typography, Stack, InputAdornment, IconButton } from "@mui/material";
+import { Box, Modal, Button, TextField, MenuItem, Typography, Stack, InputAdornment, IconButton, Autocomplete } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { toast } from "react-toastify";
@@ -17,15 +17,24 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
+
+interface Customer {
+    id: number;
+    fullname: string;
+    shortname: string;
+}
+
 const roles = ["Admin", "User", "Engineer", "Customer"];
 export default function UserModalForm({ open, handleClose, userID, fetchUserData }: { open: boolean, handleClose: () => void, userID: number, fetchUserData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         fullname: "",
         email: "",
         password: "",
-        role: ""
+        role: "",
+        customer_id: 0
     });
 
+    const [customers, setCustomers] = useState<Customer[]>([]);
 
     const getUserData = () => {
         if (userID) {
@@ -42,7 +51,8 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
                                 fullname: data.data.fullname,
                                 email: data.data.email,
                                 password: data.data.password,
-                                role: data.data.role
+                                role: data.data.role,
+                                customer_id: data.data.customer_id
                             });
                         })
                     } else {
@@ -54,17 +64,35 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
         }
     }
 
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomers(data.data);
+                    })
+                }
+            })
+    }
+
     const clearFormData = () => {
         setFormData({
             fullname: "",
             email: "",
             password: "",
-            role: ""
+            role: "",
+            customer_id: 0
         });
     }
 
     useEffect(() => {
         getUserData();
+        GetCustomer();
         if (userID == 0) {
             clearFormData()
         }
@@ -172,6 +200,7 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
                         onChange={handleChange}
                         required
                     />
+
                     {userID ? "" : <TextField
 
                         label="Password"
@@ -208,6 +237,23 @@ export default function UserModalForm({ open, handleClose, userID, fetchUserData
                             </MenuItem>
                         ))}
                     </TextField>
+                    {
+                        formData.role == "Customer" ?
+                            <Autocomplete
+                                options={customers}
+                                getOptionLabel={(option) => option.fullname}
+                                value={customers.find((customer) => customer.id === formData.customer_id) || null}
+                                onChange={(event, newValue) => {
+                                    const selectedId = newValue ? newValue.id : 0;
+                                    setFormData({
+                                        ...formData,
+                                        customer_id: selectedId
+                                    })
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Customer" />}
+                            />
+                            : ""
+                    }
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                         <Button onClick={handleClose} variant="contained" color="warning">
                             Close

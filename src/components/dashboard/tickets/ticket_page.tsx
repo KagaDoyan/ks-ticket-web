@@ -88,7 +88,7 @@ interface ticket {
   created_at: string;
   created_user: User;
   engineer: Engineer;
-  shop : {
+  shop: {
     id: number;
     shop_name: string;
     shop_number: string;
@@ -96,6 +96,21 @@ interface ticket {
 }
 
 export function TicketPage(): React.JSX.Element {
+  const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
+  React.useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+    setUserData(storedUserData);
+
+    const handleStorageChange = () => {
+      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(updatedUserData);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState<ticket[]>([]);
@@ -270,7 +285,7 @@ export function TicketPage(): React.JSX.Element {
                       <TableCell>{row.ticket_number}</TableCell>
                       <TableCell>{row.inc_number}</TableCell>
                       <TableCell>{row.title}</TableCell>
-                      <TableCell>{row.shop.shop_number+' - ' + row.shop.shop_name}</TableCell>
+                      <TableCell>{row.shop.shop_number + ' - ' + row.shop.shop_name}</TableCell>
                       <TableCell>{row.created_user.fullname}</TableCell>
                       <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                       <TableCell>{dayjs(row.due_by).format('MMM D, YYYY hh:mm:ss')}</TableCell>
@@ -280,9 +295,7 @@ export function TicketPage(): React.JSX.Element {
                         <IconButton color='warning' onClick={() => handleEditticket(row.id)}>
                           <Edit />
                         </IconButton>
-                        <IconButton color='error' onClick={() => handleDeleteticket(row.id)}>
-                          <Delete />
-                        </IconButton>
+                        {userData?.role === 'Admin' || userData?.role === 'SuperAdmin' || userData?.role === 'User' ? <IconButton color='error' onClick={() => handleDeleteticket(row.id)}> <Delete /> </IconButton> : null}
                       </TableCell>
                     </TableRow>
                   );
