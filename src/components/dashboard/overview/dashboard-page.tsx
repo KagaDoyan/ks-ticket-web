@@ -116,7 +116,7 @@ export default function DashboardPage(): React.JSX.Element {
             if (res.ok) {
                 res.json().then((data) => {
                     const customersList = data.data.map((customer: any) => customer.shortname);
-                    if (customer_name != "") {
+                    if (customer_name.length > 0) {
                         setCustomers(customersList.filter((customer:any) => customer_name.includes(customer)));
                     } else {
                         setCustomers(customersList);
