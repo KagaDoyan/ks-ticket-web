@@ -243,7 +243,7 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="24"><b>รายละเอียด ของอาการเสียที่แจ้ง/ Description :</b>
+                    <td colspan="24" style="overflow-wrap: break-word; word-wrap: break-word;"><b>รายละเอียด ของอาการเสียที่แจ้ง/ Description :</b>
                         <underline>${data.description.replace(/\n/g, '<br>')}</underline>
                     </td>
                 </tr>
@@ -251,12 +251,12 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
             <!-- Section 3 -->
             <tbody style="border: 1px solid black;">
                 <tr>
-                    <td colspan="24">
+                    <td colspan="24" style="overflow-wrap: break-word; word-wrap: break-word;">
                         ปัญหาที่ตรวจพบ / Ticket Description: <underline>${data.return_ticket.investigation}</underline>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="24">
+                    <td colspan="24" style="overflow-wrap: break-word; word-wrap: break-word;">
                         วิธีแก้ปัญหา / Solution: <underline>${data.return_ticket.solution}</underline>
                     </td>
                 </tr>

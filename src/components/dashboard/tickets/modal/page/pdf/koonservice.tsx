@@ -247,12 +247,12 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
             <!-- Section 3 -->
             <tbody style="border: 1px solid black;">
                 <tr>
-                    <td colspan="24">
+                    <td colspan="24" style="word-wrap: break-word; overflow-wrap: break-word">
                         ปัญหาที่ตรวจพบ / Ticket Description: <underline>${data.investigation}</underline>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="24">
+                    <td colspan="24" style="word-wrap: break-word; overflow-wrap: break-word">
                         วิธีแก้ปัญหา / Solution: <underline>${data.solution}</underline>
                     </td>
                 </tr>

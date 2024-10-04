@@ -33,7 +33,7 @@ interface Customer {
 
 export default function DashboardPage(): React.JSX.Element {
     const [customersOption, setCustomersOption] = useState<Customer[]>([]);
-    const [customer_name, setCustomerName] = useState(0);
+    const [customer_name, setCustomerName] = useState<string[]>([]);
     const [ticketData, setTickets] = useState<TicketData[]>([]);
     const [series, setSeries] = useState<any[]>([]);
     const [select_customer, setSelectCustomer] = useState("");
@@ -59,6 +59,10 @@ export default function DashboardPage(): React.JSX.Element {
         GetCustomerOption();
         fetchTicketByDate();
     }, [start_date, end_date, customer_name]);
+
+    useEffect(() => {
+        setCustomers(customers.filter((customer) => customer_name.includes(customer)));
+    }, [customer_name]);
 
     useEffect(() => {
         if (chart_table_data.length > 0) {
@@ -100,7 +104,7 @@ export default function DashboardPage(): React.JSX.Element {
             initialSeries[seriesIndexClosed].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'close' && ticket.customer.shortname === customer).length);
         });
         setSeries(initialSeries);
-    }, [ticketData]);
+    }, [ticketData, customers]);
 
     const fetchCustomer = () => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/option`, {
@@ -112,7 +116,11 @@ export default function DashboardPage(): React.JSX.Element {
             if (res.ok) {
                 res.json().then((data) => {
                     const customersList = data.data.map((customer: any) => customer.shortname);
-                    setCustomers(customersList);
+                    if (customer_name) {
+                        setCustomers(customersList.filter((customer:any) => customer_name.includes(customer)));
+                    } else {
+                        setCustomers(customersList);
+                    }
                 });
             }
         }).catch(err => {
@@ -189,6 +197,10 @@ export default function DashboardPage(): React.JSX.Element {
         );
     };
 
+    const handlechangeCustomer = (event: React.SyntheticEvent, value: Customer[]) => {
+        setCustomerName(value.map((customer) => customer.shortname));
+    };
+
     return (
         <>
             <TableModal open={table_modal_open} handleClose={handleTableModalClose} data={ticketData} customer={select_customer} status={select_status} />
@@ -227,7 +239,7 @@ export default function DashboardPage(): React.JSX.Element {
                                     onChange={(e) => setEnd(e.target.value)}
                                     value={end_date}
                                 />
-                                <Autocomplete
+                                {/* <Autocomplete
                                     options={customersOption}
                                     size="small"
                                     sx={{ width: 150 }}
@@ -238,6 +250,20 @@ export default function DashboardPage(): React.JSX.Element {
                                         setCustomerName(selected)
                                     }}
                                     renderInput={(params) => <TextField {...params} label="brand" />}
+                                /> */}
+                                <Autocomplete
+                                    multiple
+                                    sx={{ width: 300 }}
+                                    size="small"
+                                    id="province-select"
+                                    options={customersOption}
+                                    getOptionLabel={(option) => option.shortname}
+                                    value={customersOption.filter(customer => customer_name.includes(customer.shortname))}
+                                    onChange={handlechangeCustomer}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="brand" variant="outlined" />
+                                    )}
+                                    isOptionEqualToValue={(option, value) => option.shortname === value.shortname}
                                 />
                             </Stack>
                         </Card>

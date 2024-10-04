@@ -93,6 +93,17 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
         item_category: "",
     });
 
+    function formatTime(seconds: number): string {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = seconds % 60;
+
+        const minutesDisplay = minutes > 0 ? `${minutes}m ` : '';
+        const secondsDisplay = remainingSeconds > 0 ? `${remainingSeconds}s` : '';
+
+        return `${hours}h ${minutesDisplay}${secondsDisplay}`.trim();
+    }
+
     const [customerOptions, setCustomerOptions] = useState<customer[]>([]);
     const [shopOptions, setshopOptions] = useState<shop[]>([]);
     const [priorityOptions, setpriorityOptions] = useState<priority[]>([]);
@@ -414,7 +425,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                         <Grid item xs={12} sm={3}>
                             <Autocomplete
                                 options={priorityOptions}
-                                getOptionLabel={(option) => option.group_name + ' ' + option.name}
+                                getOptionLabel={(option) => option.name + ' ' + formatTime(option.time_sec)}
                                 value={priorityOptions.find((priority) => priority.name === formData.sla_priority_level) || null}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {

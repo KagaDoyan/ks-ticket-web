@@ -6,6 +6,7 @@ import { format } from "path";
 import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import EmailAppointmentPage from "./email_appointment_page";
+import React from "react";
 
 interface customer {
     id: number
@@ -44,6 +45,11 @@ interface team {
     id: number,
     team_name: string
 }
+
+interface category {
+    id: number
+    name: string
+}
 export default function TicketPage({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
     const [Teams, setTeams] = useState<team[]>([])
     const [formData, setFormData] = useState({
@@ -63,10 +69,12 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
         appointment_date: "",
         appointment_time: "",
         engineer_id: 0,
-        priority_id: 0
+        priority_id: 0,
+        item_category: ""
     });
 
     const [customerOptions, setCustomerOptions] = useState<customer[]>([]);
+    const [CategoryOption, setCategoryOption] = useState<category[]>([])
     const [shopOptions, setshopOptions] = useState<shop[]>([]);
     const [priorityOptions, setpriorityOptions] = useState<priority[]>([]);
     const [enginnerOption, setEngineerOption] = useState<engineer[]>([]);
@@ -98,6 +106,37 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                 })
             }
         })
+    }
+
+    const getCategoryOption = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCategoryOption(data.data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch category option");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch category option");
+            });
+    }
+
+    function formatTime(seconds: number): string {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = seconds % 60;
+
+        const minutesDisplay = minutes > 0 ? `${minutes}m ` : '';
+        const secondsDisplay = remainingSeconds > 0 ? `${remainingSeconds}s` : '';
+
+        return `${hours}h ${minutesDisplay}${secondsDisplay}`.trim();
     }
 
     const fetchTeams = () => {
@@ -153,7 +192,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                         appointment_date: data.data.appointment_date,
                         appointment_time: data.data.appointment_time,
                         engineer_id: data.data.engineer_id,
-                        priority_id: data.data.priority_id
+                        priority_id: data.data.priority_id,
+                        item_category: data.data.item_category
                     });
                 })
                 .catch((err) => {
@@ -248,7 +288,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
             appointment_date: "",
             appointment_time: "",
             engineer_id: 0,
-            priority_id: 0
+            priority_id: 0,
+            item_category: ""
         });
     }
 
@@ -292,6 +333,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
         fetchCustomer();
         fetchEngineer();
         fetchShop();
+        getCategoryOption();
     })
 
     useEffect(() => {
@@ -387,7 +429,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                 <Grid item xs={12} sm={3}>
                     <Autocomplete
                         options={priorityOptions}
-                        getOptionLabel={(option) => option.name}
+                        getOptionLabel={(option) => option.name + ' ' + formatTime(option.time_sec)}
                         value={priorityOptions.find((priority) => priority.name === formData.sla_priority_level) || null}
                         onChange={(event, newValue, reason) => {
                             if (reason === "clear") {
@@ -487,39 +529,39 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                <Autocomplete
-                                options={enginnerOption}
-                                getOptionLabel={(option) => `(${option.open_ticket}) ${option.name} ${option.lastname} ${option.distance ?? 'na'} km`}
-                                value={enginnerOption.find((engineer) => engineer.id === formData.engineer_id) || null}
-                                onChange={(event, newValue, reason) => {
-                                    if (reason === "clear") {
-                                        setFormData({
-                                            ...formData,
-                                            engineer_id: 0,
-                                        });
-                                    }
-                                    const selectedOption = newValue ? newValue.id : 0;
-                                    if (!selectedOption) {
-                                        return;
-                                    }
-                                    setFormData({
-                                        ...formData,
-                                        engineer_id: selectedOption,
-                                    });
-                                }}
-                                renderInput={(params) => <TextField required {...params} label="Engineer" />}
-                                renderOption={(props, option) => (
-                                    <li {...props}>
-                                        <span
-                                            style={{
-                                                color: option.open_ticket > 0 ? 'orange' : 'inherit', // Apply orange color if open_ticket > 0
-                                            }}
-                                        >
-                                            ({option.open_ticket}) {option.name} {option.lastname} {option.distance ?? 'na'} km
-                                        </span>
-                                    </li>
-                                )}
-                            />
+                    <Autocomplete
+                        options={enginnerOption}
+                        getOptionLabel={(option) => `(${option.open_ticket}) ${option.name} ${option.lastname} ${option.distance ?? 'na'} km`}
+                        value={enginnerOption.find((engineer) => engineer.id === formData.engineer_id) || null}
+                        onChange={(event, newValue, reason) => {
+                            if (reason === "clear") {
+                                setFormData({
+                                    ...formData,
+                                    engineer_id: 0,
+                                });
+                            }
+                            const selectedOption = newValue ? newValue.id : 0;
+                            if (!selectedOption) {
+                                return;
+                            }
+                            setFormData({
+                                ...formData,
+                                engineer_id: selectedOption,
+                            });
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Engineer" />}
+                        renderOption={(props, option) => (
+                            <li {...props}>
+                                <span
+                                    style={{
+                                        color: option.open_ticket > 0 ? 'orange' : 'inherit', // Apply orange color if open_ticket > 0
+                                    }}
+                                >
+                                    ({option.open_ticket}) {option.name} {option.lastname} {option.distance ?? 'na'} km
+                                </span>
+                            </li>
+                        )}
+                    />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Autocomplete
@@ -573,8 +615,32 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                         fullWidth
                     />
                 </Grid>
-
-                <Grid item xs={12} sm={12}>
+                <Grid item xs={12} sm={6}>
+                    <Autocomplete
+                        options={CategoryOption}
+                        getOptionLabel={(option) => option.name}
+                        value={CategoryOption.find((category) => category.name === formData.item_category) || null}
+                        onChange={(event, newValue, reason) => {
+                            if (reason === "clear") {
+                                setFormData({
+                                    ...formData,
+                                    item_category: ""
+                                })
+                            }
+                            const selectedOption = newValue ? newValue.name : "";
+                            if (!selectedOption) {
+                                return;
+                            }
+                            setFormData({
+                                ...formData,
+                                item_category: selectedOption || ""
+                            });
+                            console.log(formData);
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Equipment" />}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
                     <TextField
                         error
                         required
