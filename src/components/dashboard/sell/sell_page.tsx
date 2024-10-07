@@ -10,10 +10,8 @@ import { authClient } from "@/lib/auth/client";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import Swal from "sweetalert2";
+import React from "react";
 
-interface Sell {
-
-}
 export function SellPage(): React.JSX.Element {
 
     const [search, setSearch] = useState("");

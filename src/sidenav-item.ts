@@ -43,6 +43,7 @@ export const navItems = [
     key: 'sell',
     items: [
       { key: 'sell', title: 'sell', href: paths.dashboard.sell, icon: StorefrontOutlined, role: ["SuperAdmin"] },
+      { key: 'report_sell', title: 'report', href: paths.dashboard.report_sell, icon: SummarizeOutlined, role: ["SuperAdmin"] },
     ]
   }
 ];
