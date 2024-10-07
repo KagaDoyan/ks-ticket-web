@@ -1,7 +1,8 @@
-import { Box, Modal, Button, TextField, Typography, Stack } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack, Autocomplete } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
+import useOnMount from "@mui/utils/useOnMount";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -15,11 +16,36 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
+
+interface Customer {
+    id: number;
+    fullname: string;
+    shortname: string;
+}
+
 const roles = ["Admin", "brand"];
 export default function EmailModalForm({ open, handleClose, emailID, fetchbrandData }: { open: boolean, handleClose: () => void, emailID: number, fetchbrandData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         email: "",
+        customer_id: 0
     });
+    const [customers, setCustomers] = useState<Customer[]>([]);
+
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomers(data.data);
+                    })
+                }
+            })
+    }
 
     const getbrandData = () => {
         if (emailID) {
@@ -34,6 +60,7 @@ export default function EmailModalForm({ open, handleClose, emailID, fetchbrandD
                         res.json().then((data) => {
                             setFormData({
                                 email: data.data.email,
+                                customer_id: data.data.customer_id
                             });
                         })
                     } else {
@@ -48,6 +75,7 @@ export default function EmailModalForm({ open, handleClose, emailID, fetchbrandD
     const clearFormData = () => {
         setFormData({
             email: "",
+            customer_id: 0
         });
     }
 
@@ -121,6 +149,9 @@ export default function EmailModalForm({ open, handleClose, emailID, fetchbrandD
         setShowPassword((prev) => !prev);
     };
 
+    useOnMount(() => {
+        GetCustomer();
+    })
 
     return (
         <Modal
@@ -152,6 +183,20 @@ export default function EmailModalForm({ open, handleClose, emailID, fetchbrandD
                         onChange={handleChange}
                         required
                     />
+                    <Autocomplete
+                        options={customers}
+                        getOptionLabel={(option) => option.fullname}
+                        value={customers.find((customer) => customer.id === formData.customer_id) || null}
+                        onChange={(event, newValue) => {
+                            const selectedId = newValue ? newValue.id : 0;
+                            setFormData({
+                                ...formData,
+                                customer_id: selectedId
+                            })
+                        }}
+                        renderInput={(params) => <TextField {...params} label="Customer" />}
+                    />
+
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                         <Button onClick={handleClose} variant="contained" color="warning">
                             Close

@@ -10,6 +10,8 @@ import dayjs from "dayjs";
 import MenuReturnButton from "./menu_button_reuturn";
 import React from "react";
 import { EmailOutlined } from "@mui/icons-material";
+import ImageUpload, { ExtendedFile } from "./ImageUpload";
+import { set } from "nprogress";
 
 interface brand {
     id: number
@@ -75,7 +77,7 @@ const store_status: store_status[] = [
 ]
 
 export default function ReturnPage({ open, handleClose, ticketID, fetchticketData }: { open: boolean, handleClose: () => void, ticketID: number, fetchticketData: () => void }): React.JSX.Element {
-    const [formData, setFormData] = useState<FormData>({
+    let [formData, setFormData] = useState<FormData>({
         solution: '',
         investigation: '',
         close_description: '',
@@ -96,6 +98,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         close_date: '',
         close_time: '',
     });
+
     const [incident_number, setIncidentNumber] = useState<string>('');
 
     const [ticketData, setTicketData] = useState<any>()
@@ -112,6 +115,13 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         } else {
             toast.error("You can only add up to 5 items.");
         }
+    };
+
+    const handleImageUpload = (files: ExtendedFile[]) => {
+        setFormData({
+            ...formData,
+            uploadedFiles: files
+        });
     };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -366,6 +376,9 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 close_date: data.data.close_date ? dayjs(data.data.close_date).format('YYYY-MM-DD') : '',
                                 close_time: data.data.close_time ? data.data.close_time : '',
                                 warranty_exp: dayjs(data.data.return_ticket?.warranty_exp).format('YYYY-MM-DD'),
+                                ticket_image: [...data.data.return_ticket_images],
+                                uploadedFiles: [],
+                                delete_images: []
                             });
                             setIncidentNumber(data.data.inc_number)
                             if (data.data.spare_item?.length > 0) {
@@ -438,8 +451,24 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     }
 
     const handleSubmit = () => {
+        // Show loading toast
+        const toastId = toast.loading("Submitting...", { autoClose: false });
         if (!formData.close_date || !formData.close_time) {
-            toast.error("Please select close date and time");
+            toast.update(toastId, {
+                render: "Please select close date and time",
+                type: "error",
+                isLoading: false,
+                autoClose: 2000  // Auto close after 3 seconds
+            });
+            return;
+        }
+        if (!formData.resolve_status && !formData.resolve_remark) {
+            toast.update(toastId, {
+                render: "Please enter resolve remark",
+                type: "error",
+                isLoading: false,
+                autoClose: 2000  // Auto close after 3 seconds
+            })
             return;
         }
         const shopItemsWithType = shopitems.map(item => ({
@@ -453,8 +482,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             ticket_type: 'spare',
             type: 'inside'
         }));
-
-        console.log(shopItemsWithType, spareItemsWithType);
 
 
         // Combine the two arrays
@@ -471,30 +498,79 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             type: item.type,
             ticket_type: item.ticket_type
         }));
+
+        const payload = new FormData();
+        payload.append('solution', formData.solution);
+        payload.append('investigation', formData.investigation);
+        payload.append('close_description', formData.close_description);
+        payload.append('item_brand', formData.item_brand);
+        payload.append('item_category', formData.item_category);
+        payload.append('item_model', formData.item_model);
+        payload.append('item_sn', formData.item_sn);
+        payload.append('warranty_exp', formData.warranty_exp);
+        payload.append('ticket_status', formData.ticket_status);
+        payload.append('resolve_status', formData.resolve_status ? 'true' : 'false');
+        payload.append('resolve_remark', formData.resolve_remark);
+        payload.append('action', formData.action);
+        payload.append('time_in', formData.time_in);
+        payload.append('time_out', formData.time_out);
+        if (formData.close_date) {
+            payload.append('close_date', formData.close_date);
+        }
+        if (formData.close_time) {
+            payload.append('close_time', formData.close_time);
+        }
+
+        // Append uploaded files if present
+        if (formData.uploadedFiles) {
+            for (const file of formData.uploadedFiles) {
+                payload.append('images', file);
+            }
+        }
+
+        // Append images to delete if present
+        if (formData.delete_images) {
+            for (const image of formData.delete_images) {
+                payload.append('delete_images', image);
+            }
+        }
+
+        // Serialize and append store and spare items
+        payload.append('items', JSON.stringify(formattedItems));
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/update/returnItem/${ticketID}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authClient.getToken()}`
             },
-            body: JSON.stringify({
-                ...formData,
-                warranty_exp: new Date(formData.warranty_exp),
-                items: formattedItems,
-            })
+            body: payload
         })
             .then((res) => {
                 if (res.ok) {
                     res.json().then((data) => {
-                        toast.success(data.data.message);
                         fetchticketData()
                         fetchticketDatails()
+                        toast.update(toastId, {
+                            render: data.data.message,
+                            type: "success",
+                            autoClose: 2000,  // Auto close after 3 seconds
+                            isLoading: false
+                        });
                     })
                 } else {
-                    toast.error("Failed to create ticket");
+                    toast.update(toastId, {
+                        render: "Failed to create ticket",
+                        type: "error",
+                        autoClose: 2000,  // Auto close after 3 seconds
+                        isLoading: false
+                    })
                 }
             }).catch((err) => {
-                toast.error("Failed to create ticket");
+                toast.update(toastId, {
+                    render: "Failed to create ticket",
+                    type: "error",
+                    autoClose: 2000,  // Auto close after 3 seconds
+                    isLoading: false
+                })
             });
 
     }
@@ -1066,6 +1142,16 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     fullWidth
                     required
                 />
+            </Grid>
+            <Stack justifyContent={"flex-start"} direction="row" spacing={2}>
+                <Typography sx={{ fontSize: 17, color: 'grey', paddingBottom: 1, paddingTop: 1 }}>
+                    files
+                </Typography>
+            </Stack>
+            <Grid container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <ImageUpload onUpload={handleImageUpload} formdata={formData} setFormData={setFormData} />
+                </Grid>
             </Grid>
             <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                 <Button onClick={handleClose} variant="contained" color="warning">

@@ -30,6 +30,12 @@ function noop(): void {
 export interface email {
   id: number;
   email: string;
+  customer_id: number;
+  customer: {
+    id: number;
+    fullname: string;
+    shortname: string;
+  };
 }
 
 export function EmailPage(): React.JSX.Element {
@@ -163,6 +169,7 @@ export function EmailPage(): React.JSX.Element {
             <TableHead>
               <TableRow>
                 <TableCell>Email</TableCell>
+                <TableCell>Customer</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -171,6 +178,7 @@ export function EmailPage(): React.JSX.Element {
                 return (
                   <TableRow hover key={row.id}>
                     <TableCell>{row.email}</TableCell>
+                    <TableCell>{row.customer?.shortname}</TableCell>
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEditbrand(row.id)}>
                         <Edit />

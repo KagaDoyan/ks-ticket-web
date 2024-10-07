@@ -20,8 +20,10 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
     const [formData, setFormData] = useState({
         fullname: "",
         shortname: "",
-        line_id: "",
-        line_engineer_id: "",
+        open_mail: "",
+        line_open: "",
+        line_appointment: "",
+        line_close: "",
     });
 
     const getcustomerData = () => {
@@ -38,8 +40,10 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
                             setFormData({
                                 fullname: data.data.fullname,
                                 shortname: data.data.shortname,
-                                line_id: data.data.line_id,
-                                line_engineer_id: data.data.line_engineer_id
+                                line_open: data.data.line_open,
+                                line_appointment: data.data.line_appoint,
+                                line_close: data.data.line_close,
+                                open_mail: data.data.open_mail
                             });
                         })
                     } else {
@@ -55,8 +59,10 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
         setFormData({
             fullname: "",
             shortname: "",
-            line_id: "",
-            line_engineer_id: "",
+            open_mail: "",
+            line_open: "",
+            line_appointment: "",
+            line_close: "",
         });
     }
 
@@ -173,20 +179,40 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
                                 required
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} >
                             <TextField
-                                label="Line ID"
-                                name="line_id"
-                                value={formData.line_id}
+                                fullWidth
+                                label="Open Email"
+                                name="open_mail"
+                                value={formData.open_mail}
                                 onChange={handleChange}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12}>
                             <TextField
-                                label="Line Engineer ID"
-                                name="line_engineer_id"
-                                value={formData.line_engineer_id}
-                                onChange={handleChange}                        
+                                fullWidth
+                                label="Line Open"
+                                name="line_open"
+                                value={formData.line_open}
+                                onChange={handleChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Line Appointment"
+                                name="line_appointment"
+                                value={formData.line_appointment}
+                                onChange={handleChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Line Close"
+                                name="line_close"
+                                value={formData.line_close}
+                                onChange={handleChange}
                             />
                         </Grid>
                     </Grid>
