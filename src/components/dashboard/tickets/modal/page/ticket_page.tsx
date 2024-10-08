@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import EmailAppointmentPage from "./email_appointment_page";
 import React from "react";
+import Swal from "sweetalert2";
 
 interface customer {
     id: number
@@ -204,6 +205,45 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
 
     const handleSendAppointment = () => {
         setmailopen(true);
+    }
+
+    const handleSendOpen = () => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, send it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+               const toastID = toast.loading('Sending mail, please wait...');
+               fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/open_mail/${ticketID}`, {
+                   method: "POST",
+                   headers: {
+                       "Authorization": `Bearer ${authClient.getToken()}`,
+                   }
+               }).then((res) => {
+                   if (res.ok) {
+                       toast.update(toastID, {
+                           render: 'Mail sent successfully',
+                           type: 'success',
+                           isLoading: false,
+                           autoClose: 2000,
+                       })
+                   } else {
+                       toast.update(toastID, {
+                           render: 'Failed to send mail',
+                           type: 'error',
+                           isLoading: false,
+                           autoClose: 2000,
+                       })
+                   }
+               })
+               
+            }  
+        })
     }
 
     useEffect(() => {
@@ -660,6 +700,9 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
             <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
+                </Button>
+                <Button variant="contained" color="error" onClick={handleSendOpen}>
+                    Send Open
                 </Button>
                 <Button variant="contained" color="error" onClick={handleSendAppointment}>
                     Send Appointment
