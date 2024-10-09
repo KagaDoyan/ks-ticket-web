@@ -312,7 +312,9 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
     useEffect(() => {
         fetchCustomer();
         fetchEngineer()
-        getPriority();
+        if (formData.shop_id) {
+            getPriority();
+        }
     }, [formData.shop_id])
 
     useEffect(() => {
