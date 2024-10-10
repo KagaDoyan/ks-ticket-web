@@ -135,7 +135,6 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 const newItems = [...prevItems];
                                 newItems[index] = {
                                     ...newItems[index],
-                                    serial_number: value,
                                     category: data.data.category.name,
                                     brand: data.data.brand.name,
                                     model: data.data.model.name,
@@ -150,7 +149,6 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                         const newItems = [...prevItems];
                         newItems[index] = {
                             ...newItems[index],
-                            serial_number: value,
                             category: '',
                             brand: '',
                             model: '',
@@ -244,7 +242,6 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 const newItems = [...prevItems];
                                 newItems[index] = {
                                     ...newItems[index],
-                                    serial_number: value,
                                     category: data.data.category.name,
                                     brand: data.data.brand.name,
                                     model: data.data.model.name,
@@ -259,7 +256,6 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                         const newItems = [...prevItems];
                         newItems[index] = {
                             ...newItems[index],
-                            serial_number: value,
                             category: '',
                             brand: '',
                             model: '',
