@@ -16,7 +16,7 @@ interface inventory {
     serial: string
     owner: string
     condition: string
-    usage: string
+    location: string
     status: string
     used_by: string
     inc_no: string
@@ -122,7 +122,7 @@ export default function InventoryReportPage() {
                                 <TableCell>serial</TableCell>
                                 <TableCell>owner</TableCell>
                                 <TableCell>condition</TableCell>
-                                <TableCell>usage</TableCell>
+                                <TableCell>location</TableCell>
                                 <TableCell>status</TableCell>
                                 <TableCell>use_by</TableCell>
                                 <TableCell>inc_no</TableCell>
@@ -137,7 +137,7 @@ export default function InventoryReportPage() {
                                     <TableCell>{row.serial}</TableCell>
                                     <TableCell>{row.owner}</TableCell>
                                     <TableCell>{row.condition}</TableCell>
-                                    <TableCell>{row.usage}</TableCell>
+                                    <TableCell>{row.location}</TableCell>
                                     <TableCell>{row.status}</TableCell>
                                     <TableCell>{row.used_by}</TableCell>
                                     <TableCell>{row.inc_no}</TableCell>

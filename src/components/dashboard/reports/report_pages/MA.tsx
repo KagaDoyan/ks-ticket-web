@@ -65,6 +65,10 @@ interface MA {
     spareDeviceBrand5?: string;
     spareDeviceModel5?: string;
     spareDeviceSerial5?: string;
+    return_investigation?: string;
+    return_solution?: string;
+    return_time_in?: string;
+    return_time_out?: string;
 }
 
 interface Customer {

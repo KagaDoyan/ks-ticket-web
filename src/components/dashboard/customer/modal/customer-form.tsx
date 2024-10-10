@@ -179,15 +179,6 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
                                 required
                             />
                         </Grid>
-                        <Grid item xs={12} >
-                            <TextField
-                                fullWidth
-                                label="Open Email"
-                                name="open_mail"
-                                value={formData.open_mail}
-                                onChange={handleChange}
-                            />
-                        </Grid>
                         <Grid item xs={12}>
                             <TextField
                                 fullWidth
