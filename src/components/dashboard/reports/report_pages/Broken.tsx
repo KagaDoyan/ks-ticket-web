@@ -80,7 +80,7 @@ export default function BrokenPartReportPage() {
         XLSX.utils.book_append_sheet(workbook, worksheet, "MA");
 
         // Export the file
-        XLSX.writeFile(workbook, `Inventory-Report.xlsx`);
+        XLSX.writeFile(workbook, `Broken-Part-Report.xlsx`);
     }
     return (
         <Box sx={{ mt: 2 }}>

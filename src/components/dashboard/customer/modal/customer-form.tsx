@@ -41,7 +41,7 @@ export default function CustomerModalForm({ open, handleClose, customerID, fetch
                                 fullname: data.data.fullname,
                                 shortname: data.data.shortname,
                                 line_open: data.data.line_open,
-                                line_appointment: data.data.line_appoint,
+                                line_appointment: data.data.line_appointment,
                                 line_close: data.data.line_close,
                                 open_mail: data.data.open_mail
                             });

@@ -49,6 +49,8 @@ interface Storage {
     id: number
     name: string
 }
+
+const conditionOption = ['good', 'broken']
 export default function ItemModalForm({ open, handleClose, itemID, fetchitemData }: { open: boolean, handleClose: () => void, itemID: number, fetchitemData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         serial_number: "",
@@ -58,7 +60,9 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
         model_id: 0,
         storage_id: 0,
         warranty_expiry_date: "",
-        status: "in_stock"
+        status: "in_stock",
+        remark: "",
+        condition: "good"
     });
 
     const [StatusOption, setStatusOption] = useState([])
@@ -200,7 +204,9 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                 model_id: data.data.model_id,
                                 warranty_expiry_date: data.data.warranty_expiry_date ? formatDate(data.data.warranty_expiry_date) : "",
                                 status: data.data.status,
-                                storage_id: data.data.storage_id
+                                storage_id: data.data.storage_id,
+                                remark: data.data.Remark,
+                                condition: data.data.condition
                             });
                         })
                     } else {
@@ -221,7 +227,9 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             customer_id: 0,
             warranty_expiry_date: "",
             status: "in_stock",
-            storage_id: 0
+            storage_id: 0,
+            remark: "",
+            condition: "good"
         });
     }
 
@@ -246,7 +254,9 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             model_id: formData.model_id,
             customer_id: formData.customer_id,
             status: formData.status,
-            storage_id: formData.storage_id
+            storage_id: formData.storage_id,
+            remark: formData.remark,
+            condition: formData.condition
         };
         if (formData.warranty_expiry_date) {
             payload['warranty_expiry_date'] = new Date(formData.warranty_expiry_date);
@@ -512,6 +522,41 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                     shrink: true,
                                 }}
                                 value={formData.warranty_expiry_date}
+                                onChange={handleChange}
+                                fullWidth
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={conditionOption}
+                                getOptionLabel={(option) => option}
+                                value={conditionOption.find((option) => option === formData.condition)}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            storage_id: 0
+                                        })
+                                        return;
+                                    }
+                                    const selectedOption = newValue;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        condition: selectedOption || ""
+                                    });
+                                    console.log(formData);
+                                }}
+                                renderInput={(params) => <TextField name="status" {...params} label="condition" />}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                name="remark"
+                                label="remark"
+                                value={formData.remark}
                                 onChange={handleChange}
                                 fullWidth
                             />
