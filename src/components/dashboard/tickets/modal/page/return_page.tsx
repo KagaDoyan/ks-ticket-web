@@ -12,6 +12,7 @@ import React from "react";
 import { EmailOutlined } from "@mui/icons-material";
 import ImageUpload, { ExtendedFile } from "./ImageUpload";
 import { set } from "nprogress";
+import ReturnEmailPreviewPage from "./email_preview_reutrn_page";
 
 interface brand {
     id: number
@@ -109,6 +110,15 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
     const [returnitems, setReturnItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
 
+    const [openEmailPreview, setOpenEmailPreview] = useState(false);
+
+    const handleEmailPreviewClose = () => {
+        setOpenEmailPreview(false);
+    }
+
+    const handleEmailPreviewOpen = () => {
+        setOpenEmailPreview(true);
+    }
     const addShopItem = () => {
         if (shopitems.length < 4) {
             setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'return', id: 0, type: '' }]);
@@ -416,40 +426,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         getModelOption()
     })
 
-    const handleEmail = () => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, send it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                toast.promise(
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/return_mail/${ticketData.id}`, {
-                        method: "POST",
-                        headers: {
-                            "Authorization": `Bearer ${authClient.getToken()}`,
-                        },
-                    }).then((response) => {
-                        // Check if the response is ok (status code in the range 200-299)
-                        if (!response.ok) {
-                            throw new Error('Failed to send mail');
-                        }
-                        return response.json(); // Or return response, based on your needs
-                    }),
-                    {
-                        pending: 'Sending mail, please wait...',  // Message shown while the promise is pending
-                        success: 'Mail sent successfully!',       // Message shown if the promise resolves
-                        error: 'Failed to send mail. Please try again.', // Message shown if the promise rejects
-                    }
-                );
-            }
-        })
-    }
-
     const handleSubmit = () => {
         // Show loading toast
         const toastId = toast.loading("Submitting...", { autoClose: false });
@@ -629,6 +605,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     }, [returnitems]);
     return (
         <>
+            <ReturnEmailPreviewPage open={openEmailPreview} handleClose={handleEmailPreviewClose} ticketData={ticketData} />
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12}>
                     <TextField
@@ -1157,7 +1134,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
                 </Button>
-                <Button startIcon={<EmailOutlined />} onClick={handleEmail} variant="contained" color="error">
+                <Button startIcon={<EmailOutlined />} onClick={handleEmailPreviewOpen} variant="contained" color="error">
                     Email
                 </Button>
                 <MenuReturnButton data={ticketData} />

@@ -8,6 +8,8 @@ import { toast } from "react-toastify"
 import EmailAppointmentPage from "./email_appointment_page";
 import React from "react";
 import Swal from "sweetalert2";
+import { Ticket } from "@phosphor-icons/react/dist/ssr";
+import OpenEmailPreviewPage from "./email_preview_open_page";
 
 interface customer {
     id: number
@@ -74,6 +76,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
         item_category: ""
     });
 
+    const [ticketData, setTicketData] = useState<any>({});
     const [customerOptions, setCustomerOptions] = useState<customer[]>([]);
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
     const [shopOptions, setshopOptions] = useState<shop[]>([]);
@@ -82,6 +85,15 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     const [priority_time, setpriority_time] = useState(0);
     const [shoplatlng, setShoplatlng] = useState({ lat: "", lng: "" });
     const [mailopen, setmailopen] = useState(false);
+    const [previewopen, setpreviewopen] = useState(false);
+
+    const handlePreviewClose = () => {
+        setpreviewopen(false);
+    }
+
+    const handleMailOpen = () => {
+        setpreviewopen(true);
+    }
 
     const handleMailClose = () => {
         setmailopen(false);
@@ -176,6 +188,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                     }
                 })
                 .then((data) => {
+                    setTicketData(data.data);
                     setFormData({
                         inc_number: data.data.inc_number,
                         customer_id: data.data.customer_id,
@@ -205,45 +218,6 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
 
     const handleSendAppointment = () => {
         setmailopen(true);
-    }
-
-    const handleSendOpen = () => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, send it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-               const toastID = toast.loading('Sending mail, please wait...');
-               fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/open_mail/${ticketID}`, {
-                   method: "POST",
-                   headers: {
-                       "Authorization": `Bearer ${authClient.getToken()}`,
-                   }
-               }).then((res) => {
-                   if (res.ok) {
-                       toast.update(toastID, {
-                           render: 'Mail sent successfully',
-                           type: 'success',
-                           isLoading: false,
-                           autoClose: 2000,
-                       })
-                   } else {
-                       toast.update(toastID, {
-                           render: 'Failed to send mail',
-                           type: 'error',
-                           isLoading: false,
-                           autoClose: 2000,
-                       })
-                   }
-               })
-               
-            }  
-        })
     }
 
     useEffect(() => {
@@ -396,7 +370,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     }, [formData.open_date, formData.open_time, priority_time])
     return (
         <>
-            <EmailAppointmentPage open={mailopen} handleClose={handleMailClose} ticketID={ticketID} />
+            <EmailAppointmentPage open={mailopen} handleClose={handleMailClose} ticketID={ticketID} ticketData={ticketData}/>
+            <OpenEmailPreviewPage open={previewopen} handleClose={handlePreviewClose} ticketData={ticketData}/>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={3}>
                     <TextField
@@ -701,7 +676,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                 <Button onClick={handleClose} variant="contained" color="warning">
                     Close
                 </Button>
-                <Button variant="contained" color="error" onClick={handleSendOpen}>
+                <Button variant="contained" color="error" onClick={handleMailOpen}>
                     Send Open
                 </Button>
                 <Button variant="contained" color="error" onClick={handleSendAppointment}>
