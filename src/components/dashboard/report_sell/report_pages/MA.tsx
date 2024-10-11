@@ -145,6 +145,7 @@ export default function MAReportPage() {
                                 <TableCell>sell date</TableCell>
                                 <TableCell>buyer name</TableCell>
                                 <TableCell>sell price</TableCell>
+                                <TableCell>base price</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -158,6 +159,7 @@ export default function MAReportPage() {
                                         <TableCell>{ticket.sell_date}</TableCell>
                                         <TableCell>{ticket.buyer_name}</TableCell>
                                         <TableCell>{ticket.sell_price}</TableCell>
+                                        <TableCell>{ticket.base_price}</TableCell>
                                     </TableRow>
 
                                 )) : (
