@@ -24,9 +24,10 @@ interface inventory {
     remark: string
 }
 
-interface brand {
-    id: number
-    name: string
+interface Customer {
+    id: number;
+    fullname: string;
+    shortname: string;
 }
 
 export default function InventoryReportPage() {
@@ -40,8 +41,8 @@ export default function InventoryReportPage() {
     const [count, setCount] = React.useState(0);
     const [from, setFrom] = React.useState(formatDate(sevenDaysBefore));
     const [to, setTo] = React.useState(formatDate(currentDate));
-    const [BrandOption, setBrandOption] = React.useState<brand[]>([])
-    const [brand, setBrand] = React.useState('')
+    const [customers, setCustomers] = React.useState<Customer[]>([]);
+    const [customer_name, setCustomer] = React.useState("");
 
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
@@ -59,7 +60,7 @@ export default function InventoryReportPage() {
 
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/report/inventory?brand_name=${brand}`, {
+        fetch(`${baseUrl}/api/report/inventory?brand_name=${customer_name}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -75,8 +76,8 @@ export default function InventoryReportPage() {
             });
     };
 
-    const getBrandOption = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/brand/option`, {
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -85,14 +86,10 @@ export default function InventoryReportPage() {
             .then((res) => {
                 if (res.ok) {
                     res.json().then((data) => {
-                        setBrandOption(data.data);
+                        setCustomers(data.data);
                     })
-                } else {
-                    throw new Error("Failed to fetch brand option");
                 }
-            }).catch((err) => {
-                toast.error("Failed to fetch brand option");
-            });
+            })
     }
 
 
@@ -109,8 +106,8 @@ export default function InventoryReportPage() {
 
     useEffect(() => {
         fetchMAData();
-        getBrandOption();
-    }, [brand]);
+        GetCustomer();
+    }, [customer_name]);
 
     return (
         <Box sx={{ mt: 2 }}>
@@ -118,14 +115,14 @@ export default function InventoryReportPage() {
                 {/* Stack for alignment and spacing of inputs */}
                 <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                     <Autocomplete
-                        options={BrandOption}
+                        options={customers}
                         size="small"
                         sx={{ width: 150 }}
-                        getOptionLabel={(option) => option.name}
-                        value={BrandOption.find((b) => b.name === brand) || null}
+                        getOptionLabel={(option) => option.shortname}
+                        value={customers.find((customer) => customer.fullname === customer_name) || null}
                         onChange={(event, newValue) => {
-                            const selected = newValue ? newValue.name : "";
-                            setBrand(selected)
+                            const selected = newValue ? newValue.fullname : "";
+                            setCustomer(selected)
                         }}
                         renderInput={(params) => <TextField {...params} label="brand" />}
                     />
