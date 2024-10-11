@@ -217,12 +217,22 @@ export default function SellModalForm({ open, handleClose, SellID, fetchsellData
                         name="sell_price"
                         type="number"
                         value={formData.sell_price}
+                        InputLabelProps={
+                            {
+                                shrink: true
+                            }
+                        }
                         onChange={handleChange}
                     />
                          <TextField
                         label="base_price"
                         name="base_price"
                         type="number"
+                        InputLabelProps={
+                            {
+                                shrink: true
+                            }
+                        }
                         value={formData.base_price}
                         onChange={handleChange}
                     />
