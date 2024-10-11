@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import Swal from "sweetalert2";
 import React from "react";
+import useOnMount from "@mui/utils/useOnMount";
 
 export function SellPage(): React.JSX.Element {
 
@@ -100,7 +101,10 @@ export function SellPage(): React.JSX.Element {
         })
     }
 
-
+    useOnMount(() => {
+        fetchSellData();
+    })
+    
     return (
         <>
             <SellModalForm open={open} handleClose={handleClose} SellID={SellID} fetchsellData={fetchSellData} />
