@@ -24,6 +24,7 @@ export default function SellModalForm({ open, handleClose, SellID, fetchsellData
         sell_date: "",
         buyer_name: "",
         sell_price: null,
+        base_price: null,
     });
 
     const getInventoryData = () => {
@@ -44,7 +45,8 @@ export default function SellModalForm({ open, handleClose, SellID, fetchsellData
                                 warranty: data.data.warranty,
                                 sell_date: data.data.sell_date,
                                 buyer_name: data.data.buyer_name,
-                                sell_price: data.data.sell_price
+                                sell_price: data.data.sell_price,
+                                base_price: data.data.base_price
                             });
                         })
                     } else {
@@ -65,6 +67,7 @@ export default function SellModalForm({ open, handleClose, SellID, fetchsellData
             sell_date: "",
             buyer_name: "",
             sell_price: null,
+            base_price: null
         });
     }
 
@@ -214,6 +217,13 @@ export default function SellModalForm({ open, handleClose, SellID, fetchsellData
                         name="sell_price"
                         type="number"
                         value={formData.sell_price}
+                        onChange={handleChange}
+                    />
+                         <TextField
+                        label="base_price"
+                        name="base_price"
+                        type="number"
+                        value={formData.base_price}
                         onChange={handleChange}
                     />
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>

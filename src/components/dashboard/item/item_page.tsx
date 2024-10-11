@@ -55,6 +55,8 @@ export interface item {
     id: number;
     name: string;
   }
+  Remark: string;
+  condition: string;
 }
 
 interface storage {
@@ -304,6 +306,8 @@ export function ItemPage(): React.JSX.Element {
                 <TableCell>location</TableCell>
                 <TableCell>waranty expiry date</TableCell>
                 <TableCell>status</TableCell>
+                <TableCell>condition</TableCell>
+                <TableCell>remark</TableCell>
                 {/* <TableCell>Created at</TableCell> */}
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -333,6 +337,8 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.waranty_expiry_date ? dayjs(row.waranty_expiry_date).format('MMM D, YYYY') : 'ไม่ระบุ'}</TableCell>
                     <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
                     {/* <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell> */}
+                    <TableCell>{row.condition}</TableCell>
+                    <TableCell>{row.Remark}</TableCell>
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEdititem(row.id)}>
                         <Edit />

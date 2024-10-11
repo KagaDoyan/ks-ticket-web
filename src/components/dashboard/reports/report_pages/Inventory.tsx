@@ -1,6 +1,6 @@
 import { authClient } from "@/lib/auth/client";
 import { IosShare, Refresh } from "@mui/icons-material";
-import { Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
@@ -24,6 +24,11 @@ interface inventory {
     remark: string
 }
 
+interface brand {
+    id: number
+    name: string
+}
+
 export default function InventoryReportPage() {
     const currentDate = new Date();
     const sevenDaysBefore = new Date(currentDate);
@@ -35,6 +40,8 @@ export default function InventoryReportPage() {
     const [count, setCount] = React.useState(0);
     const [from, setFrom] = React.useState(formatDate(sevenDaysBefore));
     const [to, setTo] = React.useState(formatDate(currentDate));
+    const [BrandOption, setBrandOption] = React.useState<brand[]>([])
+    const [brand, setBrand] = React.useState('')
 
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
@@ -52,7 +59,7 @@ export default function InventoryReportPage() {
 
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/report/inventory?from=${from}&to=${to}`, {
+        fetch(`${baseUrl}/api/report/inventory?brand_name=${brand}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -68,6 +75,27 @@ export default function InventoryReportPage() {
             });
     };
 
+    const getBrandOption = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/brand/option`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setBrandOption(data.data);
+                    })
+                } else {
+                    throw new Error("Failed to fetch brand option");
+                }
+            }).catch((err) => {
+                toast.error("Failed to fetch brand option");
+            });
+    }
+
+
     const exportToExcel = () => {
         console.log(rows);
 
@@ -81,35 +109,26 @@ export default function InventoryReportPage() {
 
     useEffect(() => {
         fetchMAData();
-    }, [from, to]);
+        getBrandOption();
+    }, [brand]);
 
     return (
         <Box sx={{ mt: 2 }}>
             <Card sx={{ p: 2 }}>
                 {/* Stack for alignment and spacing of inputs */}
                 <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                    {/* <TextField
-                        label="Start Date"
-                        type="date"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        variant="outlined"
+                    <Autocomplete
+                        options={BrandOption}
                         size="small"
-                        onChange={(e) => setFrom(e.target.value)}
-                        value={from}
+                        sx={{ width: 150 }}
+                        getOptionLabel={(option) => option.name}
+                        value={BrandOption.find((b) => b.name === brand) || null}
+                        onChange={(event, newValue) => {
+                            const selected = newValue ? newValue.name : "";
+                            setBrand(selected)
+                        }}
+                        renderInput={(params) => <TextField {...params} label="brand" />}
                     />
-                    <TextField
-                        label="End Date"
-                        type="date"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        variant="outlined"
-                        size="small"
-                        onChange={(e) => setTo(e.target.value)}
-                        value={to}
-                    /> */}
                     <Button variant="contained" startIcon={<Refresh />} onClick={fetchMAData}>Refresh</Button>
                     <Button variant="contained" startIcon={<IosShare />} color="warning" onClick={exportToExcel}>Export</Button>
                 </Stack>

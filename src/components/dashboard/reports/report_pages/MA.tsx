@@ -69,6 +69,21 @@ interface MA {
     return_solution?: string;
     return_time_in?: string;
     return_time_out?: string;
+    returnDeviceBrand1?: string;
+    returnDeviceModel1?: string;
+    returnDeviceSerial1?: string;
+    returnDeviceBrand2?: string;
+    returnDeviceModel2?: string;
+    returnDeviceSerial2?: string;
+    returnDeviceBrand3?: string;
+    returnDeviceModel3?: string;
+    returnDeviceSerial3?: string;
+    returnDeviceBrand4?: string;
+    returnDeviceModel4?: string;
+    returnDeviceSerial4?: string;
+    returnDeviceBrand5?: string;
+    returnDeviceModel5?: string;
+    returnDeviceSerial5?: string;
 }
 
 interface Customer {
@@ -142,14 +157,38 @@ export default function MAReportPage() {
     };
 
     const exportToExcel = () => {
-        console.log(rows);
+        const headers: (keyof MA)[] = [
+            "brand", "ticketTitle", "ticketDescription", "incNo", "ticketNumber", "assignedTo",
+            "ticketDate", "ticketTime", "storeName", "storeContactPhone", "ticketStatus",
+            "ticketStatusDetail", "ticketCloseTime", "ticketCloseDate", "engineerName",
+            "engineerNote", "appointmentTime", "appointmentDate", "solution", "slaPriority",
+            "recoveryTime", "slaOverdue", "action", "lastUpdated", "storeDeviceBrand1",
+            "storeDeviceModel1", "storeDeviceSerial1", "storeDeviceBrand2", "storeDeviceModel2",
+            "storeDeviceSerial2", "storeDeviceBrand3", "storeDeviceModel3", "storeDeviceSerial3",
+            "storeDeviceBrand4", "storeDeviceModel4", "storeDeviceSerial4", "storeDeviceBrand5",
+            "storeDeviceModel5", "storeDeviceSerial5", "spareDeviceBrand1", "spareDeviceModel1",
+            "spareDeviceSerial1", "spareDeviceBrand2", "spareDeviceModel2", "spareDeviceSerial2",
+            "spareDeviceBrand3", "spareDeviceModel3", "spareDeviceSerial3", "spareDeviceBrand4",
+            "spareDeviceModel4", "spareDeviceSerial4", "spareDeviceBrand5", "spareDeviceModel5",
+            "spareDeviceSerial5", "return_investigation", "return_solution", "return_time_in",
+            "return_time_out", "returnDeviceBrand1", "returnDeviceModel1", "returnDeviceSerial1",
+            "returnDeviceBrand2", "returnDeviceModel2", "returnDeviceSerial2", "returnDeviceBrand3",
+            "returnDeviceModel3", "returnDeviceSerial3", "returnDeviceBrand4", "returnDeviceModel4",
+            "returnDeviceSerial4", "returnDeviceBrand5", "returnDeviceModel5", "returnDeviceSerial5",
+        ];
+        const orderedRows = rows.map(row => {
+            const orderedRow: Partial<MA> = {};
+            headers.forEach(header => {
+                orderedRow[header] = row[header] ?? ''; // Assign an empty string if field is missing
+            });
+            return orderedRow;
+        });
 
-        const worksheet = XLSX.utils.json_to_sheet(rows);
+        const worksheet = XLSX.utils.json_to_sheet(orderedRows);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "MA");
-
         // Export the file
-        XLSX.writeFile(workbook, `MA-${from}/${to}.xlsx`);
+        XLSX.writeFile(workbook, `MA-${from}-${to}.xlsx`);
     }
     useEffect(() => {
         fetchMAData();
@@ -236,7 +275,7 @@ export default function MAReportPage() {
                                     <TableRow>
                                         <TableCell colSpan={4} align="center">No data</TableCell>
                                     </TableRow>
-                                )},
+                                )}
                         </TableBody>
                     </Table>
                 </Box>

@@ -164,7 +164,7 @@ export default function MAReportPage() {
                                     <TableRow>
                                         <TableCell colSpan={7} align="center">No data</TableCell>
                                     </TableRow>
-                                )},
+                                )}
                         </TableBody>
                     </Table>
                 </Box>
