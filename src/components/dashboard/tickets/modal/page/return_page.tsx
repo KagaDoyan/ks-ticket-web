@@ -427,6 +427,10 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     })
 
     const handleSubmit = () => {
+        if (!formData.resolve_status && !formData.resolve_remark) {
+            toast.error("Please enter resolve remark");
+            return;
+        }
         // Show loading toast
         const toastId = toast.loading("Submitting...", { autoClose: false });
         if (!formData.close_date || !formData.close_time) {

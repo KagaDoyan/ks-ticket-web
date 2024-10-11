@@ -508,6 +508,10 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
     }, [shopitems, spareitems])
 
     const handleSubmit = () => {
+        if (!formData.resolve_status && !formData.resolve_remark) {
+            toast.error("Please enter resolve remark");
+            return;
+        }
         // Show loading toast
         const toastId = toast.loading("Submitting...", { autoClose: false });
 
