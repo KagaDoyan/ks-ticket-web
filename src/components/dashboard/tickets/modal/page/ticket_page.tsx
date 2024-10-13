@@ -599,7 +599,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                                 assigned_to: selectedOption
                             });
                         }}
-                        renderInput={(params) => <TextField required {...params} label="Assgin to" />}
+                        renderInput={(params) => <TextField required {...params} label="Assign to" />}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>

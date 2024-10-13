@@ -127,43 +127,16 @@ export default function OpenEmailPreviewPage({ open, handleClose, ticketData }: 
 
 
 
-                <p className="MsoNormal" style={{ margin: '0cm', color: 'gray' }}>
-                    <b>
-                        <span >
-                            --
-                        </span>
-                    </b>
-                </p>
-                <p className="MsoNormal" style={{ margin: '0cm', color: 'gray' }}>
-                    <b>
-                        <span >
-                            IT Helpdesk
-                        </span>
-                    </b>
-                </p>
-                <p className="MsoNormal" style={{ margin: '0cm', color: 'gray' }}>
-                    <b>
-                        <span >
-                            Advice IT Infinite Public Company Limited
-                        </span>
-                    </b>
-                </p>
-                <p className="MsoNormal" style={{ margin: '0cm', color: 'gray' }}>
-                    <b>
-                        <span >
-                            Mobile: 02-4609281
-                        </span>
-                    </b>
-                </p>
-                <img
-                    src="https://ci3.googleusercontent.com/meips/ADKq_NYL6cddsWyQInr61nMcO_OyGtQq11kCk0jN2o2yHPpPQK7Pof66Bez1rWvC6Fh_jLa9WU6_AkUxZJ-ft0yfTGiyZp5DeoYPdStDzDiO_8Gyf1fQQehbricff1bWWOekRsBpg74=s0-d-e1-ft#https://img.advice.co.th/images_nas/advice/oneweb/assets/images/logo-color.png"
-                    width="96"
-                    height="43"
-                    style={{ filter: 'grayscale(100%)' }}
-                    alt="Company Logo"
-                />
-
-
+                <div dangerouslySetInnerHTML={{ __html: ticket.customer?.mail_signature?.signature_body }}></div>
+                {ticket.customer?.mail_signature?.image && (
+                    <img
+                        src={`${process.env.NEXT_PUBLIC_API_URL}/image/${ticket.customer?.mail_signature?.image}`}
+                        width="96"
+                        height="43"
+                        style={{ filter: 'grayscale(100%)' }}
+                        alt="Company Logo"
+                    />
+                )}
             </div>
         )
     };

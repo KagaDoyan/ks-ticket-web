@@ -583,7 +583,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                         assigned_to: selectedOption
                                     });
                                 }}
-                                renderInput={(params) => <TextField required {...params} label="Assgin to" />}
+                                renderInput={(params) => <TextField required {...params} label="Assign to" />}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
