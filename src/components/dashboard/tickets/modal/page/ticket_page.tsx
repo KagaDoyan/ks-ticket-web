@@ -650,7 +650,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                                 ...formData,
                                 item_category: selectedOption || ""
                             });
-                            console.log(formData);
+                            
                         }}
                         renderInput={(params) => <TextField required {...params} label="Equipment" />}
                     />

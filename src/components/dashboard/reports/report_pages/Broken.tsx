@@ -73,7 +73,7 @@ export default function BrokenPartReportPage() {
     }, [from, to]);
 
     const exportToExcel = () => {
-        console.log(rows);
+        
 
         const worksheet = XLSX.utils.json_to_sheet(rows);
         const workbook = XLSX.utils.book_new();

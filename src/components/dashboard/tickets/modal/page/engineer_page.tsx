@@ -229,7 +229,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             const updatedItems = [...spareitems];
             updatedItems[index] = { ...updatedItems[index], [field]: Intvalue };
             setSpareItem(updatedItems);
-            console.log(spareitems);
+       
         } else if (field === 'serial_number') {
             const updatedItems = [...spareitems];
             updatedItems[index] = { ...updatedItems[index], [field]: value };
@@ -716,7 +716,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 ...formData,
                                 item_category: selectedOption
                             });
-                            console.log(formData);
+                            
                         }}
                         renderInput={(params) => <TextField required {...params} label="Category" />}
                     />
@@ -765,7 +765,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 ...formData,
                                 item_model: selectedOption
                             });
-                            console.log(formData);
+                            
                         }}
                         renderInput={(params) => <TextField required {...params} label="Model" />}
                     />

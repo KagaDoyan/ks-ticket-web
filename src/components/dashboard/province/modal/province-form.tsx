@@ -63,7 +63,7 @@ export default function ProvinceModalForm({ open, handleClose, provinceID, fetch
                 if (res.ok) {
                     res.json().then((data) => {
                         setPriorityGroupOption(data.data);
-                        console.log(data.data);
+                        
 
                     })
                 } else {

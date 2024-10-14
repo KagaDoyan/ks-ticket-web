@@ -75,7 +75,7 @@ export function EmailSignaturePage(): React.JSX.Element {
             .then((res) => {
                 if (res.ok) {
                     res.json().then((data) => {
-                        console.log(data.data.data);
+                        
                         
                         setRows(data.data.data);
                         setCount(data.data.total_rows);

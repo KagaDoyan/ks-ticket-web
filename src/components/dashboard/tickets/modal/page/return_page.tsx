@@ -58,11 +58,20 @@ interface FormData {
     delete_images?: string[];
     close_date: string;
     close_time: string;
+    engineer_id: number;
 }
 
 interface image_url {
     name: string
     path: string
+}
+
+interface engineer {
+    id: number
+    name: string,
+    lastname: string,
+    distance: number,
+    open_ticket: number
 }
 
 const spare_status: spare_status[] = [
@@ -98,12 +107,14 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         delete_images: [],
         close_date: '',
         close_time: '',
+        engineer_id: 0
     });
 
     const [incident_number, setIncidentNumber] = useState<string>('');
 
     const [ticketData, setTicketData] = useState<any>()
     const [BrandOption, setBrandOption] = useState<brand[]>([])
+    const [enginnerOption, setEngineerOption] = useState<engineer[]>([]);
     const [ModelOption, setModelOption] = useState<model[]>([])
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
     const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
@@ -133,6 +144,27 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             uploadedFiles: files
         });
     };
+
+    const fetchEngineer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/enigeer/${ticketData?.shop_id ? ticketData?.shop_id : 0}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setEngineerOption(data.data);
+                    })
+                } else {
+                    setEngineerOption([]);
+                    throw new Error("Failed to fetch engineer options");
+                }
+            }).catch((err) => {
+                setEngineerOption([]);
+            });
+    }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, checked } = event.target;
@@ -272,7 +304,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             const updatedItems = [...spareitems];
             updatedItems[index] = { ...updatedItems[index], [field]: Intvalue };
             setSpareItem(updatedItems);
-            console.log(spareitems);
         } else {
             const updatedItems = [...spareitems];
             updatedItems[index] = { ...updatedItems[index], [field]: value };
@@ -388,7 +419,8 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 warranty_exp: dayjs(data.data.return_ticket?.warranty_exp).format('YYYY-MM-DD'),
                                 ticket_image: [...data.data.return_ticket_images],
                                 uploadedFiles: [],
-                                delete_images: []
+                                delete_images: [],
+                                engineer_id: data.data.return_ticket?.engineer_id ? data.data.return_ticket?.engineer_id : data.data.engineer_id,
                             });
                             setIncidentNumber(data.data.inc_number)
                             if (data.data.spare_item?.length > 0) {
@@ -425,6 +457,10 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         getCategoryOption()
         getModelOption()
     })
+
+    useEffect(() => {
+        fetchEngineer()
+    }, [ticketData?.shop_id])
 
     const handleSubmit = () => {
         if (!formData.resolve_status && !formData.resolve_remark) {
@@ -494,6 +530,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         payload.append('action', formData.action);
         payload.append('time_in', formData.time_in);
         payload.append('time_out', formData.time_out);
+        payload.append('engineer_id', formData.engineer_id.toString());
         if (formData.close_date) {
             payload.append('close_date', formData.close_date);
         }
@@ -696,7 +733,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 ...formData,
                                 item_category: selectedOption
                             });
-                            console.log(formData);
                         }}
                         renderInput={(params) => <TextField required {...params} label="Category" />}
                     />
@@ -745,7 +781,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 ...formData,
                                 item_model: selectedOption
                             });
-                            console.log(formData);
                         }}
                         renderInput={(params) => <TextField required {...params} label="Model" />}
                     />
@@ -758,6 +793,30 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                         value={formData.warranty_exp}
                         onChange={e => setFormData({ ...formData, warranty_exp: dayjs(e.target.value).format('YYYY-MM-DD') })}
                         fullWidth
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Autocomplete
+                        options={enginnerOption}
+                        getOptionLabel={(option) => `(${option.open_ticket}) ${option.name} ${option.lastname} ${option.distance ?? 'na'} km`}
+                        value={enginnerOption.find((engineer) => engineer.id === formData.engineer_id) || null}
+                        onChange={(event, newValue, reason) => {
+                            if (reason === "clear") {
+                                setFormData({
+                                    ...formData,
+                                    engineer_id: 0,
+                                });
+                            }
+                            const selectedOption = newValue ? newValue.id : 0;
+                            if (!selectedOption) {
+                                return;
+                            }
+                            setFormData({
+                                ...formData,
+                                engineer_id: selectedOption,
+                            });
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Engineer" />}
                     />
                 </Grid>
             </Grid>

@@ -383,7 +383,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         model_id: selectedOption || 0
                                     });
-                                    console.log(formData);
+                                    
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
@@ -456,7 +456,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         category_id: selectedOption || 0
                                     });
-                                    console.log(formData);
+                                    
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Category" />}
                             />
@@ -482,7 +482,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         status: selectedOption || ""
                                     });
-                                    console.log(formData);
+                                    
                                 }}
                                 renderInput={(params) => <TextField required name="status" {...params} label="Status" />}
                             />
@@ -508,7 +508,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         storage_id: selectedOption || 0
                                     });
-                                    console.log(formData);
+                                    
                                 }}
                                 renderInput={(params) => <TextField required name="status" {...params} label="Location" />}
                             />
@@ -547,7 +547,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         condition: selectedOption || ""
                                     });
-                                    console.log(formData);
+                                    
                                 }}
                                 renderInput={(params) => <TextField name="status" {...params} label="condition" />}
                             />

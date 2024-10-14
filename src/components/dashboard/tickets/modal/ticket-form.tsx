@@ -634,7 +634,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                         ...formData,
                                         item_category: selectedOption || ""
                                     });
-                                    console.log(formData);
+                                    
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Equipment" />}
                             />

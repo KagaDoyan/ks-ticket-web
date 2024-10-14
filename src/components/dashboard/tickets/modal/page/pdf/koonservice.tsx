@@ -4,7 +4,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
     var spareParts = ''
     var FormName = ''
     var logo = ''
-    console.log(data);
+    
 
     switch (form) {
         case 'koon':
