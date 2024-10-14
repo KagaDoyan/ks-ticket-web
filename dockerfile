@@ -46,9 +46,9 @@ COPY --from=builder --chown=nextjs:bun /app/.next/static ./.next/static
 
 USER nextjs
 
-EXPOSE 8080
+EXPOSE 80
 
-ENV PORT 8080
+ENV PORT 80
 
 # Set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
