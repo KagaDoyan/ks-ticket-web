@@ -463,7 +463,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     }, [ticketData?.shop_id])
 
     const handleSubmit = () => {
-        if (!formData.resolve_status && !formData.resolve_remark) {
+        if (!formData.resolve_status && (formData.resolve_remark == "" || !formData.resolve_remark)) {
             toast.error("Please enter resolve remark");
             return;
         }
