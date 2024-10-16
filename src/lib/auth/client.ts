@@ -1,8 +1,8 @@
 'use client';
 
 import type { User } from '@/types/user';
-import { log } from 'console';
-import { use } from 'react';
+import { redirect } from 'next/navigation';
+import Swal from 'sweetalert2';
 
 const user = {
   id: 'USR-000',
@@ -77,7 +77,7 @@ class AuthClient {
               if (data.data) {
                 localStorage.setItem('user_info', JSON.stringify(data.data));
               }
-          })
+            })
         }
       } else {
         return { error: 'No token received' };
@@ -98,7 +98,6 @@ class AuthClient {
   }
 
   async getUser(): Promise<{ data?: User | null; error?: string }> {
-
     // We do not handle the API, so just check if we have a token in localStorage.
     const token = this.getToken();
     if (!token) {
@@ -108,7 +107,33 @@ class AuthClient {
   }
 
   getToken() {
-    return localStorage.getItem('custom-auth-token');
+    const token = localStorage.getItem('custom-auth-token');
+    if (token) {
+      fetch(`${baseUrl}/api/user/whoami`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+        .then((res) => {
+          if (res.status == 401) {
+            Swal.fire({
+              title: 'Session expired',
+              text: 'Please login again',
+              icon: 'warning',
+              showCancelButton: false,
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'OK'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                authClient.signOut()
+                window.location.reload()
+              }
+            })
+          }
+        })
+    }
+    return token
   }
 
   UserInfo() {
