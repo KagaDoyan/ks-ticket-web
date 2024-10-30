@@ -51,6 +51,7 @@ interface Storage {
 }
 
 const conditionOption = ['good', 'broken']
+const itemTypeOption = ['spare', 'replacement']
 export default function ItemModalForm({ open, handleClose, itemID, fetchitemData }: { open: boolean, handleClose: () => void, itemID: number, fetchitemData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         serial_number: "",
@@ -62,7 +63,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
         warranty_expiry_date: "",
         status: "in_stock",
         remark: "",
-        condition: "good"
+        condition: "good",
+        item_type: "spare"
     });
 
     const [StatusOption, setStatusOption] = useState([])
@@ -206,7 +208,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                 status: data.data.status,
                                 storage_id: data.data.storage_id,
                                 remark: data.data.Remark,
-                                condition: data.data.condition
+                                condition: data.data.condition,
+                                item_type: data.data.item_type
                             });
                         })
                     } else {
@@ -229,7 +232,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             status: "in_stock",
             storage_id: 0,
             remark: "",
-            condition: "good"
+            condition: "good",
+            item_type: "spare"
         });
     }
 
@@ -256,7 +260,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             status: formData.status,
             storage_id: formData.storage_id,
             remark: formData.remark,
-            condition: formData.condition
+            condition: formData.condition,
+            item_type: formData.item_type
         };
         if (formData.warranty_expiry_date) {
             payload['warranty_expiry_date'] = new Date(formData.warranty_expiry_date);
@@ -559,6 +564,32 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                 value={formData.remark}
                                 onChange={handleChange}
                                 fullWidth
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={itemTypeOption}
+                                getOptionLabel={(option) => option}
+                                value={itemTypeOption.find((option) => option === formData.condition)}
+                                onChange={(event, newValue, reason) => {
+                                    if (reason === "clear") {
+                                        setFormData({
+                                            ...formData,
+                                            storage_id: 0
+                                        })
+                                        return;
+                                    }
+                                    const selectedOption = newValue;
+                                    if (!selectedOption) {
+                                        return;
+                                    }
+                                    setFormData({
+                                        ...formData,
+                                        item_type: selectedOption || ""
+                                    });
+                                    
+                                }}
+                                renderInput={(params) => <TextField name="status" {...params} label="item type" />}
                             />
                         </Grid>
                     </Grid>

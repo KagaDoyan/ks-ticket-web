@@ -26,6 +26,7 @@ import useOnMount from '@mui/utils/useOnMount';
 
 export interface item {
   shop_number: string;
+  item_type: string;
   id: number;
   model_id: string;
   created_at: Date;
@@ -49,6 +50,10 @@ export interface item {
   engineer: {
     id: number;
     name: string;
+    node: {
+      id: number;
+      name: string;
+    }
   } | null;
   storage_id: number;
   storage: {
@@ -258,7 +263,7 @@ export function ItemPage(): React.JSX.Element {
   }
 
   const location = (row: item) => {
-    var location = row.status == "return" ? row.shop_number : row.engineer?.name ? row.engineer.name : row.storage?.name
+    var location = row.status == "return" ? row.shop_number : row.engineer?.name ? row.engineer.name + "-" + row.engineer.node.name : row.storage?.name
     return location
   }
 
@@ -307,6 +312,7 @@ export function ItemPage(): React.JSX.Element {
                 <TableCell>waranty expiry date</TableCell>
                 <TableCell>status</TableCell>
                 <TableCell>condition</TableCell>
+                <TableCell>type</TableCell>
                 <TableCell sx={{ minWidth: '50px', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   remark
                 </TableCell>
@@ -339,7 +345,8 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.waranty_expiry_date ? dayjs(row.waranty_expiry_date).format('MMM D, YYYY') : 'ไม่ระบุ'}</TableCell>
                     <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
                     {/* <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell> */}
-                    <TableCell sx={{textAlign: 'center'}}><Badge badgeContent={row.condition} color={row.condition === 'good' ? 'success' : 'warning'} /></TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.condition} color={row.condition === 'good' ? 'success' : 'warning'} /></TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.item_type} color={row.item_type === 'new' ? 'success' : 'warning'} /></TableCell>
                     <TableCell
                       sx={{
                         maxWidth: '150px',

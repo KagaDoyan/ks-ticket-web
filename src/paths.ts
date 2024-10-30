@@ -25,6 +25,7 @@ export const paths = {
     team: '/page/team',
     email: '/page/email',
     mail_signature: '/page/mail_signature',
+    mailer: '/page/mailer',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;

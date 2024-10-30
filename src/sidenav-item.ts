@@ -1,5 +1,5 @@
 import { paths } from '@/paths';
-import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, DrawOutlined, EmailOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, Groups2Outlined, GroupsOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, Person2Outlined, SpokeOutlined, StorefrontOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
+import { AssessmentOutlined, CallToActionOutlined, CategoryOutlined, ConfirmationNumberOutlined, DrawOutlined, EmailOutlined, EngineeringOutlined, ExtensionOutlined, GroupOutlined, Groups2Outlined, GroupsOutlined, LocalOfferOutlined, LowPriorityOutlined, MapOutlined, Person2Outlined, SignpostOutlined, SpokeOutlined, StorefrontOutlined, StoreMallDirectoryOutlined, SummarizeOutlined, WarehouseOutlined } from "@mui/icons-material";
 
 export const navItems = [
   {
@@ -25,6 +25,7 @@ export const navItems = [
       { key: 'teams', title: 'teams', href: paths.dashboard.team, icon: Groups2Outlined, role: ["SuperAdmin", "Admin"] },
       { key: 'email', title: 'email', href: paths.dashboard.email, icon: EmailOutlined, role: ["SuperAdmin", "Admin"] },
       { key: 'mail_signature', title: 'mail_signature', href: paths.dashboard.mail_signature, icon: DrawOutlined, role: ["SuperAdmin", "Admin"] },
+      { key: 'mailer', title: 'mailer', href: paths.dashboard.mailer, icon: SignpostOutlined, role: ["SuperAdmin", "Admin"] },
     ]
   },
   {

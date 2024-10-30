@@ -73,9 +73,9 @@ class AuthClient {
             },
           })
             .then((res) => res.json())
-            .then((data) => {
+            .then(async (data) => {
               if (data.data) {
-                localStorage.setItem('user_info', JSON.stringify(data.data));
+                await localStorage.setItem('user_info', JSON.stringify(data.data));
               }
             })
         }
