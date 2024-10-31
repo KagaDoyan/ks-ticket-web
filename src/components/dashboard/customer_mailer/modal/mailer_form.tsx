@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
 import useOnMount from "@mui/utils/useOnMount";
-import { password } from "bun";
 
 const style = {
     position: 'absolute' as 'absolute',
