@@ -51,7 +51,7 @@ interface Storage {
 }
 
 const conditionOption = ['good', 'broken']
-const itemTypeOption = ['spare', 'replacement']
+const itemTypeOption = ['spare', 'replacement', 'brand']
 export default function ItemModalForm({ open, handleClose, itemID, fetchitemData }: { open: boolean, handleClose: () => void, itemID: number, fetchitemData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         serial_number: "",
@@ -388,7 +388,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         model_id: selectedOption || 0
                                     });
-                                    
+
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
@@ -461,7 +461,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         category_id: selectedOption || 0
                                     });
-                                    
+
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Category" />}
                             />
@@ -487,7 +487,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         status: selectedOption || ""
                                     });
-                                    
+
                                 }}
                                 renderInput={(params) => <TextField required name="status" {...params} label="Status" />}
                             />
@@ -513,7 +513,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         storage_id: selectedOption || 0
                                     });
-                                    
+
                                 }}
                                 renderInput={(params) => <TextField required name="status" {...params} label="Location" />}
                             />
@@ -552,7 +552,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         condition: selectedOption || ""
                                     });
-                                    
+
                                 }}
                                 renderInput={(params) => <TextField name="status" {...params} label="condition" />}
                             />
@@ -587,7 +587,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         item_type: selectedOption || ""
                                     });
-                                    
+
                                 }}
                                 renderInput={(params) => <TextField name="status" {...params} label="item type" />}
                             />
