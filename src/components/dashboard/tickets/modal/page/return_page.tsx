@@ -119,7 +119,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
     const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
     const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
-    const [returnitems, setReturnItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string, type: string }[]>([]);
+    const [returnitems, setReturnItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string, type: string, item_type?: string }[]>([]);
 
     const [openEmailPreview, setOpenEmailPreview] = useState(false);
 
@@ -592,8 +592,8 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
 
     }
 
-    const isItemSaved = (serial_number: string) => {
-        return returnitems.some((returnItem) => returnItem.serial_number === serial_number);
+    const isItemSaved = (id: number) => {
+        return returnitems.some((returnItem) => returnItem.id === id);
     };
 
     const isItemInShopOrSpare = (serial_number: string) => {
@@ -620,7 +620,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         addUnmatchedToShopItems();
     }, [unmatchedReturnItems]);
     const replaceMatchingItems = () => {
-        // Create new arrays for shopitems and spareitems with replacements
+        // Create new array for shopitems with replacements based on serial_number match
         const updatedShopItems = shopitems.map((shopItem) => {
             const matchedReturnItem = returnitems.find(
                 (returnItem) => returnItem.serial_number === shopItem.serial_number
@@ -628,17 +628,20 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
             return matchedReturnItem ? { ...shopItem, ...matchedReturnItem } : shopItem;
         });
 
-        const updatedSpareItems = spareitems.map((spareItem) => {
-            const matchedReturnItem = returnitems.find(
-                (returnItem) => returnItem.serial_number === spareItem.serial_number
-            );
-            return matchedReturnItem ? { ...spareItem, ...matchedReturnItem } : spareItem;
+        // Filter returnitems for those with item_type "spare"
+        const spareReturnItems = returnitems.filter(item => item.item_type === "spare");
+
+        // Replace each spareItem with a spareReturnItem if any exist, ignoring serial_number
+        const updatedSpareItems = spareitems.map((spareItem, index) => {
+            const replacementItem = spareReturnItems[index] || spareItem; // Use spareReturnItem by index if available, else keep original spareItem
+            return { ...spareItem, ...replacementItem };
         });
 
         // Update state with the new arrays
         setShopItem(updatedShopItems);
         setSpareItem(updatedSpareItems);
     };
+
 
     // Effect to replace matching items when returnitems change
     useEffect(() => {
@@ -836,7 +839,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     <Grid item xs={12} sm={6} key={index}>
                         <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
                             <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                Item {index + 1} {isItemSaved(item.serial_number) ? <p style={{ color: 'green' }}>Saved</p> : ""}
+                                Item {index + 1} {isItemSaved(item.id || 0) ? <p style={{ color: 'green' }}>Saved</p> : ""}
                             </Typography>
                             <TextField
                                 label="Id"
@@ -976,7 +979,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     <Grid item xs={12} sm={6} key={index}>
                         <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
                             <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                Item {index + 1} {isItemSaved(item.serial_number) ? <p style={{ color: 'green' }}>Saved</p> : ""}
+                                Item {index + 1} {isItemSaved(item.id || 0) ? <p style={{ color: 'green' }}>Saved</p> : ""}
                             </Typography>
                             <TextField
                                 label="Id"

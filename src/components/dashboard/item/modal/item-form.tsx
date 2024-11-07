@@ -1,4 +1,4 @@
-import { Box, Modal, Button, TextField, Typography, Stack, Grid, Autocomplete } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack, Grid, Autocomplete, FormControlLabel, Checkbox } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
@@ -64,7 +64,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
         status: "in_stock",
         remark: "",
         condition: "good",
-        item_type: "spare"
+        item_type: "spare",
+        reuse: false
     });
 
     const [StatusOption, setStatusOption] = useState([])
@@ -209,7 +210,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                 storage_id: data.data.storage_id,
                                 remark: data.data.Remark,
                                 condition: data.data.condition,
-                                item_type: data.data.item_type
+                                item_type: data.data.item_type,
+                                reuse: data.data.reuse
                             });
                         })
                     } else {
@@ -233,7 +235,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             storage_id: 0,
             remark: "",
             condition: "good",
-            item_type: "spare"
+            item_type: "spare",
+            reuse: false
         });
     }
 
@@ -261,7 +264,8 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
             storage_id: formData.storage_id,
             remark: formData.remark,
             condition: formData.condition,
-            item_type: formData.item_type
+            item_type: formData.item_type,
+            reuse: formData.reuse
         };
         if (formData.warranty_expiry_date) {
             payload['warranty_expiry_date'] = new Date(formData.warranty_expiry_date);
@@ -357,6 +361,23 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                     }}
                 >
                     <Grid container spacing={2}>
+                        <Grid item xs={12} sm={12}>
+                            {/* reuseable or not option */}
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={formData.reuse}
+                                        onChange={(event) => {
+                                            setFormData({
+                                                ...formData,
+                                                reuse: event.target.checked
+                                            });
+                                        }}
+                                    />
+                                }
+                                label="Reuseable"
+                            />
+                        </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 name="serial_number"
