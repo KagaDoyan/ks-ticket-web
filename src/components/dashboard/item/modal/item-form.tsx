@@ -211,7 +211,7 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                 remark: data.data.Remark,
                                 condition: data.data.condition,
                                 item_type: data.data.item_type,
-                                reuse: data.data.reuse
+                                reuse: data.data.reuse,
                             });
                         })
                     } else {
@@ -591,12 +591,12 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                             <Autocomplete
                                 options={itemTypeOption}
                                 getOptionLabel={(option) => option}
-                                value={itemTypeOption.find((option) => option === formData.condition)}
+                                value={itemTypeOption.find((option) => option === formData.item_type)}
                                 onChange={(event, newValue, reason) => {
                                     if (reason === "clear") {
                                         setFormData({
                                             ...formData,
-                                            storage_id: 0
+                                            item_type: ""
                                         })
                                         return;
                                     }
