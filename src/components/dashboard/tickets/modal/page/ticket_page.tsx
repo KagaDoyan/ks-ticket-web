@@ -356,13 +356,14 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
 
     useEffect(() => {
         fetchCustomer();
-        fetchEngineer();
         fetchShop();
+        fetchEngineer();
     }, [formData.shop_id]);
 
     useEffect(() => {
         if (formData.shop_id != 0) {
             getPriority();
+            fetchEngineer();
         }
     },[shopOptions])
 
