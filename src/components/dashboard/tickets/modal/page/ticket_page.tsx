@@ -104,6 +104,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     }
 
     const getPriority = () => {
+        console.log(formData.customer_id, formData.shop_id);
+        console.log(shopOptions);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/find/${formData.customer_id}/${shopOptions.find((shop) => shop.id === formData.shop_id)?.province.id}`, {
             method: 'GET',
             headers: {
@@ -256,7 +258,6 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
             if (response.ok) {
                 const data = await response.json();
                 setshopOptions(data.data); // Ensure this is updated before proceeding
-                getPriority(); // Called after setshopOptions
             } else {
                 toast.error("Failed to fetch shop options");
             }
@@ -354,19 +355,16 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     })
 
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                await fetchShop(); // Wait for fetchShop to complete
-                getPriority(); // Call getPriority only after fetchShop completes
-            } catch (error) {
-                console.error("Error loading data:", error);
-            }
-        };
-
         fetchCustomer();
         fetchEngineer();
-        loadData();
+        fetchShop();
     }, [formData.shop_id]);
+
+    useEffect(() => {
+        if (formData.shop_id != 0) {
+            getPriority();
+        }
+    },[shopOptions])
 
 
     useEffect(() => {
