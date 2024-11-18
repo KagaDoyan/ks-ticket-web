@@ -608,7 +608,6 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                                         ...formData,
                                         item_type: selectedOption || ""
                                     });
-
                                 }}
                                 renderInput={(params) => <TextField name="status" {...params} label="item type" />}
                             />

@@ -145,6 +145,31 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
         });
     };
 
+    const handleRemoveSpareItem = (removeItem: any) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/returnItem/${removeItem.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'authorization': `Bearer ${authClient.getToken()}`
+                    }
+                }).then((res) => {
+                    if (res.ok) {
+                        toast.success('return item deleted');
+                        fetchticketDatails();
+                    }
+                })
+            }
+        })
+    }
+
     const fetchEngineer = () => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/enigeer/${ticketData?.shop_id ? ticketData?.shop_id : 0}`, {
             method: 'GET',
@@ -1090,6 +1115,8 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Status" />}
                             />
+
+                            {isItemSaved(item.id || 0) ? <Button variant="outlined" color="error" onClick={() => handleRemoveSpareItem(item)}>Remove</Button> : <></>}
                         </Stack>
                     </Grid>
                 ))}

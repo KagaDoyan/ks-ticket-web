@@ -244,23 +244,26 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
             });
     }
 
-    const fetchShop = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shop/option`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${authClient.getToken()}`
-            }
-        })
-            .then((res) => {
-                if (res.ok) {
-                    res.json().then((data) => {
-                        setshopOptions(data.data);
-                    })
+    const fetchShop = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shop/option`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${authClient.getToken()}`
                 }
-            }).catch((err) => {
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+                setshopOptions(data.data); // Ensure this is updated before proceeding
+                getPriority(); // Called after setshopOptions
+            } else {
                 toast.error("Failed to fetch shop options");
-            })
-    }
+            }
+        } catch (err) {
+            toast.error("Failed to fetch shop options");
+        }
+    };
 
     const fetchEngineer = () => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/enigeer/${formData.shop_id ? formData.shop_id : 0}`, {
