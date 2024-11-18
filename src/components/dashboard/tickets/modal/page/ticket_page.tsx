@@ -252,7 +252,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                     'Authorization': `Bearer ${authClient.getToken()}`
                 }
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
                 setshopOptions(data.data); // Ensure this is updated before proceeding
@@ -354,11 +354,19 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     })
 
     useEffect(() => {
+        const loadData = async () => {
+            try {
+                await fetchShop(); // Wait for fetchShop to complete
+                getPriority(); // Call getPriority only after fetchShop completes
+            } catch (error) {
+                console.error("Error loading data:", error);
+            }
+        };
+
         fetchCustomer();
         fetchEngineer();
-        fetchShop();
-        getPriority();
-    }, [formData.shop_id])
+        loadData();
+    }, [formData.shop_id]);
 
 
     useEffect(() => {
@@ -373,8 +381,8 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     }, [formData.open_date, formData.open_time, priority_time])
     return (
         <>
-            <EmailAppointmentPage open={mailopen} handleClose={handleMailClose} ticketID={ticketID} ticketData={ticketData}/>
-            <OpenEmailPreviewPage open={previewopen} handleClose={handlePreviewClose} ticketData={ticketData}/>
+            <EmailAppointmentPage open={mailopen} handleClose={handleMailClose} ticketID={ticketID} ticketData={ticketData} />
+            <OpenEmailPreviewPage open={previewopen} handleClose={handlePreviewClose} ticketData={ticketData} />
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={3}>
                     <TextField
@@ -653,7 +661,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                                 ...formData,
                                 item_category: selectedOption || ""
                             });
-                            
+
                         }}
                         renderInput={(params) => <TextField required {...params} label="Equipment" />}
                     />
