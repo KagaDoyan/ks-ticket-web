@@ -30,7 +30,7 @@ export interface item {
   id: number;
   model_id: string;
   created_at: Date;
-  waranty_expiry_date: Date;
+  warranty_expiry_date: Date;
   serial_number: string;
   status: string;
   model: {
@@ -343,7 +343,7 @@ export function ItemPage(): React.JSX.Element {
                         {location(row)}
                       </Box>
                     </TableCell>
-                    <TableCell>{row.waranty_expiry_date ? dayjs(row.waranty_expiry_date).format('MMM D, YYYY') : 'ไม่ระบุ'}</TableCell>
+                    <TableCell>{row.warranty_expiry_date ? dayjs(row.warranty_expiry_date).format('MMM D, YYYY') : 'ไม่ระบุ'}</TableCell>
                     <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
                     {/* <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell> */}
                     <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.condition} color={row.condition === 'good' ? 'success' : 'warning'} /></TableCell>

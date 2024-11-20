@@ -441,7 +441,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 time_out: dayjs(data.data.return_ticket?.time_out).format('YYYY-MM-DD HH:mm'),
                                 close_date: data.data.close_date ? dayjs(data.data.close_date).format('YYYY-MM-DD') : '',
                                 close_time: data.data.close_time ? data.data.close_time : '',
-                                warranty_exp: dayjs(data.data.return_ticket?.warranty_exp).format('YYYY-MM-DD'),
+                                warranty_exp: data.data.return_ticket?.warranty_exp ? dayjs(data.data.return_ticket?.warranty_exp).format('YYYY-MM-DD') : '',
                                 ticket_image: [...data.data.return_ticket_images],
                                 uploadedFiles: [],
                                 delete_images: [],
