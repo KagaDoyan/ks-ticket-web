@@ -818,8 +818,11 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                         label="Warranty Expiry Date"
                         type="date"
                         InputLabelProps={{ shrink: true }}
-                        value={formData.warranty_exp}
-                        onChange={e => setFormData({ ...formData, warranty_exp: dayjs(e.target.value).format('YYYY-MM-DD') })}
+                        value={formData.warranty_exp || ''}
+                        onChange={e => setFormData({
+                            ...formData,
+                            warranty_exp: e.target.value ? dayjs(e.target.value).format('YYYY-MM-DD') : ''
+                        })}
                         fullWidth
                     />
                 </Grid>
