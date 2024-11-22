@@ -263,9 +263,6 @@ export function ItemPage(): React.JSX.Element {
   }
 
   const location = (row: item) => {
-    if (row.engineers_id) {
-      return row.engineer?.name + '-' + row.engineer?.node.name
-    }
     //if status is reuturn, spare, or replace, return location
     var location = row.status === "return" || row.status === "spare" || row.status === "replace" ? row.shop_number : row.engineer?.name ? row.engineer.name + "-" + row.engineer.node.name : row.storage?.name
     return location
