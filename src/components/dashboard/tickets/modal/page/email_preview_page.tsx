@@ -34,8 +34,8 @@ export default function EmailPreviewPage({ open, handleClose, ticketData }: { op
                             <th style={{ verticalAlign: 'top' }}>Solution</th>
                             <td style={{ verticalAlign: 'top' }}>
                                 <div id="solution">{ticketData.solution}</div>
-                                <div id="device-list">{ticketData.spare_item ? ticketData.spare_item.map((item: any, index: number) => <p key={index}>• {item.category} {item.model} S/N: {item.serial_number} เก่า</p>) : ""}</div>
-                                <div id="replace-device-list">{ticketData.store_item ? ticketData.store_item.map((item: any, index: number) => <p key={index}>• {item.category} {item.model} S/N: {item.serial_number} ใหม่</p>) : ""}</div>
+                                <div id="replace-device-list">{ticketData.store_item ? ticketData.store_item.map((item: any, index: number) => <p key={index}>• {item.category} {item.model} S/N: {item.serial_number} เก่า</p>) : ""}</div>
+                                <div id="device-list">{ticketData.spare_item ? ticketData.spare_item.map((item: any, index: number) => <p key={index}>• {item.category} {item.model} S/N: {item.serial_number} ใหม่</p>) : ""}</div>
                             </td>
                         </tr>
                         <tr>

@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
 import useOnMount from "@mui/utils/useOnMount";
 import dayjs from "dayjs";
+import { TimePicker } from "@mui/x-date-pickers";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -469,17 +470,32 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                required
+                            <TimePicker
                                 label="Open Time"
                                 name="open_time"
-                                type="time"
-                                InputLabelProps={{
-                                    shrink: true,
+                                value={dayjs(formData.open_time, 'HH:mm')}
+                                format="HH:mm"
+                                timeSteps={{
+                                    minutes: 1
                                 }}
-                                value={formData.open_time}
-                                onChange={handleChange}
-                                fullWidth
+                                onChange={(time) => {
+                                    if (time) {
+                                        setFormData({
+                                            ...formData,
+                                            open_time: time.format('HH:mm')
+                                        })
+                                    }
+                                }}
+                                ampm={false}
+                                slotProps={{
+                                    actionBar: {
+                                        actions: ['clear', 'accept']
+                                    },
+                                    textField: {
+                                        fullWidth: true,
+                                        required: true
+                                    }
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={12}>
@@ -601,17 +617,22 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                required
-                                label="Appointment Time"
-                                name="appointment_time"
-                                type="time"
-                                InputLabelProps={{
-                                    shrink: true,
+                            <TimePicker
+                                slotProps={{ textField: { required: true, fullWidth: true } }}
+                                ampm={false}
+                                value={dayjs(formData.appointment_time, 'HH:mm')}
+                                timeSteps={{
+                                    minutes: 1
                                 }}
-                                value={formData.appointment_time}
-                                onChange={handleChange}
-                                fullWidth
+                                label="Appointment Time"
+                                onChange={(newValue) => {
+                                    if (newValue) {
+                                        setFormData({
+                                            ...formData,
+                                            appointment_time: newValue.format('HH:mm')
+                                        })
+                                    }
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -634,7 +655,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                                         ...formData,
                                         item_category: selectedOption || ""
                                     });
-                                    
+
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Equipment" />}
                             />

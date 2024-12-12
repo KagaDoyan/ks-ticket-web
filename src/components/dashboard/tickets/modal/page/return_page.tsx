@@ -13,6 +13,7 @@ import { EmailOutlined } from "@mui/icons-material";
 import ImageUpload, { ExtendedFile } from "./ImageUpload";
 import { set } from "nprogress";
 import ReturnEmailPreviewPage from "./email_preview_reutrn_page";
+import { DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 
 interface brand {
     id: number
@@ -716,18 +717,28 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField
-                        required
-                        type="time"
+                    <TimePicker
                         label="close time"
                         name="close_time"
-                        InputLabelProps={
-                            { shrink: true }
-                        }
-                        value={formData.close_time}
-                        onChange={handleChange}
-                        fullWidth
-                        rows={2}
+                        ampm={false}
+                        value={dayjs(formData.close_time, 'HH:mm')}
+                        onChange={(newValue) => {
+                            if (newValue) {
+                                setFormData({
+                                    ...formData,
+                                    close_time: newValue.format('HH:mm')
+                                })
+                            }
+                        }}
+                        slotProps={{
+                            textField: {
+                                fullWidth: true,
+                                required: true
+                            }
+                        }}
+                        timeSteps={{
+                            minutes: 1
+                        }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1193,27 +1204,39 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                 />
             </Grid>
             <Grid item xs={12} sm={6}>
-                <TextField
-                    name="time_in"
+                <DateTimePicker
+                    value={dayjs(formData.time_in)}
+                    format="DD/MM/YYYY HH:mm"
                     label="Time in"
-                    type="datetime-local"
-                    value={formData.time_in}
-                    InputLabelProps={{ shrink: true }}
-                    onChange={handleChange}
-                    fullWidth
-                    required
+                    timeSteps={{
+                        minutes: 1
+                    }}
+                    ampm={false}
+                    slotProps={{
+                        actionBar: {
+                            actions: ['clear', 'today'],
+                        },
+                        textField: { fullWidth: true, required: true },
+                    }}
+                    onChange={(date) => setFormData({ ...formData, time_in: date?.toISOString() || "" })}
                 />
             </Grid>
             <Grid item xs={12} sm={6}>
-                <TextField
-                    name="time_out"
+                <DateTimePicker
+                    value={dayjs(formData.time_out)}
+                    format="DD/MM/YYYY HH:mm"
                     label="Time out"
-                    type="datetime-local"
-                    value={formData.time_out}
-                    InputLabelProps={{ shrink: true }}
-                    onChange={handleChange}
-                    fullWidth
-                    required
+                    ampm={false}
+                    timeSteps={{
+                        minutes: 1
+                    }}
+                    slotProps={{
+                        actionBar: {
+                            actions: ['clear', 'today'],
+                        },
+                        textField: { fullWidth: true, required: true },
+                    }}
+                    onChange={(date) => setFormData({ ...formData, time_out: date?.toISOString() || "" })}
                 />
             </Grid>
             <Stack justifyContent={"flex-start"} direction="row" spacing={2}>

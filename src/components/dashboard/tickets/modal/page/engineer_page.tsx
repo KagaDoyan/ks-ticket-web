@@ -11,6 +11,7 @@ import MenuButton from "./menu_button";
 import { EmailOutlined } from "@mui/icons-material";
 import EmailPreviewPagefunction from "./email_preview_page";
 import React from "react";
+import { DateTimePicker } from "@mui/x-date-pickers";
 
 interface brand {
     id: number
@@ -229,7 +230,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
             const updatedItems = [...spareitems];
             updatedItems[index] = { ...updatedItems[index], [field]: Intvalue };
             setSpareItem(updatedItems);
-       
+
         } else if (field === 'serial_number') {
             const updatedItems = [...spareitems];
             updatedItems[index] = { ...updatedItems[index], [field]: value };
@@ -634,9 +635,9 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <Autocomplete
-                        options={['open', 'oncall', 'pending', 'spare', 'close']}
+                        options={['open', 'oncall', 'pending', 'spare', 'cancel', 'close']}
                         getOptionLabel={(option) => option}
-                        value={['open', 'oncall', 'pending', 'spare', 'close'].find((option) => option === formData.ticket_status) || null}
+                        value={['open', 'oncall', 'pending', 'spare', 'cancel', 'close'].find((option) => option === formData.ticket_status) || null}
                         onChange={(event, newValue, reason) => {
                             if (reason === "clear") {
                                 setFormData({
@@ -716,7 +717,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 ...formData,
                                 item_category: selectedOption
                             });
-                            
+
                         }}
                         renderInput={(params) => <TextField required {...params} label="Category" />}
                     />
@@ -765,7 +766,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 ...formData,
                                 item_model: selectedOption
                             });
-                            
+
                         }}
                         renderInput={(params) => <TextField required {...params} label="Model" />}
                     />
@@ -1102,27 +1103,41 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                 />
             </Grid>
             <Grid item xs={12} sm={6}>
-                <TextField
-                    name="time_in"
-                    label="Time in"
-                    type="datetime-local"
-                    value={formData.time_in}
-                    InputLabelProps={{ shrink: true }}
-                    onChange={handleChange}
-                    fullWidth
-                    required
-                />
+                <Grid item xs={12} sm={6}>
+                    <DateTimePicker
+                        value={dayjs(formData.time_in)}
+                        format="DD/MM/YYYY HH:mm"
+                        label="Time in"
+                        timeSteps={{
+                            minutes: 1
+                        }}
+                        ampm={false}
+                        slotProps={{
+                            actionBar: {
+                                actions: ['clear', 'today'],
+                            },
+                            textField: { fullWidth: true, required: true },
+                        }}
+                        onChange={(date) => setFormData({ ...formData, time_in: date?.toISOString() || "" })}
+                    />
+                </Grid>
             </Grid>
             <Grid item xs={12} sm={6}>
-                <TextField
-                    name="time_out"
+                <DateTimePicker
+                    value={dayjs(formData.time_out)}
+                    format="DD/MM/YYYY HH:mm"
                     label="Time out"
-                    type="datetime-local"
-                    value={formData.time_out}
-                    InputLabelProps={{ shrink: true }}
-                    onChange={handleChange}
-                    fullWidth
-                    required
+                    timeSteps={{
+                        minutes: 1
+                    }}
+                    ampm={false}
+                    slotProps={{
+                        actionBar: {
+                            actions: ['clear', 'today'],
+                        },
+                        textField: { fullWidth: true, required: true },
+                    }}
+                    onChange={(date) => setFormData({ ...formData, time_out: date?.toISOString() || "" })}
                 />
             </Grid>
             <Stack justifyContent={"flex-start"} direction="row" spacing={2}>

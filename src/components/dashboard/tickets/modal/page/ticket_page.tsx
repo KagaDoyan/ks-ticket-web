@@ -10,6 +10,7 @@ import React from "react";
 import Swal from "sweetalert2";
 import { Ticket } from "@phosphor-icons/react/dist/ssr";
 import OpenEmailPreviewPage from "./email_preview_open_page";
+import { DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 
 interface customer {
     id: number
@@ -365,7 +366,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
             getPriority();
             fetchEngineer();
         }
-    },[shopOptions])
+    }, [shopOptions])
 
 
     useEffect(() => {
@@ -496,17 +497,23 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField
-                        required
+                    <TimePicker
+                        slotProps={{ textField: { required: true, fullWidth: true } }}
                         label="Open Time"
                         name="open_time"
-                        type="time"
-                        InputLabelProps={{
-                            shrink: true,
+                        value={dayjs(formData.open_time, 'HH:mm')}
+                        timeSteps={{
+                            minutes: 1
                         }}
-                        value={formData.open_time}
-                        onChange={handleChange}
-                        fullWidth
+                        onChange={(newValue) => {
+                            if (newValue) {
+                                setFormData({
+                                    ...formData,
+                                    open_time: newValue.format('HH:mm')
+                                })
+                            }
+                        }}
+                        ampm={false}
                     />
                 </Grid>
                 <Grid item xs={12} sm={12}>
@@ -627,17 +634,22 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField
-                        required
-                        label="Appointment Time"
-                        name="appointment_time"
-                        type="time"
-                        InputLabelProps={{
-                            shrink: true,
+                    <TimePicker
+                        slotProps={{ textField: { required: true, fullWidth: true } }}
+                        ampm={false}
+                        value={dayjs(formData.appointment_time, 'HH:mm')}
+                        timeSteps={{
+                            minutes: 1
                         }}
-                        value={formData.appointment_time}
-                        onChange={handleChange}
-                        fullWidth
+                        label="Appointment Time"
+                        onChange={(newValue) => {
+                            if (newValue) {
+                                setFormData({
+                                    ...formData,
+                                    appointment_time: newValue.format('HH:mm')
+                                })
+                            }
+                        }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -666,19 +678,21 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField
-                        error
-                        required
-                        label="Due By"
-                        name="due_by"
-                        type="datetime-local"
-                        InputLabelProps={{
-                            shrink: true,
+                    <DateTimePicker
+                        value={dayjs(formData.due_by)}
+                        label="Due Date"
+                        ampm={false}
+                        timeSteps={{
+                            minutes: 1
                         }}
-                        inputProps={{ readOnly: true }}
-                        value={formData.due_by}
-                        onChange={handleChange}
-                        fullWidth
+                        slotProps={{
+                            actionBar: {
+                                actions: ['clear', 'today'],
+                            },
+                            textField: { fullWidth: true }
+                        }}
+                        onChange={(date) => setFormData({ ...formData, due_by: date?.toISOString() || "" })}
+                        readOnly
                     />
                 </Grid>
             </Grid>
