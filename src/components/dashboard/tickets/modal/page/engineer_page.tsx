@@ -11,7 +11,7 @@ import MenuButton from "./menu_button";
 import { EmailOutlined } from "@mui/icons-material";
 import EmailPreviewPagefunction from "./email_preview_page";
 import React from "react";
-import { DateTimePicker } from "@mui/x-date-pickers";
+import { DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 
 interface brand {
     id: number
@@ -673,15 +673,22 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField
-                                name="close_time"
+                            <TimePicker
+                                slotProps={{ textField: { required: true, fullWidth: true } }}
+                                ampm={false}
+                                value={dayjs(formData.close_time, 'HH:mm')}
+                                timeSteps={{
+                                    minutes: 1
+                                }}
                                 label="Close Time"
-                                type="time"
-                                value={formData.close_time}
-                                onChange={handleChange}
-                                fullWidth
-                                required
-                                InputLabelProps={{ shrink: true }}
+                                onChange={(newValue) => {
+                                    if (newValue) {
+                                        setFormData({
+                                            ...formData,
+                                            close_time: newValue.format('HH:mm')
+                                        })
+                                    }
+                                }}
                             />
                         </Grid>
                     </>
