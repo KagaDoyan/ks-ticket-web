@@ -268,6 +268,18 @@ export function ItemPage(): React.JSX.Element {
     return location
   }
 
+  const switchStatusColor = (status: string) => {
+    switch (status) {
+      case 'repair':
+        return 'error';
+      case 'replace':
+        return 'success';
+      case 'in_stock':
+        return 'info';
+      default:
+        return 'warning';
+    }
+  }
 
   return (
     <>
@@ -344,10 +356,11 @@ export function ItemPage(): React.JSX.Element {
                       </Box>
                     </TableCell>
                     <TableCell>{row.warranty_expiry_date ? dayjs(row.warranty_expiry_date).format('MMM D, YYYY') : 'ไม่ระบุ'}</TableCell>
-                    <TableCell><Badge badgeContent={row.status} color={row.status === 'in_stock' ? 'success' : 'warning'} /></TableCell>
+                    {/* status color replace as green repair as red */}
+                    <TableCell><Badge badgeContent={row.status} color={switchStatusColor(row.status)} /></TableCell>
                     {/* <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell> */}
                     <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.condition} color={row.condition === 'good' ? 'success' : 'warning'} /></TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.item_type} color={row.item_type === 'new' ? 'success' : 'warning'} /></TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}><Badge badgeContent={row.item_type} color={row.item_type === 'replacement' || row.item_type === 'spare' ? 'success' : 'error'} /></TableCell>
                     <TableCell
                       sx={{
                         maxWidth: '150px',

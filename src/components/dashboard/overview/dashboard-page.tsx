@@ -87,7 +87,7 @@ export default function DashboardPage(): React.JSX.Element {
     }
 
     useEffect(() => {
-        const initialSeries: { name: string, data: number[] }[] = ["open", "pending", "spare", "close"].map(status => (
+        const initialSeries: { name: string, data: number[] }[] = ["open", "pending", "oncall", "spare", "close", "cancel"].map(status => (
             {
                 name: status.charAt(0).toUpperCase() + status.slice(1),
                 data: []
@@ -98,10 +98,14 @@ export default function DashboardPage(): React.JSX.Element {
             const seriesIndexPending = initialSeries.findIndex(series => series.name.toLowerCase() === 'pending');
             const seriesIndexSpare = initialSeries.findIndex(series => series.name.toLowerCase() === 'spare');
             const seriesIndexClosed = initialSeries.findIndex(series => series.name.toLowerCase() === 'close');
+            const seriesIndexOnCall = initialSeries.findIndex(series => series.name.toLowerCase() === 'oncall');
+            const seriesIndexCancel = initialSeries.findIndex(series => series.name.toLowerCase() === 'cancel');
             initialSeries[seriesIndexOpen].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'open' && ticket.customer.shortname === customer).length);
             initialSeries[seriesIndexPending].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'pending' && ticket.customer.shortname === customer).length);
             initialSeries[seriesIndexSpare].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'spare' && ticket.customer.shortname === customer).length);
             initialSeries[seriesIndexClosed].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'close' && ticket.customer.shortname === customer).length);
+            initialSeries[seriesIndexOnCall].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'oncall' && ticket.customer.shortname === customer).length);
+            initialSeries[seriesIndexCancel].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'cancel' && ticket.customer.shortname === customer).length);
         });
         setSeries(initialSeries);
     }, [ticketData, customers]);
@@ -117,7 +121,7 @@ export default function DashboardPage(): React.JSX.Element {
                 res.json().then((data) => {
                     const customersList = data.data.map((customer: any) => customer.shortname);
                     if (customer_name.length > 0) {
-                        setCustomers(customersList.filter((customer:any) => customer_name.includes(customer)));
+                        setCustomers(customersList.filter((customer: any) => customer_name.includes(customer)));
                     } else {
                         setCustomers(customersList);
                     }
@@ -392,7 +396,7 @@ export default function DashboardPage(): React.JSX.Element {
                                             text: "Ticket Status Count",
                                         },
                                     },
-                                    colors: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
+                                    colors: ["rgb(255, 47, 47)", "rgb(251, 132, 58)", "rgb(60, 190, 255)", "rgb(255, 204, 153)", "rgb(153, 255, 153)", "rgb(158, 158, 158)", "#4BC0C0", "#9966FF", "#808080"],
                                     plotOptions: {
                                         bar: {
                                             dataLabels: {

@@ -126,15 +126,17 @@ export function TicketPage(): React.JSX.Element {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
-        return 'rgb(240, 128, 128)';
+        return 'rgb(255, 47, 47)';
       case 'pending':
-        return 'rgb(255, 153, 153)';
+        return 'rgb(251, 106, 58)';
       case 'spare':
         return 'rgb(255, 204, 153)';
       case 'close':
         return 'rgb(153, 255, 153)';
       case 'oncall':
-        return 'rgb(255, 153, 153)';
+        return 'rgb(57, 156, 255)';
+      case 'cancel':
+        return 'rgb(158, 158, 158)';
       default:
         return 'info';
     }
