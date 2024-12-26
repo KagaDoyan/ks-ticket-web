@@ -33,6 +33,7 @@ export interface item {
   warranty_expiry_date: Date;
   serial_number: string;
   status: string;
+  inc_number: string;
   model: {
     id: number;
     name: string;
@@ -321,6 +322,7 @@ export function ItemPage(): React.JSX.Element {
                 <TableCell>category</TableCell>
                 <TableCell>brand</TableCell>
                 <TableCell>model</TableCell>
+                <TableCell>incident number</TableCell>
                 <TableCell>location</TableCell>
                 <TableCell>waranty expiry date</TableCell>
                 <TableCell>status</TableCell>
@@ -341,6 +343,7 @@ export function ItemPage(): React.JSX.Element {
                     <TableCell>{row.category.name}</TableCell>
                     <TableCell>{row.brand.name}</TableCell>
                     <TableCell>{row.model.name}</TableCell>
+                    <TableCell>{(row.status != "in_stock" ? row.inc_number : "")}</TableCell>
                     <TableCell>
                       <Box
                         sx={{

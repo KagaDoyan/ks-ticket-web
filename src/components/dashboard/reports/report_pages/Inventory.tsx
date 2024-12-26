@@ -4,6 +4,7 @@ import { Autocomplete, Box, Button, Card, Divider, Stack, Table, TableBody, Tabl
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
+import Loading from "./loading";
 const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
 };
@@ -31,6 +32,7 @@ interface Customer {
 }
 
 export default function InventoryReportPage() {
+    const [loading, setLoading] = React.useState(true);
     const currentDate = new Date();
     const sevenDaysBefore = new Date(currentDate);
     sevenDaysBefore.setDate(currentDate.getDate() - 7);
@@ -70,6 +72,7 @@ export default function InventoryReportPage() {
             .then((response) => response.json())
             .then((data) => {
                 setRows(data.data.report)
+                setLoading(false)
             })
             .catch((error) => {
                 toast.error(error.message);
@@ -94,7 +97,7 @@ export default function InventoryReportPage() {
 
 
     const exportToExcel = () => {
-        
+
 
         const worksheet = XLSX.utils.json_to_sheet(rows);
         const workbook = XLSX.utils.book_new();
@@ -131,41 +134,43 @@ export default function InventoryReportPage() {
                 </Stack>
 
                 <Box sx={{ overflowX: 'auto' }}>
-                    <Table sx={{ minWidth: 800 }}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>item</TableCell>
-                                <TableCell>serial</TableCell>
-                                <TableCell>owner</TableCell>
-                                <TableCell>condition</TableCell>
-                                <TableCell>location</TableCell>
-                                <TableCell>status</TableCell>
-                                <TableCell>use_by</TableCell>
-                                <TableCell>inc_no</TableCell>
-                                <TableCell>ticket_no</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows.length > 0 ? rows.map((row) => (
-                                // Example Row: Uncomment and replace with your actual data structure
+                    {loading ? <Loading /> :
+                        <Table sx={{ minWidth: 800 }}>
+                            <TableHead>
                                 <TableRow>
-                                    <TableCell>{row.category} {row.brand} {row.model}</TableCell>
-                                    <TableCell>{row.serial}</TableCell>
-                                    <TableCell>{row.owner}</TableCell>
-                                    <TableCell>{row.condition}</TableCell>
-                                    <TableCell>{row.location}</TableCell>
-                                    <TableCell>{row.status}</TableCell>
-                                    <TableCell>{row.used_by}</TableCell>
-                                    <TableCell>{row.inc_no}</TableCell>
-                                    <TableCell>{row.ticket_no}</TableCell>
+                                    <TableCell>item</TableCell>
+                                    <TableCell>serial</TableCell>
+                                    <TableCell>owner</TableCell>
+                                    <TableCell>condition</TableCell>
+                                    <TableCell>location</TableCell>
+                                    <TableCell>status</TableCell>
+                                    <TableCell>use_by</TableCell>
+                                    <TableCell>inc_no</TableCell>
+                                    <TableCell>ticket_no</TableCell>
                                 </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} align="center">No data</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                            </TableHead>
+                            <TableBody>
+                                {rows.length > 0 ? rows.map((row) => (
+                                    // Example Row: Uncomment and replace with your actual data structure
+                                    <TableRow>
+                                        <TableCell>{row.category} {row.brand} {row.model}</TableCell>
+                                        <TableCell>{row.serial}</TableCell>
+                                        <TableCell>{row.owner}</TableCell>
+                                        <TableCell>{row.condition}</TableCell>
+                                        <TableCell>{row.location}</TableCell>
+                                        <TableCell>{row.status}</TableCell>
+                                        <TableCell>{row.used_by}</TableCell>
+                                        <TableCell>{row.inc_no}</TableCell>
+                                        <TableCell>{row.ticket_no}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} align="center">No data</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    }
                 </Box>
                 <Divider />
                 <TablePagination

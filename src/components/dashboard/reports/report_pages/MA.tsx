@@ -5,20 +5,23 @@ import useOnMount from "@mui/utils/useOnMount";
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
+import Loading from "./loading";
+import dayjs from "dayjs";
 const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
 };
 
 // Main interface for Ticket data
 interface MA {
+    created_by: string;
     brand: string;
     ticketTitle: string;
     ticketDescription: string;
     incNo: string; // Incident Number
     ticketNumber: string;
     assignedTo: string;
-    ticketDate: string; // Consider using Date type if you're handling date objects
-    ticketTime: string; // Consider using Date type if you're handling time objects
+    ticketopenDate: string; // Consider using Date type if you're handling date objects
+    ticketopenTime: string; // Consider using Date type if you're handling time objects
     storeName: string;
     storeContactPhone: string;
     ticketStatus: string;
@@ -26,11 +29,13 @@ interface MA {
     ticketCloseTime?: string; // Optional if the ticket is not yet closed
     ticketCloseDate?: string; // Optional if the ticket is not yet closed
     engineerName: string;
-    engineerNote?: string; // Optional if no notes are provided
+    engineerNode?: string; // Optional if no notes are provided
     appointmentTime?: string; // Optional if no appointment is scheduled
     appointmentDate?: string; // Optional if no appointment is scheduled
     solution?: string | null; // Optional if no solution is provided yet
+    slaPriorityGroup?: string;
     slaPriority: string; // SLA Priority
+    slaPriorityTime: string; // Time when the SLA was reached
     recoveryTime: string; // Deadline for SLA (could also be Date if preferred)
     slaOverdue: string; // Whether it was closed within SLA (Yes/No as boolean)
     action: string;
@@ -94,6 +99,7 @@ interface Customer {
 
 
 export default function MAReportPage() {
+    const [loading, setLoading] = React.useState(true);
     const [customers, setCustomers] = React.useState<Customer[]>([]);
     const currentDate = new Date();
     const sevenDaysBefore = new Date(currentDate);
@@ -150,6 +156,7 @@ export default function MAReportPage() {
             .then((response) => response.json())
             .then((data) => {
                 setRows(data.data.report)
+                setLoading(false);
             })
             .catch((error) => {
                 toast.error(error.message);
@@ -158,10 +165,11 @@ export default function MAReportPage() {
 
     const exportToExcel = () => {
         const headers: (keyof MA)[] = [
+            "created_by",
             "brand", "ticketTitle", "ticketDescription", "incNo", "ticketNumber", "assignedTo",
-            "ticketDate", "ticketTime", "storeName", "storeContactPhone", "ticketStatus",
-            "ticketStatusDetail", "ticketCloseTime", "ticketCloseDate", "engineerName",
-            "engineerNote", "appointmentTime", "appointmentDate", "solution", "slaPriority",
+            "ticketopenDate", "ticketopenTime", "storeName", "storeContactPhone", "ticketStatus",
+            "ticketCloseTime", "ticketCloseDate", "engineerName",
+            "engineerNode", "appointmentTime", "appointmentDate", "solution", "slaPriorityGroup", "slaPriority", "slaPriorityTime",
             "recoveryTime", "slaOverdue", "action", "lastUpdated", "storeDeviceBrand1",
             "storeDeviceModel1", "storeDeviceSerial1", "storeDeviceBrand2", "storeDeviceModel2",
             "storeDeviceSerial2", "storeDeviceBrand3", "storeDeviceModel3", "storeDeviceSerial3",
@@ -179,7 +187,13 @@ export default function MAReportPage() {
         const orderedRows = rows.map(row => {
             const orderedRow: Partial<MA> = {};
             headers.forEach(header => {
-                orderedRow[header] = row[header] ?? ''; // Assign an empty string if field is missing
+                //for data field change format as dd/mm/yyyy
+                const dateFields = ['ticketopenDate', 'ticketCloseDate', 'lastUpdated'];
+                if (dateFields.includes(header)) {
+                    orderedRow[header] = row[header] ? dayjs(row[header]).format('DD/MM/YYYY') : '';
+                } else {
+                    orderedRow[header] = row[header] ?? ''; // Assign an empty string if field is missing
+                }
             });
             return orderedRow;
         });
@@ -242,42 +256,44 @@ export default function MAReportPage() {
                 </Stack>
 
                 <Box sx={{ overflowX: 'auto' }}>
-                    <Table sx={{ minWidth: 800, }}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Incident Number</TableCell>
-                                <TableCell>Ticket Number</TableCell>
-                                <TableCell>Title</TableCell>
-                                <TableCell>Status</TableCell>
-                                <TableCell>Assigned To</TableCell>
-                                <TableCell>Engineer</TableCell>
-                                <TableCell>Shop</TableCell>
-                                <TableCell>Due By</TableCell>
-                                <TableCell>Action</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows.length > 0 ?
-                                rows.map((ticket) => (
-                                    <TableRow>
-                                        <TableCell>{ticket.incNo}</TableCell>
-                                        <TableCell>{ticket.ticketNumber}</TableCell>
-                                        <TableCell>{ticket.ticketTitle}</TableCell>
-                                        <TableCell>{ticket.ticketStatus}</TableCell>
-                                        <TableCell>{ticket.assignedTo}</TableCell>
-                                        <TableCell>{ticket.engineerName}</TableCell>
-                                        <TableCell>{ticket.storeName}</TableCell>
-                                        <TableCell>{ticket.recoveryTime}</TableCell>
-                                        <TableCell>{ticket.action}</TableCell>
-                                    </TableRow>
+                    {loading ? <Loading /> :
+                        <Table sx={{ minWidth: 800, }}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Incident Number</TableCell>
+                                    <TableCell>Ticket Number</TableCell>
+                                    <TableCell>Title</TableCell>
+                                    <TableCell>Status</TableCell>
+                                    <TableCell>Assigned To</TableCell>
+                                    <TableCell>Engineer</TableCell>
+                                    <TableCell>Shop</TableCell>
+                                    <TableCell>Due By</TableCell>
+                                    <TableCell>Action</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {rows.length > 0 ?
+                                    rows.map((ticket) => (
+                                        <TableRow>
+                                            <TableCell>{ticket.incNo}</TableCell>
+                                            <TableCell>{ticket.ticketNumber}</TableCell>
+                                            <TableCell>{ticket.ticketTitle}</TableCell>
+                                            <TableCell>{ticket.ticketStatus}</TableCell>
+                                            <TableCell>{ticket.assignedTo}</TableCell>
+                                            <TableCell>{ticket.engineerName}</TableCell>
+                                            <TableCell>{ticket.storeName}</TableCell>
+                                            <TableCell>{ticket.recoveryTime}</TableCell>
+                                            <TableCell>{ticket.action}</TableCell>
+                                        </TableRow>
 
-                                )) : (
-                                    <TableRow>
-                                        <TableCell colSpan={4} align="center">No data</TableCell>
-                                    </TableRow>
-                                )}
-                        </TableBody>
-                    </Table>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center">No data</TableCell>
+                                        </TableRow>
+                                    )}
+                            </TableBody>
+                        </Table>
+                    }
                 </Box>
                 <Divider />
                 <TablePagination

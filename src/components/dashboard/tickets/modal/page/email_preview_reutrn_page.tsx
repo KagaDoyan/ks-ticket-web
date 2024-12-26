@@ -9,8 +9,8 @@ export default function ReturnEmailPreviewPage({ open, handleClose, ticketData }
 
     const status_title = "Return Case";
 
-    const deviceListClean = ticketData?.return_item.filter((element: any) => element.item_type == "spare" && element.status == "return");
-    const replaceDeviceListClean = ticketData?.return_item.filter((element: any) => element.item_type == "store" && element.status == "return");
+    const deviceListClean = ticketData?.return_item.filter((element: any) => element.item_type == "spare" && (element.status == "return" || element.status == "replace"));
+    const replaceDeviceListClean = ticketData?.return_item.filter((element: any) => element.item_type == "store" && (element.status == "return" || element.status == "replace"));
 
     const oldDeviceLabel = "   เก่า<br>";
     const newDeviceLabel = "   ใหม่<br>";

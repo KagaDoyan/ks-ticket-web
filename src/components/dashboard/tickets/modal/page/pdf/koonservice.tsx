@@ -4,7 +4,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
     var spareParts = ''
     var FormName = ''
     var logo = ''
-    
+
 
     switch (form) {
         case 'koon':
@@ -32,27 +32,51 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
             FormName = 'Koon Service'
     }
     if (data.spare_item != null && data.store_item != null) {
-        for (var i = 0; i < 5; i++) {
-            spareParts += `
-            <tr>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.spare_item[i] ? data.spare_item[i].category || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.store_item[i] ? data.store_item[i].brand || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.store_item[i] ? data.store_item[i].serial_number || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.spare_item[i] ? data.spare_item[i].brand || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.spare_item[i] ? data.spare_item[i].serial_number || "" : "_"}
-                </td>
-            </tr>`
+        const groupedData: any = {};
+
+        if (data.spare_item) {
+            data.spare_item.forEach((item: any) => {
+                const category = item.category || "_";
+                if (!groupedData[category]) groupedData[category] = { spare: [], store: [] };
+                groupedData[category].spare.push(item);
+            });
         }
+
+        if (data.store_item) {
+            data.store_item.forEach((item: any) => {
+                const category = item.category || "_";
+                if (!groupedData[category]) groupedData[category] = { spare: [], store: [] };
+                groupedData[category].store.push(item);
+            });
+        }
+
+        Object.keys(groupedData).forEach((category) => {
+            const { spare, store } = groupedData[category];
+            const maxRows = Math.max(spare.length, store.length);
+
+            for (let i = 0; i < maxRows; i++) {
+                spareParts += `
+        <tr>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${category}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < store.length ? store[i].brand || "_" : "_"}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < store.length ? store[i].serial_number || "_" : "_"}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < spare.length ? spare[i].brand || "_" : "_"}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < spare.length ? spare[i].serial_number || "_" : "_"}
+            </td>
+        </tr>`;
+            }
+        
+        console.log(spareParts);});
     }
     var html_format = `<!DOCTYPE html>
 <html lang="en">

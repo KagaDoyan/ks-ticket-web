@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
 import useOnMount from "@mui/utils/useOnMount";
 import dayjs from "dayjs";
-import { TimePicker } from "@mui/x-date-pickers";
+import { DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -661,19 +661,22 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                error
-                                required
-                                label="Due By"
-                                name="due_by"
-                                type="datetime-local"
-                                InputLabelProps={{
-                                    shrink: true,
+                            <DateTimePicker
+                                value={dayjs(formData.due_by)}
+                                label="Due Date"
+                                ampm={false}
+                                format="DD/MM/YYYY HH:mm"
+                                timeSteps={{
+                                    minutes: 1
                                 }}
-                                inputProps={{ readOnly: true }}
-                                value={formData.due_by}
-                                onChange={handleChange}
-                                fullWidth
+                                slotProps={{
+                                    actionBar: {
+                                        actions: ['clear', 'today'],
+                                    },
+                                    textField: { fullWidth: true }
+                                }}
+                                onChange={(date) => setFormData({ ...formData, due_by: date?.toISOString() || "" })}
+                                readOnly
                             />
                         </Grid>
                     </Grid>

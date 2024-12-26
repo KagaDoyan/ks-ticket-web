@@ -4,7 +4,7 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
     var spareParts = ''
     var FormName = ''
     var logo = ''
-    
+
 
     switch (form) {
         case 'koon':
@@ -36,27 +36,62 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
         //     (returnItem: any) => !data.store_item.some((item: any) => item.serial_number === returnItem.serial_number)
         // );
         // data.store_item.push(...unmatchedReturnItems)
-        for (var i = 0; i < 5; i++) {
-            spareParts += `
-            <tr>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.store_item[i] ? data.store_item[i].category || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.spare_item[i] ? data.spare_item[i].brand || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.spare_item[i] ? data.spare_item[i].serial_number || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.store_item[i] ? data.store_item[i].brand || "" : "_"}
-                </td>
-                <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${data.store_item[i] ? data.store_item[i].serial_number || "" : "_"}
-                </td>
-            </tr>`
-        }
+    
+        // Filter items based on the conditions
+        const deviceListClean = data.return_item.filter(
+            (element: any) =>
+                element.item_type === "spare" &&
+                (element.status === "return" || element.status === "replace")
+        );
+        const replaceDeviceListClean = data.return_item.filter(
+            (element: any) =>
+                element.item_type === "store" &&
+                (element.status === "return" || element.status === "replace")
+        );
+    
+        // Group items by category
+        const groupedData: Record<string, { spare: any[]; store: any[] }> = {};
+    
+        deviceListClean.forEach((item:any) => {
+            const category = item.category || "Uncategorized";
+            if (!groupedData[category]) groupedData[category] = { spare: [], store: [] };
+            groupedData[category].spare.push(item);
+        });
+    
+        replaceDeviceListClean.forEach((item:any) => {
+            const category = item.category || "Uncategorized";
+            if (!groupedData[category]) groupedData[category] = { spare: [], store: [] };
+            groupedData[category].store.push(item);
+        });
+    
+        // Generate rows
+    
+        Object.keys(groupedData).forEach((category) => {
+            const { spare, store } = groupedData[category];
+            const maxRows = Math.max(spare.length, store.length);
+    
+            for (let i = 0; i < maxRows; i++) {
+                spareParts += `
+                <tr>
+                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                        ${category}
+                    </td>
+                    <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
+                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                        ${spare[i]?.brand || "_"}
+                    </td>
+                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                        ${spare[i]?.serial_number || "_"}
+                    </td>
+                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                        ${store[i]?.brand || "_"}
+                    </td>
+                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                        ${store[i]?.serial_number || "_"}
+                    </td>
+                </tr>`;
+            }
+        });
     }
     var html_format = `<!DOCTYPE html>
 <html lang="en">

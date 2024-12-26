@@ -4,6 +4,7 @@ import { Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHe
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
+import Loading from "./loading";
 const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
 };
@@ -25,6 +26,7 @@ interface broken {
 }
 
 export default function BrokenPartReportPage() {
+    const [loading, setLoading] = React.useState(true);
     const currentDate = new Date();
     const sevenDaysBefore = new Date(currentDate);
     sevenDaysBefore.setDate(currentDate.getDate() - 7);
@@ -62,6 +64,7 @@ export default function BrokenPartReportPage() {
             .then((response) => response.json())
             .then((data) => {
                 setRows(data.data.report)
+                setLoading(false)
             })
             .catch((error) => {
                 toast.error(error.message);
@@ -73,7 +76,7 @@ export default function BrokenPartReportPage() {
     }, [from, to]);
 
     const exportToExcel = () => {
-        
+
 
         const worksheet = XLSX.utils.json_to_sheet(rows);
         const workbook = XLSX.utils.book_new();
@@ -114,43 +117,45 @@ export default function BrokenPartReportPage() {
                 </Stack>
 
                 <Box sx={{ overflowX: 'auto' }}>
-                    <Table sx={{ minWidth: 800 }}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>inc_no</TableCell>
-                                <TableCell>ticket_date</TableCell>
-                                <TableCell>ticket_time</TableCell>
-                                <TableCell>store_id</TableCell>
-                                <TableCell>store_name</TableCell>
-                                <TableCell>ticket_title</TableCell>
-                                <TableCell>item</TableCell>
-                                <TableCell>serial</TableCell>
-                                <TableCell>warranty</TableCell>
-                                <TableCell>location</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows.length > 0 ? rows.map((row) => (
-                                // Example Row: Uncomment and replace with your actual data structure
+                    {loading ? <Loading /> :
+                        <Table sx={{ minWidth: 800 }}>
+                            <TableHead>
                                 <TableRow>
-                                    <TableCell>{row.inc_no}</TableCell> 
-                                    <TableCell>{row.ticket_date}</TableCell>
-                                    <TableCell>{row.ticket_time}</TableCell>
-                                    <TableCell>{row.store_id}</TableCell>
-                                    <TableCell>{row.store_name}</TableCell>
-                                    <TableCell>{row.ticket_title}</TableCell>
-                                    <TableCell>{row.category} {row.brand} {row.model}</TableCell>
-                                    <TableCell>{row.serial}</TableCell>
-                                    <TableCell>{row.warranty}</TableCell>
-                                    <TableCell>{row.location}</TableCell>
+                                    <TableCell>inc_no</TableCell>
+                                    <TableCell>ticket_date</TableCell>
+                                    <TableCell>ticket_time</TableCell>
+                                    <TableCell>store_id</TableCell>
+                                    <TableCell>store_name</TableCell>
+                                    <TableCell>ticket_title</TableCell>
+                                    <TableCell>item</TableCell>
+                                    <TableCell>serial</TableCell>
+                                    <TableCell>warranty</TableCell>
+                                    <TableCell>location</TableCell>
                                 </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} align="center">No data</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                            </TableHead>
+                            <TableBody>
+                                {rows.length > 0 ? rows.map((row) => (
+                                    // Example Row: Uncomment and replace with your actual data structure
+                                    <TableRow>
+                                        <TableCell>{row.inc_no}</TableCell>
+                                        <TableCell>{row.ticket_date}</TableCell>
+                                        <TableCell>{row.ticket_time}</TableCell>
+                                        <TableCell>{row.store_id}</TableCell>
+                                        <TableCell>{row.store_name}</TableCell>
+                                        <TableCell>{row.ticket_title}</TableCell>
+                                        <TableCell>{row.category} {row.brand} {row.model}</TableCell>
+                                        <TableCell>{row.serial}</TableCell>
+                                        <TableCell>{row.warranty}</TableCell>
+                                        <TableCell>{row.location}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} align="center">No data</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    }
                 </Box>
                 <Divider />
                 <TablePagination
