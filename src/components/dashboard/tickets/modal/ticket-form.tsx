@@ -4,7 +4,8 @@ import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
 import useOnMount from "@mui/utils/useOnMount";
 import dayjs from "dayjs";
-import { DateTimePicker, TimePicker } from "@mui/x-date-pickers";
+import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
+import { text } from "stream/consumers";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -324,7 +325,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
             const due_by = open_date.setSeconds(open_date.getSeconds() + priority_time);
             setFormData({
                 ...formData,
-                due_by: dayjs(due_by).format("YYYY-MM-DD HH:mm:ss")
+                due_by: dayjs(due_by).format("YYYY-MM-DD HH:mm")
             })
         }
     }, [formData.open_date, formData.open_time, priority_time])
@@ -455,18 +456,20 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                required
+                            <DatePicker
                                 label="Open Date"
                                 name="open_date"
-                                type="date"
-                                InputLabelProps={{
-                                    shrink: true,
+                                slotProps={{ textField: { fullWidth: true, required: true } }}
+                                format="DD/MM/YYYY"
+                                value={formData.open_date ? dayjs(formData.open_date, "YYYY-MM-DD") : null}
+                                onChange={(newValue) => {
+                                    if (newValue) {
+                                        setFormData({
+                                            ...formData,
+                                            open_date: newValue.format('YYYY-MM-DD')
+                                        });
+                                    }
                                 }}
-                                value={formData.open_date}
-                                onChange={handleChange}
-                                fullWidth
-
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -603,17 +606,20 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                required
+                            <DatePicker
                                 label="Appointment Date"
                                 name="appointment_date"
-                                type="date"
-                                InputLabelProps={{
-                                    shrink: true,
+                                slotProps={{ textField: { fullWidth: true, required: true } }}
+                                format="DD/MM/YYYY"
+                                value={dayjs(formData.appointment_date, "YYYY-MM-DD")}
+                                onChange={(newValue) => {
+                                    if (newValue) {
+                                        setFormData({
+                                            ...formData,
+                                            appointment_date: newValue.format('YYYY-MM-DD')
+                                        })
+                                    }
                                 }}
-                                value={formData.appointment_date}
-                                onChange={handleChange}
-                                fullWidth
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -662,20 +668,18 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <DateTimePicker
-                                value={dayjs(formData.due_by)}
+                                value={formData.due_by ? dayjs(formData.due_by, "YYYY-MM-DD HH:mm") : null}
                                 label="Due Date"
                                 ampm={false}
-                                format="DD/MM/YYYY HH:mm"
                                 timeSteps={{
                                     minutes: 1
                                 }}
+                                format="DD/MM/YYYY HH:mm"
                                 slotProps={{
-                                    actionBar: {
-                                        actions: ['clear', 'today'],
-                                    },
-                                    textField: { fullWidth: true }
+                                    textField: {
+                                        fullWidth: true
+                                    }
                                 }}
-                                onChange={(date) => setFormData({ ...formData, due_by: date?.toISOString() || "" })}
                                 readOnly
                             />
                         </Grid>

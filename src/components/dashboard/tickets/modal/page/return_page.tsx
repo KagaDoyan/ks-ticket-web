@@ -13,7 +13,7 @@ import { EmailOutlined } from "@mui/icons-material";
 import ImageUpload, { ExtendedFile } from "./ImageUpload";
 import { set } from "nprogress";
 import ReturnEmailPreviewPage from "./email_preview_reutrn_page";
-import { DateTimePicker, TimePicker } from "@mui/x-date-pickers";
+import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 
 interface brand {
     id: number
@@ -702,18 +702,20 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField
-                        required
-                        type="date"
+                    <DatePicker
                         label="close date"
                         name="close_date"
-                        value={formData.close_date}
-                        onChange={handleChange}
-                        InputLabelProps={
-                            { shrink: true }
-                        }
-                        fullWidth
-                        rows={2}
+                        slotProps={{ textField: { fullWidth: true, required: true } }}
+                        format="DD/MM/YYYY"
+                        value={dayjs(formData.close_date, "YYYY-MM-DD")}
+                        onChange={(newValue) => {
+                            if (newValue) {
+                                setFormData({
+                                    ...formData,
+                                    close_date: newValue.format('YYYY-MM-DD')
+                                })
+                            }
+                        }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -825,16 +827,20 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <TextField
-                        label="Warranty Expiry Date"
-                        type="date"
-                        InputLabelProps={{ shrink: true }}
-                        value={formData.warranty_exp || ''}
-                        onChange={e => setFormData({
-                            ...formData,
-                            warranty_exp: e.target.value ? dayjs(e.target.value).format('YYYY-MM-DD') : ''
-                        })}
-                        fullWidth
+                    <DatePicker
+                        label="warranty expiry"
+                        name="warranty_exp"
+                        slotProps={{ textField: { fullWidth: true, required: true } }}
+                        format="DD/MM/YYYY"
+                        value={dayjs(formData.warranty_exp, "YYYY-MM-DD")}
+                        onChange={(newValue) => {
+                            if (newValue) {
+                                setFormData({
+                                    ...formData,
+                                    warranty_exp: newValue.format('YYYY-MM-DD')
+                                })
+                            }
+                        }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={12}>
@@ -951,15 +957,16 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
-                            <TextField
-                                disabled={item.id != 0}
+                            <DatePicker
                                 label="Warranty Expiry Date"
-                                type="date"
-                                InputLabelProps={{ shrink: true }}
-                                value={item.warranty_expire_date}
-                                onChange={(e) => handleShopItemChange(index, 'warranty_expire_date', e.target.value)}
-                                fullWidth
-                                size="small"
+                                value={dayjs(item.warranty_expire_date)}
+                                onChange={(e) => { if (e) handleShopItemChange(index, 'warranty_expire_date', e.format('YYYY-MM-DD')) }}
+                                slotProps={{
+                                    textField: {
+                                        fullWidth: true,
+                                        size: "small"
+                                    }
+                                }}
                                 sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
                             />
                             <Autocomplete
@@ -1097,15 +1104,16 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
-                            <TextField
+                            <DatePicker
                                 label="Warranty Expiry Date"
-                                type="date"
-                                disabled
-                                InputLabelProps={{ shrink: true }}
-                                value={item.warranty_expire_date}
-                                onChange={(e) => handleSpareItemChange(index, 'warranty_expire_date', e.target.value)}
-                                fullWidth
-                                size="small"
+                                value={dayjs(item.warranty_expire_date)}
+                                onChange={(e) => { if (e) handleSpareItemChange(index, 'warranty_expire_date', e.format('YYYY-MM-DD')) }}
+                                slotProps={{
+                                    textField: {
+                                        fullWidth: true,
+                                        size: "small"
+                                    }
+                                }}
                                 sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
                             />
                             <Autocomplete

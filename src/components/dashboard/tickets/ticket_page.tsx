@@ -289,8 +289,8 @@ export function TicketPage(): React.JSX.Element {
                       <TableCell>{row.title}</TableCell>
                       <TableCell>{row.shop.shop_number + ' - ' + row.shop.shop_name}</TableCell>
                       <TableCell>{row.created_user.fullname}</TableCell>
-                      <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
-                      <TableCell>{dayjs(row.due_by).format('MMM D, YYYY hh:mm:ss')}</TableCell>
+                      <TableCell>{dayjs(row.created_at).format('DD/MM/YYYY')}</TableCell>
+                      <TableCell>{dayjs(row.due_by).format('DD/MM/YYYY hh:mm:ss')}</TableCell>
                       <TableCell>{row.engineer.name + ' ' + row.engineer.lastname}</TableCell>
                       <TableCell><Box sx={{ bgcolor: getStatusColor(row.ticket_status), display: 'inline-block', height: '10', width: '10', borderRadius: '5px', marginRight: '5px', padding: '5px', color: 'white' }}>{row.ticket_status}</Box></TableCell>
                       <TableCell>

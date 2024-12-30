@@ -11,6 +11,7 @@ import { authClient } from "@/lib/auth/client";
 import dayjs from "dayjs";
 import TableModal from "./modal/data_modal";
 import React from "react";
+import { DatePicker } from "@mui/x-date-pickers";
 
 interface TicketData {
     id: number;
@@ -221,27 +222,23 @@ export default function DashboardPage(): React.JSX.Element {
                     <Box>
                         <Card sx={{ p: 2 }}>
                             <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                                <TextField
+                                <DatePicker
                                     label="Start Date"
-                                    type="date"
-                                    InputLabelProps={{
-                                        shrink: true,
+                                    value={dayjs(start_date)}
+                                    format="DD/MM/YYYY"
+                                    onChange={(newValue) => {
+                                        if (newValue) { setStart(newValue.format('DD/MM/YYYY')) }
                                     }}
-                                    variant="outlined"
-                                    size="small"
-                                    onChange={(e) => setStart(e.target.value)}
-                                    value={start_date}
+                                    slotProps={{ textField: { size: 'small' } }}
                                 />
-                                <TextField
+                                <DatePicker
                                     label="End Date"
-                                    type="date"
-                                    InputLabelProps={{
-                                        shrink: true,
+                                    value={dayjs(end_date)}
+                                    format="DD/MM/YYYY"
+                                    onChange={(newValue) => {
+                                        if (newValue) { setEnd(newValue.format('DD/MM/YYYY')) }
                                     }}
-                                    variant="outlined"
-                                    size="small"
-                                    onChange={(e) => setEnd(e.target.value)}
-                                    value={end_date}
+                                    slotProps={{ textField: { size: 'small' } }}
                                 />
                                 {/* <Autocomplete
                                     options={customersOption}

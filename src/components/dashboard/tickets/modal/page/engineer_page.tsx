@@ -11,7 +11,7 @@ import MenuButton from "./menu_button";
 import { EmailOutlined } from "@mui/icons-material";
 import EmailPreviewPagefunction from "./email_preview_page";
 import React from "react";
-import { DateTimePicker, TimePicker } from "@mui/x-date-pickers";
+import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 
 interface brand {
     id: number
@@ -661,15 +661,23 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                 {formData.ticket_status == 'close' &&
                     <>
                         <Grid item xs={12} sm={4}>
-                            <TextField
+                            <DatePicker
+                                label="close date"
                                 name="close_date"
-                                label="Close date"
-                                type="date"
-                                value={formData.close_date}
-                                onChange={handleChange}
-                                fullWidth
-                                required
-                                InputLabelProps={{ shrink: true }}
+                                slotProps={{
+                                    textField: { fullWidth: true, required: true },
+                                    actionBar: { actions: ['clear', 'today'] }
+                                }}
+                                format="DD/MM/YYYY"
+                                value={dayjs(formData.close_date, "YYYY-MM-DD")}
+                                onChange={(newValue) => {
+                                    if (newValue) {
+                                        setFormData({
+                                            ...formData,
+                                            close_date: newValue.format('YYYY-MM-DD')
+                                        })
+                                    }
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
@@ -779,13 +787,23 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <TextField
-                        label="Warranty Expiry Date"
-                        type="date"
-                        InputLabelProps={{ shrink: true }}
-                        value={formData.warranty_exp}
-                        onChange={e => setFormData({ ...formData, warranty_exp: dayjs(e.target.value).format('YYYY-MM-DD') })}
-                        fullWidth
+                    <DatePicker
+                        label="warranty expiry"
+                        name="warranty_exp"
+                        slotProps={{
+                            textField: { fullWidth: true },
+                            actionBar: { actions: ['clear', 'today'] }
+                        }}
+                        format="DD/MM/YYYY"
+                        value={dayjs(formData.warranty_exp, "YYYY-MM-DD")}
+                        onChange={(newValue) => {
+                            if (newValue) {
+                                setFormData({
+                                    ...formData,
+                                    warranty_exp: newValue.format('YYYY-MM-DD')
+                                })
+                            }
+                        }}
                     />
                 </Grid>
             </Grid>
@@ -875,14 +893,18 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
-                            <TextField
+                            <DatePicker
                                 label="Warranty Expiry Date"
-                                type="date"
-                                InputLabelProps={{ shrink: true }}
-                                value={item.warranty_expire_date}
-                                onChange={(e) => handleShopItemChange(index, 'warranty_expire_date', e.target.value)}
-                                fullWidth
-                                size="small"
+                                format="DD/MM/YYYY"
+                                value={dayjs(item.warranty_expire_date)}
+                                onChange={(e) => { if (e) handleShopItemChange(index, 'warranty_expire_date', e.format('YYYY-MM-DD')) }}
+                                slotProps={{
+                                    textField: {
+                                        fullWidth: true,
+                                        size: "small"
+                                    },
+                                    actionBar: { actions: ['clear', 'today'] }
+                                }}
                                 sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
                             />
                             <Button
@@ -993,14 +1015,18 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 }}
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
-                            <TextField
+                            <DatePicker
                                 label="Warranty Expiry Date"
-                                type="date"
-                                InputLabelProps={{ shrink: true }}
-                                value={item.warranty_expire_date}
-                                onChange={(e) => handleSpareItemChange(index, 'warranty_expire_date', e.target.value)}
-                                fullWidth
-                                size="small"
+                                format="DD/MM/YYYY"
+                                value={dayjs(item.warranty_expire_date)}
+                                onChange={(e) => { if (e) handleSpareItemChange(index, 'warranty_expire_date', e.format('YYYY-MM-DD')) }}
+                                slotProps={{
+                                    textField: {
+                                        fullWidth: true,
+                                        size: "small"
+                                    },
+                                    actionBar: { actions: ['clear', 'today'] }
+                                }}
                                 sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
                             />
                             <Autocomplete

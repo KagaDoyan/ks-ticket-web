@@ -2,6 +2,8 @@ import { authClient } from "@/lib/auth/client";
 import { IosShare, Refresh } from "@mui/icons-material";
 import { Autocomplete, Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import useOnMount from "@mui/utils/useOnMount";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
@@ -79,7 +81,7 @@ export default function MAReportPage() {
     };
 
     const exportToExcel = () => {
-        
+
 
         const worksheet = XLSX.utils.json_to_sheet(rows);
         const workbook = XLSX.utils.book_new();
@@ -101,27 +103,23 @@ export default function MAReportPage() {
             <Card sx={{ p: 2 }}>
                 {/* Stack for alignment and spacing of inputs */}
                 <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                    <TextField
+                    <DatePicker
                         label="Start Date"
-                        type="date"
-                        InputLabelProps={{
-                            shrink: true,
+                        value={dayjs(from)}
+                        format="DD/MM/YYYY"
+                        onChange={(newValue) => {
+                            if (newValue) { setFrom(newValue.format('DD/MM/YYYY')) }
                         }}
-                        variant="outlined"
-                        size="small"
-                        onChange={(e) => setFrom(e.target.value)}
-                        value={from}
+                        slotProps={{ textField: { size: 'small' } }}
                     />
-                    <TextField
+                    <DatePicker
                         label="End Date"
-                        type="date"
-                        InputLabelProps={{
-                            shrink: true,
+                        value={dayjs(to)}
+                        format="DD/MM/YYYY"
+                        onChange={(newValue) => {
+                            if (newValue) { setTo(newValue.format('DD/MM/YYYY')) }
                         }}
-                        variant="outlined"
-                        size="small"
-                        onChange={(e) => setTo(e.target.value)}
-                        value={to}
+                        slotProps={{ textField: { size: 'small' } }}
                     />
                     <TextField
                         label="Search"

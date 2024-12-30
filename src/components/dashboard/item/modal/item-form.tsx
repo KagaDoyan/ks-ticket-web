@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
 import useOnMount from "@mui/utils/useOnMount";
 import formatDate from "@/lib/dateformat";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -540,16 +542,22 @@ export default function ItemModalForm({ open, handleClose, itemID, fetchitemData
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                name="warranty_expiry_date"
+                            <DatePicker
                                 label="Warranty Expiry Date"
-                                type="date"
-                                InputLabelProps={{
-                                    shrink: true,
+                                value={formData.warranty_expiry_date ? dayjs(formData.warranty_expiry_date, "YYYY-MM-DD") : null}
+                                slotProps={{ 
+                                    textField: { fullWidth: true },
+                                    actionBar: { actions: ['clear', 'today'] }
+                                 }}
+                                format="DD/MM/YYYY"
+                                onChange={(newValue) => {
+                                    if (newValue) {
+                                        setFormData({
+                                            ...formData,
+                                            warranty_expiry_date: newValue.format('YYYY-MM-DD')
+                                        })
+                                    }
                                 }}
-                                value={formData.warranty_expiry_date}
-                                onChange={handleChange}
-                                fullWidth
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>

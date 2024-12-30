@@ -5,6 +5,8 @@ import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
 import Loading from "./loading";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
 };
@@ -90,27 +92,23 @@ export default function BrokenPartReportPage() {
             <Card sx={{ p: 2 }}>
                 {/* Stack for alignment and spacing of inputs */}
                 <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                    <TextField
+                <DatePicker
                         label="Start Date"
-                        type="date"
-                        InputLabelProps={{
-                            shrink: true,
+                        value={dayjs(from)}
+                        format="DD/MM/YYYY"
+                        onChange={(newValue) => {
+                            if (newValue) { setFrom(newValue.format('DD/MM/YYYY')) }
                         }}
-                        variant="outlined"
-                        size="small"
-                        onChange={(e) => setFrom(e.target.value)}
-                        value={from}
+                        slotProps={{ textField: { size: 'small' } }}
                     />
-                    <TextField
+                    <DatePicker
                         label="End Date"
-                        type="date"
-                        InputLabelProps={{
-                            shrink: true,
+                        value={dayjs(to)}
+                        format="DD/MM/YYYY"
+                        onChange={(newValue) => {
+                            if (newValue) { setTo(newValue.format('DD/MM/YYYY')) }
                         }}
-                        variant="outlined"
-                        size="small"
-                        onChange={(e) => setTo(e.target.value)}
-                        value={to}
+                        slotProps={{ textField: { size: 'small' } }}
                     />
                     <Button variant="contained" startIcon={<Refresh />} onClick={fetchMAData}>Refresh</Button>
                     <Button variant="contained" startIcon={<IosShare />} color="warning" onClick={exportToExcel}>Export</Button>

@@ -2,6 +2,8 @@ import { Box, Modal, Button, TextField, Typography, Stack } from "@mui/material"
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
+import dayjs from "dayjs";
+import { DatePicker } from "@mui/x-date-pickers";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -180,31 +182,35 @@ export default function SellModalForm({ open, handleClose, SellID, fetchsellData
                         onChange={handleChange}
                         required
                     />
-                    <TextField
+                    <DatePicker
                         label="warranty"
                         name="warranty"
-                        type="date"
-                        InputLabelProps={
-                            {
-                                shrink: true
+                        slotProps={{ textField: { fullWidth: true, required: true } }}
+                        format="DD/MM/YYYY"
+                        value={dayjs(formData.warranty, 'YYYY-MM-DD')}
+                        onChange={(newValue) => {
+                            if (newValue) {
+                                setFormData({
+                                    ...formData,
+                                    warranty: newValue.format('YYYY-MM-DD')
+                                })
                             }
-                        }
-                        value={formData.warranty}
-                        onChange={handleChange}
-                        required
+                        }}
                     />
-                    <TextField
-                        label="sell_date"
+                    <DatePicker
+                        label="sell Date"
                         name="sell_date"
-                        type="date"
-                        value={formData.sell_date}
-                        InputLabelProps={
-                            {
-                                shrink: true
+                        slotProps={{ textField: { fullWidth: true, required: true } }}
+                        format="DD/MM/YYYY"
+                        value={dayjs(formData.sell_date, 'YYYY-MM-DD')}
+                        onChange={(newValue) => {
+                            if (newValue) {
+                                setFormData({
+                                    ...formData,
+                                    sell_date: newValue.format('YYYY-MM-DD')
+                                })
                             }
-                        }
-                        onChange={handleChange}
-                        required
+                        }}
                     />
                     <TextField
                         label="buyer_name"
@@ -224,7 +230,7 @@ export default function SellModalForm({ open, handleClose, SellID, fetchsellData
                         }
                         onChange={handleChange}
                     />
-                         <TextField
+                    <TextField
                         label="base_price"
                         name="base_price"
                         type="number"
