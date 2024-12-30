@@ -830,16 +830,14 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                     <DatePicker
                         label="warranty expiry"
                         name="warranty_exp"
-                        slotProps={{ textField: { fullWidth: true, required: true } }}
+                        slotProps={{ textField: { fullWidth: true, required: true }, actionBar: { actions: ['clear', 'today'] } }}
                         format="DD/MM/YYYY"
                         value={dayjs(formData.warranty_exp, "YYYY-MM-DD")}
                         onChange={(newValue) => {
-                            if (newValue) {
-                                setFormData({
-                                    ...formData,
-                                    warranty_exp: newValue.format('YYYY-MM-DD')
-                                })
-                            }
+                            setFormData({
+                                ...formData,
+                                warranty_exp: newValue ? newValue.format('YYYY-MM-DD') : ''
+                            })
                         }}
                     />
                 </Grid>
@@ -1105,11 +1103,13 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                                 renderInput={(params) => <TextField required {...params} label="Model" />}
                             />
                             <DatePicker
+                                readOnly
                                 label="Warranty Expiry Date"
                                 value={dayjs(item.warranty_expire_date)}
                                 onChange={(e) => { if (e) handleSpareItemChange(index, 'warranty_expire_date', e.format('YYYY-MM-DD')) }}
                                 slotProps={{
                                     textField: {
+                                        disabled: true,
                                         fullWidth: true,
                                         size: "small"
                                     }

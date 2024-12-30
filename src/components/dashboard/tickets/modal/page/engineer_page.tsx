@@ -94,12 +94,12 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
     const [BrandOption, setBrandOption] = useState<brand[]>([])
     const [ModelOption, setModelOption] = useState<model[]>([])
     const [CategoryOption, setCategoryOption] = useState<category[]>([])
-    const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string, status: string }[]>([]);
-    const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, status: string }[]>([]);
+    const [shopitems, setShopItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id?: number, model: string, warranty_expire_date: string, warranty_exp: string, status: string }[]>([]);
+    const [spareitems, setSpareItem] = useState<{ id?: number, serial_number: string, category: string, category_id?: number, brand: string, brand_id?: number, model_id: number, model: string, warranty_expire_date: string, warranty_exp: string, status: string }[]>([]);
 
     const addShopItem = () => {
         if (shopitems.length < 4) {
-            setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'repair' }]);
+            setShopItem([...shopitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'repair', warranty_exp: '' }]);
         } else {
             toast.error("You can only add up to 5 items.");
         }
@@ -139,7 +139,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                     category: data.data.category.name,
                                     brand: data.data.brand.name,
                                     model: data.data.model.name,
-                                    warranty_expire_date: formatDate(data.data.warranty_expiry_date)
+                                    warranty_expire_date: data.data.warranty_expiry_date ? formatDate(data.data.warranty_expiry_date) : '',
                                 };
                                 return newItems;
                             });
@@ -217,7 +217,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
 
     const addSpareItem = () => {
         if (spareitems.length < 4) {
-            setSpareItem([...spareitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'spare', model_id: 0 }]);
+            setSpareItem([...spareitems, { serial_number: '', category: '', brand: '', model: '', warranty_expire_date: '', status: 'spare', model_id: 0, warranty_exp: '' }]);
         } else {
             toast.error("You can only add up to 4 items.");
         }
@@ -671,12 +671,10 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                                 format="DD/MM/YYYY"
                                 value={dayjs(formData.close_date, "YYYY-MM-DD")}
                                 onChange={(newValue) => {
-                                    if (newValue) {
-                                        setFormData({
-                                            ...formData,
-                                            close_date: newValue.format('YYYY-MM-DD')
-                                        })
-                                    }
+                                    setFormData({
+                                        ...formData,
+                                        close_date: newValue ? newValue.format('YYYY-MM-DD') : ""
+                                    })
                                 }}
                             />
                         </Grid>
@@ -797,12 +795,10 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                         format="DD/MM/YYYY"
                         value={dayjs(formData.warranty_exp, "YYYY-MM-DD")}
                         onChange={(newValue) => {
-                            if (newValue) {
-                                setFormData({
-                                    ...formData,
-                                    warranty_exp: newValue.format('YYYY-MM-DD')
-                                })
-                            }
+                            setFormData({
+                                ...formData,
+                                warranty_exp: newValue ? newValue.format('YYYY-MM-DD') : ""
+                            })
                         }}
                     />
                 </Grid>
@@ -819,110 +815,130 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                             Add item
                         </Button>
                     </Grid>
-                ) : shopitems.map((item, index) => (
-                    <Grid item xs={12} sm={6} key={index}>
-                        <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
-                            <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                Item {index + 1} {item.id ? <p style={{ color: 'green' }}>Saved</p> : ""}
-                            </Typography>
-                            <TextField
-                                label="Id"
-                                value={item.id}
-                                sx={{ display: 'none' }}
-                            />
-                            <TextField
-                                label="Serial Number"
-                                value={item.serial_number}
-                                onChange={(e) => handleShopItemChange(index, 'serial_number', e.target.value)}
-                                fullWidth
-                                size="small"
-                                sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
-                            />
-                            <Autocomplete
-                                size="small"
-                                options={CategoryOption}
-                                getOptionLabel={(option) => option.name}
-                                value={CategoryOption.find((category) => category.name === item.category) || null}
-                                onChange={(event, newValue, reason) => {
-                                    if (reason === "clear") {
-                                        handleShopItemChange(index, 'category_id', "0")
-                                        handleShopItemChange(index, 'category', "")
+                ) : shopitems.map((item, index) => {
+                    item.warranty_expire_date = item.warranty_exp ? dayjs(item.warranty_exp).format('YYYY-MM-DD') : '';
+                    return (
+                        <Grid item xs={12} sm={6} key={index}>
+                            <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
+                                <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
+                                    Item {index + 1} {item.id ? <p style={{ color: 'green' }}>Saved</p> : ""}
+                                </Typography>
+                                <TextField
+                                    label="Id"
+                                    value={item.id}
+                                    sx={{ display: 'none' }}
+                                />
+                                <TextField
+                                    label="Serial Number"
+                                    value={item.serial_number}
+                                    onChange={(e) => handleShopItemChange(index, 'serial_number', e.target.value)}
+                                    fullWidth
+                                    size="small"
+                                    sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
+                                />
+                                <Autocomplete
+                                    size="small"
+                                    options={CategoryOption}
+                                    getOptionLabel={(option) => option.name}
+                                    value={CategoryOption.find((category) => category.name === item.category) || null}
+                                    onChange={(event, newValue, reason) => {
+                                        if (reason === "clear") {
+                                            handleShopItemChange(index, 'category_id', "0")
+                                            handleShopItemChange(index, 'category', "")
+                                        }
+                                        const selectedOption = newValue ? newValue : null;
+                                        if (!selectedOption) {
+                                            return;
+                                        }
+                                        handleShopItemChange(index, 'category_id', newValue?.id.toString() || "0");
+                                        handleShopCategoryChange(index, selectedOption);
+                                    }}
+                                    renderInput={(params) => <TextField required {...params} label="Category" />}
+                                />
+                                <Autocomplete
+                                    size="small"
+                                    options={BrandOption}
+                                    getOptionLabel={(option) => option.name}
+                                    value={BrandOption.find((brand) => brand.name === item.brand) || null}
+                                    onChange={(event, newValue, reason) => {
+                                        if (reason === "clear") {
+                                            handleShopItemChange(index, 'brand_id', "0")
+                                            handleShopItemChange(index, 'brand', "")
+                                        }
+                                        const selectedOption = newValue ? newValue : null;
+                                        if (!selectedOption) {
+                                            return;
+                                        }
+                                        handleShopBrandChange(index, selectedOption);
+                                    }}
+                                    renderInput={(params) => <TextField required {...params} label="Brand" />}
+                                />
+                                <Autocomplete
+                                    size="small"
+                                    options={ModelOption}
+                                    getOptionLabel={(option) => option.name}
+                                    value={ModelOption.find((model) => model.name === item.model) || null}
+                                    onChange={(event, newValue, reason) => {
+                                        if (reason === "clear") {
+                                            handleShopItemChange(index, 'model_id', "0")
+                                            handleShopItemChange(index, 'model', "")
+                                        }
+                                        const selectedOption = newValue ? newValue : null;
+                                        if (!selectedOption) {
+                                            return;
+                                        }
+                                        handleShopModelChange(index, selectedOption);
+                                    }}
+                                    renderInput={(params) => <TextField required {...params} label="Model" />}
+                                />
+                                <DatePicker
+                                    label="Warranty Expiry Date"
+                                    name="warranty_expire_date"
+                                    format="DD/MM/YYYY"
+                                    value={item.warranty_expire_date ? dayjs(item.warranty_expire_date, "YYYY-MM-DD") : null}
+                                    onChange={(e) => {
+                                        handleShopItemChange(
+                                            index,
+                                            'warranty_expire_date',
+                                            e ? e.format("YYYY-MM-DD") : ""
+                                        )
+                                        handleShopItemChange(
+                                            index,
+                                            'warranty_exp',
+                                            e ? e.format("YYYY-MM-DD") : ""
+                                        )
                                     }
-                                    const selectedOption = newValue ? newValue : null;
-                                    if (!selectedOption) {
-                                        return;
                                     }
-                                    handleShopItemChange(index, 'category_id', newValue?.id.toString() || "0");
-                                    handleShopCategoryChange(index, selectedOption);
-                                }}
-                                renderInput={(params) => <TextField required {...params} label="Category" />}
-                            />
-                            <Autocomplete
-                                size="small"
-                                options={BrandOption}
-                                getOptionLabel={(option) => option.name}
-                                value={BrandOption.find((brand) => brand.name === item.brand) || null}
-                                onChange={(event, newValue, reason) => {
-                                    if (reason === "clear") {
-                                        handleShopItemChange(index, 'brand_id', "0")
-                                        handleShopItemChange(index, 'brand', "")
-                                    }
-                                    const selectedOption = newValue ? newValue : null;
-                                    if (!selectedOption) {
-                                        return;
-                                    }
-                                    handleShopBrandChange(index, selectedOption);
-                                }}
-                                renderInput={(params) => <TextField required {...params} label="Brand" />}
-                            />
-                            <Autocomplete
-                                size="small"
-                                options={ModelOption}
-                                getOptionLabel={(option) => option.name}
-                                value={ModelOption.find((model) => model.name === item.model) || null}
-                                onChange={(event, newValue, reason) => {
-                                    if (reason === "clear") {
-                                        handleShopItemChange(index, 'model_id', "0")
-                                        handleShopItemChange(index, 'model', "")
-                                    }
-                                    const selectedOption = newValue ? newValue : null;
-                                    if (!selectedOption) {
-                                        return;
-                                    }
-                                    handleShopModelChange(index, selectedOption);
-                                }}
-                                renderInput={(params) => <TextField required {...params} label="Model" />}
-                            />
-                            <DatePicker
-                                label="Warranty Expiry Date"
-                                format="DD/MM/YYYY"
-                                value={dayjs(item.warranty_expire_date)}
-                                onChange={(e) => { if (e) handleShopItemChange(index, 'warranty_expire_date', e.format('YYYY-MM-DD')) }}
-                                slotProps={{
-                                    textField: {
-                                        fullWidth: true,
-                                        size: "small"
-                                    },
-                                    actionBar: { actions: ['clear', 'today'] }
-                                }}
-                                sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
-                            />
-                            <Button
-                                onClick={() => removeShopItem(index)}
-                                variant="outlined"
-                                color="error"
-                                size="small"
-                            >
-                                Remove
-                            </Button>
-                            {index === shopitems.length - 1 && shopitems.length < 4 && (
-                                <Button onClick={addShopItem} variant="contained" color="primary">
-                                    Add More
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            size: "small",
+                                        },
+                                        actionBar: { actions: ['clear', 'today'] },
+                                    }}
+                                    sx={{
+                                        '& .MuiInputBase-input': { padding: '8px' },
+                                        border: '1px solid #ddd',
+                                        borderRadius: 1,
+                                    }}
+                                />
+                                <Button
+                                    onClick={() => removeShopItem(index)}
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                >
+                                    Remove
                                 </Button>
-                            )}
-                        </Stack>
-                    </Grid>
-                ))}
+                                {index === shopitems.length - 1 && shopitems.length < 4 && (
+                                    <Button onClick={addShopItem} variant="contained" color="primary">
+                                        Add More
+                                    </Button>
+                                )}
+                            </Stack>
+                        </Grid>
+                    )
+                })}
             </Grid>
             <Stack justifyContent={"flex-start"} direction="row" spacing={2}>
                 <Typography sx={{ fontSize: 17, color: 'grey', paddingBottom: 1, paddingTop: 1 }}>
@@ -936,136 +952,142 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                             Add item
                         </Button>
                     </Grid>
-                ) : spareitems.map((item, index) => (
-                    <Grid item xs={12} sm={6} key={index}>
-                        <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
-                            <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                Item {index + 1} {item.id ? <p style={{ color: 'green' }}>Saved</p> : ""}
-                            </Typography>
-                            <TextField
-                                label="Id"
-                                value={item.id}
-                                sx={{ display: 'none' }}
-                            />
-                            <TextField
-                                label="Serial Number"
-                                value={item.serial_number}
-                                onChange={(e) => handleSpareItemChange(index, 'serial_number', e.target.value)}
-                                fullWidth
-                                size="small"
-                                sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
-                            />
-                            <Autocomplete
-                                size="small"
-                                options={CategoryOption}
-                                getOptionLabel={(option) => option.name}
-                                value={CategoryOption.find((category) => category.name === item.category) || null}
-                                onChange={(event, newValue, reason) => {
-                                    if (reason === "clear") {
-                                        handleSpareItemChange(index, 'category_id', "0")
-                                        handleSpareItemChange(index, 'category', "")
-                                    }
-                                    const selectedOption = newValue ? newValue : null;
-                                    if (!selectedOption) {
-                                        return;
-                                    } else {
-                                        handleSpareCategoryChange(index, selectedOption);
-                                    }
-                                }}
-                                renderInput={(params) => <TextField required {...params} label="Category" />}
-                            />
-                            <Autocomplete
-                                size="small"
-                                options={BrandOption}
-                                getOptionLabel={(option) => option.name}
-                                value={BrandOption.find((brand) => brand.name === item.brand) || null}
-                                onChange={(event, newValue, reason) => {
-                                    if (reason === "clear") {
-                                        handleSpareItemChange(index, 'brand_id', "0")
-                                        handleSpareItemChange(index, 'brand', "")
-                                    }
-                                    const selectedOption = newValue ? newValue : null;
-                                    // const selectOptionID = newValue ? newValue.id : 0;
-                                    if (!selectedOption) {
-                                        return;
-                                    } else {
-                                        handleSpareBrandChange(index, selectedOption);
-                                    }
-                                }}
-                                renderInput={(params) => <TextField required {...params} label="Brand" />}
-                            />
-                            <Autocomplete
-                                size="small"
-                                options={ModelOption}
-                                getOptionLabel={(option) => option.name}
-                                value={ModelOption.find((model) => model.name === item.model) || null}
-                                onChange={(event, newValue, reason) => {
-                                    if (reason === "clear") {
-                                        handleSpareItemChange(index, 'model_id', "0")
-                                        handleSpareItemChange(index, 'model', "")
-                                        return
-                                    }
-                                    const selectedOption = newValue ? newValue : null;
-                                    if (!selectedOption) {
-                                        return;
-                                    } else {
-                                        handleSpareModelChange(index, selectedOption);
-                                    }
+                ) : spareitems.map((item, index) => {
+                    item.warranty_expire_date = item.warranty_exp ? dayjs(item.warranty_exp).format('YYYY-MM-DD') : '';
+                    return (
+                        <Grid item xs={12} sm={6} key={index}>
+                            <Stack spacing={2} sx={{ border: '1px solid #ddd', padding: 2, borderRadius: 1 }}>
+                                <Typography variant="caption" sx={{ mb: 1, fontWeight: 'bold' }}>
+                                    Item {index + 1} {item.id ? <p style={{ color: 'green' }}>Saved</p> : ""}
+                                </Typography>
+                                <TextField
+                                    label="Id"
+                                    value={item.id}
+                                    sx={{ display: 'none' }}
+                                />
+                                <TextField
+                                    label="Serial Number"
+                                    value={item.serial_number}
+                                    onChange={(e) => handleSpareItemChange(index, 'serial_number', e.target.value)}
+                                    fullWidth
+                                    size="small"
+                                    sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
+                                />
+                                <Autocomplete
+                                    size="small"
+                                    options={CategoryOption}
+                                    getOptionLabel={(option) => option.name}
+                                    value={CategoryOption.find((category) => category.name === item.category) || null}
+                                    onChange={(event, newValue, reason) => {
+                                        if (reason === "clear") {
+                                            handleSpareItemChange(index, 'category_id', "0")
+                                            handleSpareItemChange(index, 'category', "")
+                                        }
+                                        const selectedOption = newValue ? newValue : null;
+                                        if (!selectedOption) {
+                                            return;
+                                        } else {
+                                            handleSpareCategoryChange(index, selectedOption);
+                                        }
+                                    }}
+                                    renderInput={(params) => <TextField required {...params} label="Category" />}
+                                />
+                                <Autocomplete
+                                    size="small"
+                                    options={BrandOption}
+                                    getOptionLabel={(option) => option.name}
+                                    value={BrandOption.find((brand) => brand.name === item.brand) || null}
+                                    onChange={(event, newValue, reason) => {
+                                        if (reason === "clear") {
+                                            handleSpareItemChange(index, 'brand_id', "0")
+                                            handleSpareItemChange(index, 'brand', "")
+                                        }
+                                        const selectedOption = newValue ? newValue : null;
+                                        // const selectOptionID = newValue ? newValue.id : 0;
+                                        if (!selectedOption) {
+                                            return;
+                                        } else {
+                                            handleSpareBrandChange(index, selectedOption);
+                                        }
+                                    }}
+                                    renderInput={(params) => <TextField required {...params} label="Brand" />}
+                                />
+                                <Autocomplete
+                                    size="small"
+                                    options={ModelOption}
+                                    getOptionLabel={(option) => option.name}
+                                    value={ModelOption.find((model) => model.name === item.model) || null}
+                                    onChange={(event, newValue, reason) => {
+                                        if (reason === "clear") {
+                                            handleSpareItemChange(index, 'model_id', "0")
+                                            handleSpareItemChange(index, 'model', "")
+                                            return
+                                        }
+                                        const selectedOption = newValue ? newValue : null;
+                                        if (!selectedOption) {
+                                            return;
+                                        } else {
+                                            handleSpareModelChange(index, selectedOption);
+                                        }
 
-                                }}
-                                renderInput={(params) => <TextField required {...params} label="Model" />}
-                            />
-                            <DatePicker
-                                label="Warranty Expiry Date"
-                                format="DD/MM/YYYY"
-                                value={dayjs(item.warranty_expire_date)}
-                                onChange={(e) => { if (e) handleSpareItemChange(index, 'warranty_expire_date', e.format('YYYY-MM-DD')) }}
-                                slotProps={{
-                                    textField: {
-                                        fullWidth: true,
-                                        size: "small"
-                                    },
-                                    actionBar: { actions: ['clear', 'today'] }
-                                }}
-                                sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
-                            />
-                            <Autocomplete
-                                size="small"
-                                options={spare_status}
-                                getOptionLabel={(option) => option.name}
-                                value={
-                                    item.status
-                                        ? spare_status.find((status) => status.name === item.status)
-                                        : spare_status[0] || null
-                                }
-                                onChange={(event, newValue, reason) => {
-                                    if (reason === "clear") {
-                                        handleSpareItemChange(index, 'status', "spare")
+                                    }}
+                                    renderInput={(params) => <TextField required {...params} label="Model" />}
+                                />
+                                <DatePicker
+                                    label="Warranty Expiry Date"
+                                    format="DD/MM/YYYY"
+                                    value={dayjs(item.warranty_expire_date, "YYYY-MM-DD")}
+                                    onChange={(e) => {
+                                        handleSpareItemChange(index, 'warranty_expire_date', e ? e.format('YYYY-MM-DD') : "")
+                                        handleSpareItemChange(index, 'warranty_exp', e ? e.format('YYYY-MM-DD') : "")
+                                    }}
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            size: "small"
+                                        },
+                                        actionBar: { actions: ['clear', 'today'] }
+                                    }}
+                                    sx={{ '& .MuiInputBase-input': { padding: '8px' }, border: '1px solid #ddd', borderRadius: 1 }}
+                                />
+                                <Autocomplete
+                                    size="small"
+                                    options={spare_status}
+                                    getOptionLabel={(option) => option.name}
+                                    value={
+                                        item.status
+                                            ? spare_status.find((status) => status.name === item.status)
+                                            : spare_status[0] || null
                                     }
-                                    const selectedOption = newValue ? newValue.name : null;
-                                    if (!selectedOption) {
-                                        return;
-                                    }
-                                    handleSpareItemChange(index, 'status', selectedOption);
-                                }}
-                                renderInput={(params) => <TextField required {...params} label="Status" />}
-                            />
-                            <Button
-                                onClick={() => removeSpareItem(index)}
-                                variant="outlined"
-                                color="error"
-                                size="small"
-                            >
-                                Remove
-                            </Button>
-                            {index === spareitems.length - 1 && spareitems.length < 4 && (
-                                <Button onClick={addSpareItem} variant="contained" color="primary">
-                                    Add More
+                                    onChange={(event, newValue, reason) => {
+                                        if (reason === "clear") {
+                                            handleSpareItemChange(index, 'status', "spare")
+                                        }
+                                        const selectedOption = newValue ? newValue.name : null;
+                                        if (!selectedOption) {
+                                            return;
+                                        }
+                                        handleSpareItemChange(index, 'status', selectedOption);
+                                    }}
+                                    renderInput={(params) => <TextField required {...params} label="Status" />}
+                                />
+                                <Button
+                                    onClick={() => removeSpareItem(index)}
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                >
+                                    Remove
                                 </Button>
-                            )}
-                        </Stack>
-                    </Grid>
-                ))}
+                                {index === spareitems.length - 1 && spareitems.length < 4 && (
+                                    <Button onClick={addSpareItem} variant="contained" color="primary">
+                                        Add More
+                                    </Button>
+                                )}
+                            </Stack>
+                        </Grid>
+                    )
+                })}
             </Grid>
             <Grid item xs={12} sm={3}>
                 <FormControlLabel
