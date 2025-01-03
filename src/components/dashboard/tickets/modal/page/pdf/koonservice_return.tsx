@@ -36,7 +36,7 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
         //     (returnItem: any) => !data.store_item.some((item: any) => item.serial_number === returnItem.serial_number)
         // );
         // data.store_item.push(...unmatchedReturnItems)
-    
+
         // Filter items based on the conditions
         const deviceListClean = data.return_item.filter(
             (element: any) =>
@@ -48,52 +48,68 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
                 element.item_type === "store" &&
                 (element.status === "return" || element.status === "replace")
         );
-    
+
         // Group items by category
         const groupedData: Record<string, { spare: any[]; store: any[] }> = {};
-    
-        deviceListClean.forEach((item:any) => {
+
+        deviceListClean.forEach((item: any) => {
             const category = item.category || "Uncategorized";
             if (!groupedData[category]) groupedData[category] = { spare: [], store: [] };
             groupedData[category].spare.push(item);
         });
-    
-        replaceDeviceListClean.forEach((item:any) => {
+
+        replaceDeviceListClean.forEach((item: any) => {
             const category = item.category || "Uncategorized";
             if (!groupedData[category]) groupedData[category] = { spare: [], store: [] };
             groupedData[category].store.push(item);
         });
-    
+
         // Generate rows
-    
-        Object.keys(groupedData).forEach((category) => {
-            const { spare, store } = groupedData[category];
-            let maxRows = Math.max(spare.length, store.length);
-            if (maxRows < 5) {
-                maxRows = 5
-            }
+
+        let categories = Object.keys(groupedData); // Get the categories
+        let totalRows = 0; // Track the total number of rows generated
+
+        for (let c = 0; c < categories.length; c++) {
+            const category = categories[c];
+            const { spare = [], store = [] } = groupedData[category];
+            const maxRows = Math.max(spare.length, store.length);
+
             for (let i = 0; i < maxRows; i++) {
                 spareParts += `
-                <tr>
-                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                        ${category}
-                    </td>
-                    <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
-                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                        ${spare[i]?.brand || "_"}
-                    </td>
-                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                        ${spare[i]?.serial_number || "_"}
-                    </td>
-                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                        ${store[i]?.brand || "_"}
-                    </td>
-                    <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                        ${store[i]?.serial_number || "_"}
-                    </td>
-                </tr>`;
+        <tr>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i === 0 ? category : ""} <!-- Show category only for the first row -->
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < store.length ? store[i]?.brand || "_" : "_"}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < store.length ? store[i]?.serial_number || "_" : "_"}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < spare.length ? spare[i]?.brand || "_" : "_"}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < spare.length ? spare[i]?.serial_number || "_" : "_"}
+            </td>
+        </tr>`;
+                totalRows++; // Increment the total rows
             }
-        });
+        }
+
+        // Ensure a minimum of 5 rows
+        for (let i = totalRows; i < 5; i++) {
+            spareParts += `
+    <tr>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;">_</td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;">_</td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;">_</td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;">_</td>
+    </tr>`;
+        }
     }
     var html_format = `<!DOCTYPE html>
 <html lang="en">

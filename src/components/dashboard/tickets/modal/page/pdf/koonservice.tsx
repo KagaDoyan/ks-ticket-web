@@ -50,33 +50,51 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
             });
         }
 
-        Object.keys(groupedData).forEach((category) => {
-            const { spare, store } = groupedData[category];
-            let maxRows = Math.max(spare.length, store.length);
-            if (maxRows < 5) {
-                maxRows = 5
-            }
+        let categories = Object.keys(groupedData); // Get the categories
+        let totalRows = 0; // Track the total number of rows generated
+
+        for (let c = 0; c < categories.length; c++) {
+            const category = categories[c];
+            const { spare = [], store = [] } = groupedData[category];
+            const maxRows = Math.max(spare.length, store.length);
+
             for (let i = 0; i < maxRows; i++) {
                 spareParts += `
         <tr>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${category}
+                ${i === 0 ? category : ""} <!-- Show category only for the first row -->
             </td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${i < store.length ? store[i].brand || "_" : "_"}
+                ${i < store.length ? store[i]?.brand || "_" : "_"}
             </td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${i < store.length ? store[i].serial_number || "_" : "_"}
+                ${i < store.length ? store[i]?.serial_number || "_" : "_"}
             </td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${i < spare.length ? spare[i].brand || "_" : "_"}
+                ${i < spare.length ? spare[i]?.brand || "_" : "_"}
             </td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${i < spare.length ? spare[i].serial_number || "_" : "_"}
+                ${i < spare.length ? spare[i]?.serial_number || "_" : "_"}
             </td>
         </tr>`;
-            }});
+                totalRows++; // Increment the total rows
+            }
+        }
+
+        // Ensure a minimum of 5 rows
+        for (let i = totalRows; i < 5; i++) {
+            spareParts += `
+    <tr>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;">_</td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;">_</td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;">_</td>
+        <td style="word-wrap: break-word; overflow-wrap: break-word;">_</td>
+    </tr>`;
+        }
+
     }
     var html_format = `<!DOCTYPE html>
 <html lang="en">
