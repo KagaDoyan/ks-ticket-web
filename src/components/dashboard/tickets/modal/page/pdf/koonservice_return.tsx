@@ -68,8 +68,10 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
     
         Object.keys(groupedData).forEach((category) => {
             const { spare, store } = groupedData[category];
-            const maxRows = Math.max(spare.length, store.length);
-    
+            let maxRows = Math.max(spare.length, store.length);
+            if (maxRows < 5) {
+                maxRows = 5
+            }
             for (let i = 0; i < maxRows; i++) {
                 spareParts += `
                 <tr>
