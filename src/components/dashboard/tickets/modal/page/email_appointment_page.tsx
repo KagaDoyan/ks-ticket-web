@@ -1,6 +1,7 @@
 import { authClient } from "@/lib/auth/client";
 import { EmailOutlined, SendAndArchiveOutlined } from "@mui/icons-material";
 import { Box, Button, Divider, Modal, Stack, TextField, Typography } from "@mui/material";
+import dayjs from "dayjs";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -73,10 +74,10 @@ export default function EmailAppointmentPage({ open, handleClose, ticketID, tick
                             Priority: {ticketData.sla_priority_level} {formatTime(parseInt(ticketData.prioritie?.time_sec || "0"))}
                         </p>
                         <p>Engineer: {ticketData.engineer?.name} {ticketData.engineer?.lastname}</p>
-                        <p>Appointment: {ticketData.appointment_date} {ticketData.appointment_time}</p>
+                        <p>Appointment: {dayjs(ticketData.appointment_date).format('DD-MM-YYYY')} {ticketData.appointment_time}</p>
                         <br />
                         <p>
-                            ช่างนัดหมายสาขาวันที่ {ticketData.appointment_date} {ticketData.appointment_time}{" "}
+                            ช่างนัดหมายสาขาวันที่ {dayjs(ticketData.appointment_date).format('DD-MM-YYYY')} {ticketData.appointment_time}{" "}
                             {remark || "เนื่องจากสาขาสะดวกให้เข้าเวลาดังกล่าว"}
                         </p>
                     </div>

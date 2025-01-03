@@ -1,6 +1,7 @@
 import { authClient } from "@/lib/auth/client";
 import { EmailOutlined, SendAndArchiveOutlined } from "@mui/icons-material";
 import { Box, Button, Divider, Modal, Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -33,9 +34,9 @@ export default function ReturnEmailPreviewPage({ open, handleClose, ticketData }
         <tr><th style="vertical-align:top">Equipment</th><td style="vertical-align:top">${ticketData?.return_ticket?.item_category}</td></tr>
         <tr><th style="vertical-align:top">Investigation</th><td style="vertical-align:top">${ticketData?.return_ticket?.investigation}</td></tr>
         <tr><th style="vertical-align:top">Solution</th><td style="vertical-align:top">${ticketData?.return_ticket?.solution}<br>${deviceStr}${replaceDeviceStr}</td></tr>
-        <tr><th style="vertical-align:top">Appointment Time</th><td style="vertical-align:top">${ticketData?.appointment_date} ${ticketData?.appointment_time}</td></tr>
-        <tr><th style="vertical-align:top">Time Start</th><td style="vertical-align:top">${ticketData?.open_date} ${ticketData?.open_time}</td></tr>
-        <tr><th style="vertical-align:top">Time Finish</th><td style="vertical-align:top">${ticketData?.close_date || ""} ${ticketData?.close_time || ""}</td></tr>
+        <tr><th style="vertical-align:top">Appointment Time</th><td style="vertical-align:top">${dayjs(ticketData?.appointment_date).format('DD-MM-YYYY')} ${ticketData?.appointment_time}</td></tr>
+        <tr><th style="vertical-align:top">Time Start</th><td style="vertical-align:top">${dayjs(ticketData?.return_ticket?.time_in).format('DD-MM-YYYY HH:mm')}</td></tr>
+        <tr><th style="vertical-align:top">Time Finish</th><td style="vertical-align:top">${dayjs(ticketData?.return_ticket?.time_out).format('DD-MM-YYYY HH:mm')}</td></tr>
     </table>`;
 
     const BodyData = ({ ticketData }: { ticketData: any }) => {

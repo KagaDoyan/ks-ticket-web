@@ -271,7 +271,7 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
                 </tr>
                 <tr>
                     <td colspan="12"><b>วันที่หมดประกัน/Expired :</b>
-                        <underline>${data.return_ticket.warranty_exp}</underline>
+                        <underline>${data.return_ticket.warranty_exp ? dayjs(data.return_ticket.warranty_exp).format("DD-MM-YYYY") : ""}</underline>
                     </td>
                     <td colspan="12"><b>เงื่อนไข / SLA :</b>
                         <underline>${data.sla_priority_level}</underline>

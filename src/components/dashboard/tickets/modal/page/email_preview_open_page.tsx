@@ -95,7 +95,7 @@ export default function OpenEmailPreviewPage({ open, handleClose, ticketData }: 
                         </span>
                     </b>
                     <span >
-                        {dayjs(ticket.open_date).format('DD/MM/YYYY')} {ticket.open_time}
+                        {dayjs(ticket.open_date).format('DD-MM-YYYY')} {ticket.open_time}
                     </span>
                 </p>
 
@@ -121,7 +121,7 @@ export default function OpenEmailPreviewPage({ open, handleClose, ticketData }: 
                         </span>
                     </b>
                     <span style={{}}>
-                        {dayjs(ticket.due_by).format('DD/MM/YYYY hh:mm')}
+                        {dayjs(ticket.due_by).format('DD-MM-YYYY hh:mm')}
                     </span>
                 </p>
 

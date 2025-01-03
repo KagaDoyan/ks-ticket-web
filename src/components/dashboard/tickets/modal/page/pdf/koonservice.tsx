@@ -74,9 +74,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                 ${i < spare.length ? spare[i].serial_number || "_" : "_"}
             </td>
         </tr>`;
-            }
-        
-        console.log(spareParts);});
+            }});
     }
     var html_format = `<!DOCTYPE html>
 <html lang="en">
@@ -256,7 +254,7 @@ export default function CraeteKoonServiceForm(form: string, data: any) {
                 </tr>
                 <tr>
                     <td colspan="12"><b>วันที่หมดประกัน/Expired :</b>
-                        <underline>${data.warranty_exp}</underline>
+                        <underline>${data.warranty_exp ? dayjs(data.warranty_exp).format("DD-MM-YYYY") : ""}</underline>
                     </td>
                     <td colspan="12"><b>เงื่อนไข / SLA :</b>
                         <underline>${data.sla_priority_level}</underline>

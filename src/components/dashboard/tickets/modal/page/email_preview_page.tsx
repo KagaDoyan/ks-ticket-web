@@ -1,6 +1,7 @@
 import { authClient } from "@/lib/auth/client";
 import { EmailOutlined, SendAndArchiveOutlined } from "@mui/icons-material";
 import { Box, Button, Divider, Modal, Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -40,15 +41,15 @@ export default function EmailPreviewPage({ open, handleClose, ticketData }: { op
                         </tr>
                         <tr>
                             <th style={{ verticalAlign: 'top' }}>Appointment Time</th>
-                            <td style={{ verticalAlign: 'top' }} id="appointment-time">{ticketData.appointment_date + " " + ticketData.appointment_time}</td>
+                            <td style={{ verticalAlign: 'top' }} id="appointment-time">{dayjs(ticketData.appointment_date).format('DD-MM-YYYY') + " " + ticketData.appointment_time}</td>
                         </tr>
                         <tr>
                             <th style={{ verticalAlign: 'top' }}>Time Start</th>
-                            <td style={{ verticalAlign: 'top' }} id="time-start">{ticketData.time_in}</td>
+                            <td style={{ verticalAlign: 'top' }} id="time-start">{dayjs(ticketData.time_in).format('DD-MM-YYYY HH:mm')}</td>
                         </tr>
                         <tr>
                             <th style={{ verticalAlign: 'top' }}>Time Finish</th>
-                            <td style={{ verticalAlign: 'top' }} id="time-finish">{ticketData.time_out}</td>
+                            <td style={{ verticalAlign: 'top' }} id="time-finish">{dayjs(ticketData.time_out).format('DD-MM-YYYY HH:mm')}</td>
                         </tr>
                     </tbody>
                 </table>

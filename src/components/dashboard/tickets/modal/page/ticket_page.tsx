@@ -105,8 +105,6 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     }
 
     const getPriority = () => {
-        console.log(formData.customer_id, formData.shop_id);
-        console.log(shopOptions);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/priorityGroup/find/${formData.customer_id}/${shopOptions.find((shop) => shop.id === formData.shop_id)?.province.id}`, {
             method: 'GET',
             headers: {
@@ -373,7 +371,6 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
         if (formData.open_date && formData.open_time && priority_time) {
             const open_date = new Date(formData.open_date + " " + formData.open_time);
             const due_by = open_date.setSeconds(open_date.getSeconds() + priority_time);
-            console.log(due_by);
             setFormData({
                 ...formData,
                 due_by: dayjs(due_by).format("YYYY-MM-DD HH:mm")

@@ -879,7 +879,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                         </Button>
                     </Grid>
                 ) : shopitems.map((item, index) => {
-                    console.log(item);
 
                     item.warranty_expire_date = item.warranty_exp ? dayjs(item.warranty_exp).format("YYYY-MM-DD") : '';
                     return (
@@ -1030,7 +1029,6 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                         </Stack>
                     </Grid>
                 ) : spareitems.map((item, index) => {
-                    console.log(item);
                     item.warranty_expire_date = item.warranty_exp ? dayjs(item.warranty_exp).format('YYYY-MM-DD') : '';
                     return (
                         <Grid item xs={12} sm={6} key={index}>
