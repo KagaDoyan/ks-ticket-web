@@ -78,7 +78,7 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
                 spareParts += `
         <tr>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${i === 0 ? category : ""} <!-- Show category only for the first row -->
+                ${category} <!-- Show category only for the first row -->
             </td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
