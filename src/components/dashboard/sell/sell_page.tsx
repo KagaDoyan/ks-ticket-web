@@ -142,6 +142,7 @@ export function SellPage(): React.JSX.Element {
                             <TableRow>
                                 <TableCell>brand</TableCell>
                                 <TableCell>model</TableCell>
+                                <TableCell>Customer</TableCell>
                                 <TableCell>warranty</TableCell>
                                 <TableCell>sell date</TableCell>
                                 <TableCell>Created at</TableCell>
@@ -158,9 +159,10 @@ export function SellPage(): React.JSX.Element {
                                             </Stack>
                                         </TableCell>
                                         <TableCell>{row.model}</TableCell>
-                                        <TableCell>{row.warranty}</TableCell>
-                                        <TableCell>{dayjs(row.sell_date).format('MMM D, YYYY')}</TableCell>
-                                        <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
+                                        <TableCell>{row.buyer_name}</TableCell>
+                                        <TableCell>{dayjs(row.warranty_expire_date).format('DD-MM-YYYY')}</TableCell>
+                                        <TableCell>{dayjs(row.sell_date).format('DD-MM-YYYY')}</TableCell>
+                                        <TableCell>{dayjs(row.created_at).format('DD-MM-YYYY')}</TableCell>
                                         <TableCell>
                                             <IconButton color='warning' onClick={() => handleEditSell(row.id)}>
                                                 <Edit />
