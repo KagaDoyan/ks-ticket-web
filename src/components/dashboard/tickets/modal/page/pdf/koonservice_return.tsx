@@ -82,16 +82,16 @@ export default function CraeteKoonServiceReturnForm(form: string, data: any) {
             </td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;"></td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${i < store.length ? store[i]?.brand || "_" : "_"}
-            </td>
-            <td style="word-wrap: break-word; overflow-wrap: break-word;">
-                ${i < store.length ? store[i]?.serial_number || "_" : "_"}
-            </td>
-            <td style="word-wrap: break-word; overflow-wrap: break-word;">
                 ${i < spare.length ? spare[i]?.brand || "_" : "_"}
             </td>
             <td style="word-wrap: break-word; overflow-wrap: break-word;">
                 ${i < spare.length ? spare[i]?.serial_number || "_" : "_"}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < store.length ? store[i]?.brand || "_" : "_"}
+            </td>
+            <td style="word-wrap: break-word; overflow-wrap: break-word;">
+                ${i < store.length ? store[i]?.serial_number || "_" : "_"}
             </td>
         </tr>`;
                 totalRows++; // Increment the total rows
