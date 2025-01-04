@@ -37,8 +37,8 @@ export default function BrokenPartReportPage() {
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [rows, setRows] = React.useState<broken[]>([]);
     const [count, setCount] = React.useState(0);
-    const [from, setFrom] = React.useState(formatDate(sevenDaysBefore));
-    const [to, setTo] = React.useState(formatDate(currentDate));
+    const [from, setFrom] = React.useState(dayjs(sevenDaysBefore).format("DD/MM/YYYY"));
+    const [to, setTo] = React.useState(dayjs(currentDate).format("DD/MM/YYYY"));
 
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
@@ -56,7 +56,7 @@ export default function BrokenPartReportPage() {
 
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/report/sparebrokenpart?from=${from}&to=${to}`, {
+        fetch(`${baseUrl}/api/report/sparebrokenpart?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,9 +92,9 @@ export default function BrokenPartReportPage() {
             <Card sx={{ p: 2 }}>
                 {/* Stack for alignment and spacing of inputs */}
                 <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                <DatePicker
+                    <DatePicker
                         label="Start Date"
-                        value={dayjs(from)}
+                        value={dayjs(from, "DD/MM/YYYY")}
                         format="DD/MM/YYYY"
                         onChange={(newValue) => {
                             if (newValue) { setFrom(newValue.format('DD/MM/YYYY')) }
@@ -103,7 +103,7 @@ export default function BrokenPartReportPage() {
                     />
                     <DatePicker
                         label="End Date"
-                        value={dayjs(to)}
+                        value={dayjs(to, "DD/MM/YYYY")}
                         format="DD/MM/YYYY"
                         onChange={(newValue) => {
                             if (newValue) { setTo(newValue.format('DD/MM/YYYY')) }

@@ -110,8 +110,8 @@ export default function MAReportPage() {
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [rows, setRows] = React.useState<MA[]>([]);
     const [count, setCount] = React.useState(0);
-    const [from, setFrom] = React.useState(formatDate(sevenDaysBefore));
-    const [to, setTo] = React.useState(formatDate(currentDate));
+    const [from, setFrom] = React.useState(dayjs(sevenDaysBefore).format("DD/MM/YYYY"));
+    const [to, setTo] = React.useState(dayjs(currentDate).format("DD/MM/YYYY"));
     const [customer_name, setCustomer] = React.useState("");
 
     const handleChangePage = (
@@ -147,7 +147,7 @@ export default function MAReportPage() {
 
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/report/ma?from=${from}&to=${to}&brand_name=${customer_name}`, {
+        fetch(`${baseUrl}/api/report/ma?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ export default function MAReportPage() {
                 <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                     <DatePicker
                         label="Start Date"
-                        value={dayjs(from)}
+                        value={dayjs(from, "DD/MM/YYYY")}
                         format="DD/MM/YYYY"
                         onChange={(newValue) => {
                             if (newValue) { setFrom(newValue.format('DD/MM/YYYY')) }
@@ -229,7 +229,7 @@ export default function MAReportPage() {
                     />
                     <DatePicker
                         label="End Date"
-                        value={dayjs(to)}
+                        value={dayjs(to, "DD/MM/YYYY")}
                         format="DD/MM/YYYY"
                         onChange={(newValue) => {
                             if (newValue) { setTo(newValue.format('DD/MM/YYYY')) }

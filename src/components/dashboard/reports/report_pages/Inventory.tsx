@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
 import Loading from "./loading";
+import dayjs from "dayjs";
 const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
 };
@@ -41,8 +42,8 @@ export default function InventoryReportPage() {
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [rows, setRows] = React.useState<inventory[]>([]);
     const [count, setCount] = React.useState(0);
-    const [from, setFrom] = React.useState(formatDate(sevenDaysBefore));
-    const [to, setTo] = React.useState(formatDate(currentDate));
+    const [from, setFrom] = React.useState(dayjs(sevenDaysBefore).format("DD/MM/YYYY"));
+    const [to, setTo] = React.useState(dayjs(currentDate).format("DD/MM/YYYY"));
     const [customers, setCustomers] = React.useState<Customer[]>([]);
     const [customer_name, setCustomer] = React.useState("");
 

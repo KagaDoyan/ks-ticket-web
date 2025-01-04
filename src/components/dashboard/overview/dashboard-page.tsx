@@ -50,8 +50,8 @@ export default function DashboardPage(): React.JSX.Element {
 
     const [customers, setCustomers] = useState<string[]>([]);
     const [modal_open, setModalOpen] = useState(false);
-    const [start_date, setStart] = useState(dayjs(Date.now() - 7 * 24 * 60 * 60 * 1000).format('YYYY-MM-DD'))
-    const [end_date, setEnd] = useState(dayjs(Date.now()).format('YYYY-MM-DD'))
+    const [start_date, setStart] = useState(dayjs(Date.now() - 7 * 24 * 60 * 60 * 1000).format('DD/MM/YYYY'))
+    const [end_date, setEnd] = useState(dayjs(Date.now()).format('DD/MM/YYYY'))
 
     const handleModalClose = () => setModalOpen(false);
 
@@ -134,7 +134,7 @@ export default function DashboardPage(): React.JSX.Element {
     };
 
     const fetchTicketByDate = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${start_date}&end=${end_date}&brand_name=${customer_name}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${dayjs(start_date,"DD/MM/YYYY").format("YYYY-MM-DD")}&end=${dayjs(end_date,"DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -224,7 +224,7 @@ export default function DashboardPage(): React.JSX.Element {
                             <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                                 <DatePicker
                                     label="Start Date"
-                                    value={dayjs(start_date)}
+                                    value={dayjs(start_date, "DD/MM/YYYY")}
                                     format="DD/MM/YYYY"
                                     onChange={(newValue) => {
                                         if (newValue) { setStart(newValue.format('DD/MM/YYYY')) }
@@ -233,7 +233,7 @@ export default function DashboardPage(): React.JSX.Element {
                                 />
                                 <DatePicker
                                     label="End Date"
-                                    value={dayjs(end_date)}
+                                    value={dayjs(end_date, "DD/MM/YYYY")}
                                     format="DD/MM/YYYY"
                                     onChange={(newValue) => {
                                         if (newValue) { setEnd(newValue.format('DD/MM/YYYY')) }
