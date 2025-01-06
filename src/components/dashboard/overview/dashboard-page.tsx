@@ -161,8 +161,6 @@ export default function DashboardPage(): React.JSX.Element {
         console.log(userData);
         let url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${dayjs(start_date, "DD/MM/YYYY").format("YYYY-MM-DD")}&end=${dayjs(end_date, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`
         if (userData?.role === "Customer") {
-            console.log("Customer");
-
             url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${dayjs(start_date, "DD/MM/YYYY").format("YYYY-MM-DD")}&end=${dayjs(end_date, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${userData.customer?.shortname}`
         }
         fetch(url, {
