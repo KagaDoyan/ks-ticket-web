@@ -24,6 +24,21 @@ import BrokenPartReportPage from './report_pages/Broken';
 import InventoryReportPage from './report_pages/Inventory';
 
 export function ReportPage(): React.JSX.Element {
+  const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
+  React.useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+    setUserData(storedUserData);
+
+    const handleStorageChange = () => {
+      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(updatedUserData);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
   const [active_tabs, setValue] = React.useState("MA");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -39,22 +54,30 @@ export function ReportPage(): React.JSX.Element {
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={active_tabs} onChange={handleChange} aria-label="report">
           <Tab value="MA" label="MA Report" />
+          {userData?.role !== "Customer" && (
           <Tab value="Inventory" label="Inventory Report" />
+          )}
+          {userData?.role !== "Customer" && (
           <Tab value="BrokenPart" label="Broken Part Report" />
+          )}
         </Tabs>
         {active_tabs === "MA" && (
           <>
             <MAReportPage />
           </>
         )}
-        {active_tabs === "Inventory" && (
+        {userData?.role !== "Customer" && (
           <>
-            <InventoryReportPage />
-          </>
-        )}
-        {active_tabs === "BrokenPart" && (
-          <>
-            <BrokenPartReportPage />
+            {active_tabs === "Inventory" && (
+              <>
+                <InventoryReportPage />
+              </>
+            )}
+            {active_tabs === "BrokenPart" && (
+              <>
+                <BrokenPartReportPage />
+              </>
+            )}
           </>
         )}
       </Box>

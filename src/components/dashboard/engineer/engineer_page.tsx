@@ -47,6 +47,22 @@ interface provinces {
 }
 
 export function EngineerPage(): React.JSX.Element {
+  const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
+  React.useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+    setUserData(storedUserData);
+
+    const handleStorageChange = () => {
+      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(updatedUserData);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState<engineer[]>([]);
@@ -196,12 +212,14 @@ export function EngineerPage(): React.JSX.Element {
                     <TableCell>{row.node.name}</TableCell>
                     <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                     <TableCell>
-                      <IconButton color='warning' onClick={() => handleEditengineer(row.id)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton color='error' onClick={() => handleDeleteengineer(row.id)}>
-                        <Delete />
-                      </IconButton>
+                      {userData?.role === "Admin" || userData?.role === "SuperAdmin" ? <div>
+                        <IconButton color='warning' onClick={() => handleEditengineer(row.id)}>
+                          <Edit />
+                        </IconButton>
+                        <IconButton color='error' onClick={() => handleDeleteengineer(row.id)}>
+                          <Delete />
+                        </IconButton>
+                      </div> : ""}
                     </TableCell>
                   </TableRow>
                 );

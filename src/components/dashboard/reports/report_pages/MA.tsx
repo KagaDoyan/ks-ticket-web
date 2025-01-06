@@ -100,6 +100,22 @@ interface Customer {
 
 
 export default function MAReportPage() {
+    const [userData, setUserData] = React.useState<{ role?: string, customer?: { shortname: string,fullname: string } } | null>(null);
+    React.useEffect(() => {
+        const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+        setUserData(storedUserData);
+
+        const handleStorageChange = () => {
+            const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+            setUserData(updatedUserData);
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
     const [loading, setLoading] = React.useState(true);
     const [customers, setCustomers] = React.useState<Customer[]>([]);
     const currentDate = new Date();
@@ -147,7 +163,11 @@ export default function MAReportPage() {
 
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/report/ma?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`, {
+        let url = `${baseUrl}/api/report/ma?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`
+        if (userData?.role === "Customer") {
+            url = `${baseUrl}/api/report/ma?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${userData.customer?.fullname}`
+        }
+        fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -236,18 +256,20 @@ export default function MAReportPage() {
                         }}
                         slotProps={{ textField: { size: 'small' } }}
                     />
-                    <Autocomplete
-                        options={customers}
-                        size="small"
-                        sx={{ width: 150 }}
-                        getOptionLabel={(option) => option.shortname}
-                        value={customers.find((customer) => customer.fullname === customer_name) || null}
-                        onChange={(event, newValue) => {
-                            const selected = newValue ? newValue.fullname : "";
-                            setCustomer(selected)
-                        }}
-                        renderInput={(params) => <TextField {...params} label="brand" />}
-                    />
+                    {userData?.role !== "Customer" && (
+                        <Autocomplete
+                            options={customers}
+                            size="small"
+                            sx={{ width: 150 }}
+                            getOptionLabel={(option) => option.shortname}
+                            value={customers.find((customer) => customer.shortname === customer_name) || null}
+                            onChange={(event, newValue) => {
+                                const selected = newValue ? newValue.fullname : "";
+                                setCustomer(selected)
+                            }}
+                            renderInput={(params) => <TextField {...params} label="brand" />}
+                        />
+                    )}
                     <Button variant="contained" startIcon={<Refresh />} onClick={fetchMAData}>Refresh</Button>
                     <Button variant="contained" startIcon={<IosShare />} color="warning" onClick={() => exportToExcel()}>Export</Button>
                 </Stack>

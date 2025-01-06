@@ -33,6 +33,23 @@ interface Customer {
 }
 
 export default function DashboardPage(): React.JSX.Element {
+    const [userData, setUserData] = React.useState<{ role?: string, customer?: { shortname: string, fullname: string } } | null>(null);
+    React.useEffect(() => {
+        const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+        setUserData(storedUserData);
+
+        const handleStorageChange = () => {
+            const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+            setUserData(updatedUserData);
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
+
     const [customersOption, setCustomersOption] = useState<Customer[]>([]);
     const [customer_name, setCustomerName] = useState<string[]>([]);
     const [ticketData, setTickets] = useState<TicketData[]>([]);
@@ -60,6 +77,13 @@ export default function DashboardPage(): React.JSX.Element {
         GetCustomerOption();
         fetchTicketByDate();
     }, [start_date, end_date, customer_name]);
+
+    useEffect(() => {
+        if (userData?.customer?.shortname) {
+            setCustomerName([userData?.customer?.shortname]);
+            setCustomers(customers.filter((customer) => customer_name.includes(userData?.customer?.shortname || '')));
+        }
+    }, [userData]);
 
     useEffect(() => {
         setCustomers(customers.filter((customer) => customer_name.includes(customer)));
@@ -134,7 +158,14 @@ export default function DashboardPage(): React.JSX.Element {
     };
 
     const fetchTicketByDate = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${dayjs(start_date,"DD/MM/YYYY").format("YYYY-MM-DD")}&end=${dayjs(end_date,"DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`, {
+        console.log(userData);
+        let url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${dayjs(start_date, "DD/MM/YYYY").format("YYYY-MM-DD")}&end=${dayjs(end_date, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`
+        if (userData?.role === "Customer") {
+            console.log("Customer");
+
+            url = `${process.env.NEXT_PUBLIC_API_URL}/api/ticket/dashboard?start=${dayjs(start_date, "DD/MM/YYYY").format("YYYY-MM-DD")}&end=${dayjs(end_date, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${userData.customer?.shortname}`
+        }
+        fetch(url, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -259,12 +290,13 @@ export default function DashboardPage(): React.JSX.Element {
                                     id="province-select"
                                     options={customersOption}
                                     getOptionLabel={(option) => option.shortname}
-                                    value={customersOption.filter(customer => customer_name.includes(customer.shortname))}
+                                    value={customersOption.filter(customer => userData?.role === "Customer" ? customer.shortname === userData.customer?.shortname : customer_name.includes(customer.shortname))}
                                     onChange={handlechangeCustomer}
                                     renderInput={(params) => (
                                         <TextField {...params} label="brand" variant="outlined" />
                                     )}
                                     isOptionEqualToValue={(option, value) => option.shortname === value.shortname}
+                                    disabled={userData?.role === "Customer"}
                                 />
                             </Stack>
                         </Card>

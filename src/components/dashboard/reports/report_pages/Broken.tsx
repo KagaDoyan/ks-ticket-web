@@ -1,6 +1,6 @@
 import { authClient } from "@/lib/auth/client";
 import { IosShare, Refresh } from "@mui/icons-material";
-import { Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Card, Divider, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from 'xlsx';
@@ -27,6 +27,12 @@ interface broken {
     location: string
 }
 
+interface Customer {
+    id: number;
+    fullname: string;
+    shortname: string;
+}
+
 export default function BrokenPartReportPage() {
     const [loading, setLoading] = React.useState(true);
     const currentDate = new Date();
@@ -39,6 +45,8 @@ export default function BrokenPartReportPage() {
     const [count, setCount] = React.useState(0);
     const [from, setFrom] = React.useState(dayjs(sevenDaysBefore).format("DD/MM/YYYY"));
     const [to, setTo] = React.useState(dayjs(currentDate).format("DD/MM/YYYY"));
+    const [customers, setCustomers] = React.useState<Customer[]>([]);
+    const [customer_name, setCustomer] = React.useState("");
 
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
@@ -54,9 +62,25 @@ export default function BrokenPartReportPage() {
         setPage(0);
     };
 
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomers(data.data);
+                    })
+                }
+            })
+    }
+
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/report/sparebrokenpart?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}`, {
+        fetch(`${baseUrl}/api/report/sparebrokenpart?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -109,6 +133,18 @@ export default function BrokenPartReportPage() {
                             if (newValue) { setTo(newValue.format('DD/MM/YYYY')) }
                         }}
                         slotProps={{ textField: { size: 'small' } }}
+                    />
+                    <Autocomplete
+                        options={customers}
+                        size="small"
+                        sx={{ width: 150 }}
+                        getOptionLabel={(option) => option.shortname}
+                        value={customers.find((customer) => customer.fullname === customer_name) || null}
+                        onChange={(event, newValue) => {
+                            const selected = newValue ? newValue.fullname : "";
+                            setCustomer(selected)
+                        }}
+                        renderInput={(params) => <TextField {...params} label="brand" />}
                     />
                     <Button variant="contained" startIcon={<Refresh />} onClick={fetchMAData}>Refresh</Button>
                     <Button variant="contained" startIcon={<IosShare />} color="warning" onClick={exportToExcel}>Export</Button>

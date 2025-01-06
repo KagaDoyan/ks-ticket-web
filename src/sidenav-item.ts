@@ -8,7 +8,7 @@ export const navItems = [
     items: [
       { key: 'dashboard', title: 'Dashboard', href: paths.dashboard.overview, icon: AssessmentOutlined, role: ["SuperAdmin", "Admin", "User", "Customer"] },
       { key: 'ticket', title: 'ticket', href: paths.dashboard.ticket, icon: ConfirmationNumberOutlined, role: ["SuperAdmin", "Admin", "Engineer", "User"] },
-      { key: 'report', title: 'report', href: paths.dashboard.report, icon: SummarizeOutlined, role: ["SuperAdmin", "Admin", "User"] },
+      { key: 'report', title: 'report', href: paths.dashboard.report, icon: SummarizeOutlined, role: ["SuperAdmin", "Admin", "User", "Customer"] },
     ]
   },
   {
@@ -16,8 +16,8 @@ export const navItems = [
     key: 'Settings',
     items: [
       { key: 'customer', title: 'customer', href: paths.dashboard.customer, icon: GroupOutlined, role: ["SuperAdmin", "Admin"] },
-      { key: 'shop', title: 'shop', href: paths.dashboard.shop, icon: StoreMallDirectoryOutlined, role: ["SuperAdmin", "Admin"] },
-      { key: 'engineer', title: 'engineer', href: paths.dashboard.engineer, icon: EngineeringOutlined, role: ["SuperAdmin", "Admin"] },
+      { key: 'shop', title: 'shop', href: paths.dashboard.shop, icon: StoreMallDirectoryOutlined, role: ["SuperAdmin", "Admin", "User"] },
+      { key: 'engineer', title: 'engineer', href: paths.dashboard.engineer, icon: EngineeringOutlined, role: ["SuperAdmin", "Admin", "User"] },
       { key: 'users', title: 'users', href: paths.dashboard.users, icon: Person2Outlined, role: ["SuperAdmin", "Admin"] },
       { key: 'node', title: 'node', href: paths.dashboard.node, icon: SpokeOutlined, role: ["SuperAdmin", "Admin"] },
       { key: 'provinces', title: 'provinces', href: paths.dashboard.province, icon: MapOutlined, role: ["SuperAdmin", "Admin"] },

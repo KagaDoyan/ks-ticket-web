@@ -21,6 +21,7 @@ import { Delete, Edit, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import ShopModalForm from './modal/shop-form';
 import Swal from 'sweetalert2';
+import useOnMount from '@mui/utils/useOnMount';
 
 export interface shop {
   id: number,
@@ -49,6 +50,22 @@ interface province {
 }
 
 export function ShopPage(): React.JSX.Element {
+  const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
+  React.useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+    setUserData(storedUserData);
+
+    const handleStorageChange = () => {
+      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(updatedUserData);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState<shop[]>([]);
@@ -72,6 +89,23 @@ export function ShopPage(): React.JSX.Element {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  const getUserData = () => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
+    fetch(`${baseUrl}/api/whoami`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
+    })
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            console.log(data);
+          })
+        }
+      })
+  }
 
   const fetchshopData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
@@ -133,6 +167,10 @@ export function ShopPage(): React.JSX.Element {
   React.useEffect(() => {
     fetchshopData();
   }, [page, rowsPerPage, search])
+
+  useOnMount(() => {
+    getUserData();
+  })
 
   const HandleModalAddData = () => {
     handleOpen()
@@ -200,12 +238,15 @@ export function ShopPage(): React.JSX.Element {
                     <TableCell>{row.province.code}</TableCell>
                     <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                     <TableCell>
-                      <IconButton color='warning' onClick={() => handleEditshop(row.id)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton color='error' onClick={() => handleDeleteshop(row.id)}>
-                        <Delete />
-                      </IconButton>
+                      {userData?.role === "Admin" || userData?.role === "SuperAdmin" ? <div>
+                        <IconButton color='warning' onClick={() => handleEditshop(row.id)}>
+                          <Edit />
+                        </IconButton>
+                        <IconButton color='error' onClick={() => handleDeleteshop(row.id)}>
+                          <Delete />
+                        </IconButton>
+                      </div>
+                        : ""}
                     </TableCell>
                   </TableRow>
                 );
