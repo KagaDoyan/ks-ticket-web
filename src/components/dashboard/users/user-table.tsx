@@ -40,6 +40,22 @@ export interface Customer {
 }
 
 export function UserTable(): React.JSX.Element {
+  const [userData, setUserData] = React.useState<{ role?: string, customer?: { shortname: string, fullname: string } } | null>(null);
+  React.useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+    setUserData(storedUserData);
+
+    const handleStorageChange = () => {
+      const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+      setUserData(updatedUserData);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState<Customer[]>([]);
@@ -202,15 +218,19 @@ export function UserTable(): React.JSX.Element {
                     <TableCell>{row.role}</TableCell>
                     <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
                     <TableCell>
-                      <IconButton color='warning' onClick={() => handleEditUser(row.id)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton color='success' onClick={() => handleEditUserPassword(row.id)}>
-                        <Key />
-                      </IconButton>
-                      <IconButton color='error' onClick={() => handleDeleteUser(row.id)}>
-                        <Delete />
-                      </IconButton>
+                      {row.role === 'SuperAdmin' && userData?.role !== 'SuperAdmin' ? (
+                        <></>
+                      ) : <>
+                        <IconButton color='warning' onClick={() => handleEditUser(row.id)}>
+                          <Edit />
+                        </IconButton>
+                        <IconButton color='success' onClick={() => handleEditUserPassword(row.id)}>
+                          <Key />
+                        </IconButton>
+                        <IconButton color='error' onClick={() => handleDeleteUser(row.id)}>
+                          <Delete />
+                        </IconButton>
+                      </>}
                     </TableCell>
                   </TableRow>
                 );
