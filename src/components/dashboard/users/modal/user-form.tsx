@@ -26,6 +26,28 @@ interface Customer {
 
 const roles = ["Admin", "User", "Engineer", "Customer"];
 export default function UserModalForm({ open, handleClose, userID, fetchUserData }: { open: boolean, handleClose: () => void, userID: number, fetchUserData: () => void }): React.JSX.Element {
+    const [userData, setUserData] = useState<{ role?: string, customer?: { shortname: string, fullname: string } } | null>(null);
+    useEffect(() => {
+        const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+        setUserData(storedUserData);
+
+        const handleStorageChange = () => {
+            const updatedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
+            setUserData(updatedUserData);
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (userData?.role === "SuperAdmin") {
+            roles.push("SuperAdmin");
+        }
+    }, [userData]);
+
     const [formData, setFormData] = useState({
         fullname: "",
         email: "",
