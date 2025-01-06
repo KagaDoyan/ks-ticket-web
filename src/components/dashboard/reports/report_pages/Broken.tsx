@@ -99,6 +99,7 @@ export default function BrokenPartReportPage() {
 
     useEffect(() => {
         fetchMAData();
+        GetCustomer();
     }, [from, to]);
 
     const exportToExcel = () => {
