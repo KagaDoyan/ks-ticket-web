@@ -90,23 +90,6 @@ export function ShopPage(): React.JSX.Element {
     setPage(0);
   };
 
-  const getUserData = () => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-    fetch(`${baseUrl}/api/whoami`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${authClient.getToken()}`
-      }
-    })
-      .then((res) => {
-        if (res.ok) {
-          res.json().then((data) => {
-            console.log(data);
-          })
-        }
-      })
-  }
-
   const fetchshopData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
     fetch(`${baseUrl}/api/shop?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
@@ -167,10 +150,6 @@ export function ShopPage(): React.JSX.Element {
   React.useEffect(() => {
     fetchshopData();
   }, [page, rowsPerPage, search])
-
-  useOnMount(() => {
-    getUserData();
-  })
 
   const HandleModalAddData = () => {
     handleOpen()
