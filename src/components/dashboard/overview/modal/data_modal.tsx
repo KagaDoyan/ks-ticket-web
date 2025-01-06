@@ -24,6 +24,7 @@ const TableModal: React.FC<DynamicTableModalProps> = ({ open, handleClose, custo
             xl: '40%', // 1800+
         },
         maxHeight: '80vh', // Dynamic height
+        overflowY: 'auto',
         bgcolor: 'background.paper',
         p: 4,
         outline: 'none'
