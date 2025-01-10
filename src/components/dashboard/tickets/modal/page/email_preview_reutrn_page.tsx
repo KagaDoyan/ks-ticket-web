@@ -30,7 +30,7 @@ export default function ReturnEmailPreviewPage({ open, handleClose, ticketData }
     <h3>Service Detail</h3><br>
     <table style="width:100%;text-align:left;">
         <tr><th style="vertical-align:top">Service Number</th><td style="vertical-align:top">${ticketData?.ticket_number}</td></tr>
-        <tr><th style="vertical-align:top">Engineer</th><td style="vertical-align:top">${ticketData?.engineer.name} ${ticketData?.engineer.lastname}</td></tr>
+        <tr><th style="vertical-align:top">Engineer</th><td style="vertical-align:top">${ticketData?.return_ticket?.engineer.name} ${ticketData?.return_ticket?.engineer.lastname}</td></tr>
         <tr><th style="vertical-align:top">Equipment</th><td style="vertical-align:top">${ticketData?.return_ticket?.item_category}</td></tr>
         <tr><th style="vertical-align:top">Investigation</th><td style="vertical-align:top">${ticketData?.return_ticket?.investigation}</td></tr>
         <tr><th style="vertical-align:top">Solution</th><td style="vertical-align:top">${ticketData?.return_ticket?.solution}<br>${deviceStr}${replaceDeviceStr}</td></tr>
