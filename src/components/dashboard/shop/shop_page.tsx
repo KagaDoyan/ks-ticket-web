@@ -200,8 +200,7 @@ export function ShopPage(): React.JSX.Element {
                 <TableCell>phone</TableCell>
                 <TableCell>email</TableCell>
                 <TableCell>customer</TableCell>
-                <TableCell>province</TableCell>
-                <TableCell>Created at</TableCell>
+                <TableCell>Location</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -214,8 +213,7 @@ export function ShopPage(): React.JSX.Element {
                     <TableCell>{row.phone}</TableCell>
                     <TableCell>{row.email}</TableCell>
                     <TableCell>{row.customer.shortname}</TableCell>
-                    <TableCell>{row.province.code}</TableCell>
-                    <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
+                    <TableCell>{row.latitude}, {row.longitude}</TableCell>
                     <TableCell>
                       {userData?.role === "Admin" || userData?.role === "SuperAdmin" ? <div>
                         <IconButton color='warning' onClick={() => handleEditshop(row.id)}>

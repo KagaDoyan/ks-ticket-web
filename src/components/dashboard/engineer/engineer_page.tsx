@@ -197,7 +197,7 @@ export function EngineerPage(): React.JSX.Element {
                 <TableCell>Phone</TableCell>
                 <TableCell>Line Name</TableCell>
                 <TableCell>Node</TableCell>
-                <TableCell>Created at</TableCell>
+                <TableCell>Location </TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -210,7 +210,7 @@ export function EngineerPage(): React.JSX.Element {
                     <TableCell>{row.phone}</TableCell>
                     <TableCell>{row.line_name}</TableCell>
                     <TableCell>{row.node.name}</TableCell>
-                    <TableCell>{dayjs(row.created_at).format('MMM D, YYYY')}</TableCell>
+                    <TableCell>{row.latitude}, {row.longitude}</TableCell>
                     <TableCell>
                       {userData?.role === "Admin" || userData?.role === "SuperAdmin" ? <div>
                         <IconButton color='warning' onClick={() => handleEditengineer(row.id)}>
