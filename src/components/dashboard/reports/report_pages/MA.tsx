@@ -162,6 +162,7 @@ export default function MAReportPage() {
     }
 
     const fetchMAData = async () => {
+        setLoading(false)
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
         let url = `${baseUrl}/api/report/ma?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`
         if (userData?.role === "Customer") {

@@ -62,6 +62,7 @@ export default function InventoryReportPage() {
     };
 
     const fetchMAData = async () => {
+        setLoading(true);
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
         fetch(`${baseUrl}/api/report/inventory?brand_name=${customer_name}`, {
             method: 'GET',

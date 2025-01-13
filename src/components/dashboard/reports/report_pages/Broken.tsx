@@ -79,6 +79,7 @@ export default function BrokenPartReportPage() {
     }
 
     const fetchMAData = async () => {
+        setLoading(false)
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
         fetch(`${baseUrl}/api/report/sparebrokenpart?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}&brand_name=${customer_name}`, {
             method: 'GET',
