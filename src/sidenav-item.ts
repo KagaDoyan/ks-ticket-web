@@ -7,6 +7,7 @@ export const navItems = [
     key: 'Main',
     items: [
       { key: 'dashboard', title: 'Dashboard', href: paths.dashboard.overview, icon: AssessmentOutlined, role: ["SuperAdmin", "Admin", "User", "Customer"] },
+      { key: 'node_dashboard', title: 'node dashboard', href: paths.dashboard.node_dashboard, icon: SpokeOutlined, role: ["SuperAdmin", "Admin"] },
       { key: 'ticket', title: 'ticket', href: paths.dashboard.ticket, icon: ConfirmationNumberOutlined, role: ["SuperAdmin", "Admin", "Engineer", "User"] },
       { key: 'report', title: 'report', href: paths.dashboard.report, icon: SummarizeOutlined, role: ["SuperAdmin", "Admin", "User", "Customer"] },
     ]

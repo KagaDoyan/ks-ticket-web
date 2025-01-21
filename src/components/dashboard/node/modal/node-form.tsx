@@ -24,7 +24,8 @@ interface Province {
 export default function NodeModalForm({ open, handleClose, nodeID, fetchnodeData }: { open: boolean, handleClose: () => void, nodeID: number, fetchnodeData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
         name: "",
-        province_id: [] as number[]
+        province_id: [] as number[],
+        node_time: null as number | null
     });
     const [provinceData, setProvinceData] = useState<Province[]>([]);
 
@@ -63,7 +64,8 @@ export default function NodeModalForm({ open, handleClose, nodeID, fetchnodeData
                             const array_of_provinceID = data.data.province.map((p: Province) => p.id);
                             setFormData({
                                 name: data.data.name,
-                                province_id: array_of_provinceID
+                                province_id: array_of_provinceID,
+                                node_time: data.data.node_time
                             });
                         })
                     } else {
@@ -79,6 +81,7 @@ export default function NodeModalForm({ open, handleClose, nodeID, fetchnodeData
         setFormData({
             name: "",
             province_id: [],
+            node_time: null
         });
     }
 
@@ -201,6 +204,14 @@ export default function NodeModalForm({ open, handleClose, nodeID, fetchnodeData
                             <TextField {...params} label="Province" variant="outlined" />
                         )}
                         isOptionEqualToValue={(option, value) => option.id === value.id}
+                    />
+
+                    <TextField
+                        name="node_time"
+                        label="Node Time"
+                        variant="outlined"
+                        value={formData.node_time}
+                        onChange={handleChange}
                     />
 
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>

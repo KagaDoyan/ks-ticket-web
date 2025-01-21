@@ -22,6 +22,8 @@ import { authClient } from '@/lib/auth/client';
 import MAReportPage from './report_pages/MA';
 import BrokenPartReportPage from './report_pages/Broken';
 import InventoryReportPage from './report_pages/Inventory';
+import { EngineerReportPage } from './report_pages/Engineer';
+import TicketKPIReportPage from './report_pages/TicketKPI';
 
 export function ReportPage(): React.JSX.Element {
   const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
@@ -60,6 +62,12 @@ export function ReportPage(): React.JSX.Element {
           {userData?.role !== "Customer" && (
           <Tab value="BrokenPart" label="Broken Part Report" />
           )}
+          {userData?.role !== "Customer" && (
+          <Tab value="Engineer" label="Engineer Report" />
+          )}
+          {userData?.role !== "Customer" && (
+          <Tab value="TicketKPI" label="Ticket KPI Report" />
+          )}
         </Tabs>
         {active_tabs === "MA" && (
           <>
@@ -76,6 +84,16 @@ export function ReportPage(): React.JSX.Element {
             {active_tabs === "BrokenPart" && (
               <>
                 <BrokenPartReportPage />
+              </>
+            )}
+            {active_tabs === "Engineer" && (
+              <>
+                <EngineerReportPage />
+              </>
+            )}
+            {active_tabs === "TicketKPI" && (
+              <>
+                <TicketKPIReportPage />
               </>
             )}
           </>

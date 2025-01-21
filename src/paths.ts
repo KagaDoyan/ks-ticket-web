@@ -26,6 +26,7 @@ export const paths = {
     email: '/page/email',
     mail_signature: '/page/mail_signature',
     mailer: '/page/mailer',
+    node_dashboard: '/node_dashboard',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;
