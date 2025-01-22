@@ -21,16 +21,28 @@ import { Delete, Edit, Key, Refresh } from '@mui/icons-material';
 import { authClient } from '@/lib/auth/client';
 import Swal from 'sweetalert2';
 import NodeModalForm from './modal/node-form';
+
 interface Node {
   id: number;
   name: string;
-  province: Province[]
+  created_at: string;
+  created_by: number;
+  deleted_at: string | null;
+  node_on_province: NodeProvince[];
 }
 
-interface Province {
-  id: number;
-  name: string;
-  code: string;
+interface NodeProvince {
+  node_time: number;
+  province_id: number;
+  node_id: number;
+  provinces: {
+    id: number;
+    name: string;
+    code: string;
+    deleted_at: string | null;
+    created_at: string;
+    created_by: number;
+  };
 }
 
 export function NodePage(): React.JSX.Element {
@@ -39,6 +51,7 @@ export function NodePage(): React.JSX.Element {
   const [rows, setRows] = React.useState<Node[]>([]);
   const [search, setSearch] = React.useState<string>('');
   const [count, setCount] = React.useState(0);
+  const [totalPages, setTotalPages] = React.useState(0);
   const [nodeID, setnodeID] = React.useState(0);
 
   const [open, setOpen] = React.useState(false);
@@ -79,10 +92,10 @@ export function NodePage(): React.JSX.Element {
           res.json().then((data) => {
             setRows(data.data.data);
             setCount(data.data.total_rows);
+            setTotalPages(data.data.total_page);
           })
         }
       }).catch((err) => {
-        // throw new Error(err);
         toast.error("Failed to fetch node data");
       });
   }
@@ -116,7 +129,7 @@ export function NodePage(): React.JSX.Element {
         }).then((res) => {
           if (res.ok) {
             fetchnodeData();
-            toast.success("node deleted successfully");
+            toast.success("Node deleted successfully");
           } else {
             throw new Error("Failed to delete node");
           }
@@ -176,12 +189,16 @@ export function NodePage(): React.JSX.Element {
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
-                <TableCell>Location</TableCell>
+                <TableCell>Provinces</TableCell>
+                <TableCell>Node Time</TableCell>
+                <TableCell>Created At</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.length > 0 ? rows.map((row) => {
+                const provinces = row.node_on_province.map(np => np.provinces.name).join(', ');
+                const nodeTimes = row.node_on_province.map(np => np.node_time).join(', ');
                 return (
                   <TableRow hover key={row.id}>
                     <TableCell>
@@ -189,9 +206,9 @@ export function NodePage(): React.JSX.Element {
                         <Typography variant="subtitle2">{row.name}</Typography>
                       </Stack>
                     </TableCell>
-                    <TableCell>
-                      {row.province.map((province) => province.code).join(', ')}
-                    </TableCell>
+                    <TableCell>{provinces || 'No provinces'}</TableCell>
+                    <TableCell>{nodeTimes || 'N/A'}</TableCell>
+                    <TableCell>{dayjs(row.created_at).format('YYYY-MM-DD HH:mm')}</TableCell>
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEditnode(row.id)}>
                         <Edit />
@@ -202,7 +219,7 @@ export function NodePage(): React.JSX.Element {
                     </TableCell>
                   </TableRow>
                 );
-              }) : <TableCell colSpan={5} sx={{ textAlign: 'center' }}>No data</TableCell>}
+              }) : <TableRow><TableCell colSpan={5} sx={{ textAlign: 'center' }}>No data</TableCell></TableRow>}
             </TableBody>
           </Table>
         </Box>
