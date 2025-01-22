@@ -14,7 +14,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { Badge, Button, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
+import { Badge, Button, IconButton, InputAdornment, OutlinedInput, TextField, Autocomplete } from '@mui/material';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
 import { Delete, Edit, PersonAddAlt1Outlined, PersonRemoveAlt1Outlined, Refresh } from '@mui/icons-material';
@@ -23,6 +23,7 @@ import ItemModalForm from './modal/item-form';
 import EngineerSelectionModal from './modal/engineer_select';
 import Swal from 'sweetalert2';
 import useOnMount from '@mui/utils/useOnMount';
+import { url } from 'inspector';
 
 export interface item {
   shop_number: string;
@@ -91,9 +92,16 @@ export function ItemPage(): React.JSX.Element {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState<item[]>([]);
   const [search, setSearch] = React.useState<string>('');
+  const [categoryFilter, setCategoryFilter] = React.useState<number>(0);
+  const [locationFilter, setLocationFilter] = React.useState<string>('');
+  const [conditionFilter, setConditionFilter] = React.useState<string>('');
+  const [typeFilter, setTypeFilter] = React.useState<string>('');
+  const [statusFilter, setStatusFilter] = React.useState<string>('');
+  const [statusOptions, setStatusOptions] = React.useState<string[]>([]);
   const [count, setCount] = React.useState(0);
   const [itemID, setitemID] = React.useState(0);
   const [storage, setStorage] = React.useState<storage[]>([]);
+  const [categories, setCategories] = React.useState<{ id: number; name: string }[]>([]);
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -135,9 +143,52 @@ export function ItemPage(): React.JSX.Element {
       })
   }
 
+  const fetchCategories = () => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/option`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
+    })
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            setCategories(data.data);
+          })
+        }
+      })
+  }
+
+  const fetchStatusOptions = () => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/item/status`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
+    })
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            setStatusOptions(data.data);
+          })
+        }
+      })
+  }
+
   const fetchitemData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-    fetch(`${baseUrl}/api/item?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
+    const params = new URLSearchParams({
+      page: (page + 1).toString(),
+      limit: rowsPerPage.toString(),
+      search: search,
+      ...(categoryFilter && { category: categoryFilter.toString() }),
+      ...(locationFilter && { location: encodeURIComponent(locationFilter) }),
+      ...(conditionFilter && { condition: conditionFilter }),
+      ...(typeFilter && { type: typeFilter }),
+      ...(statusFilter && { status: statusFilter })
+    });
+
+    fetch(`${baseUrl}/api/item?${params}`,
       {
         method: 'GET',
         headers: {
@@ -249,10 +300,12 @@ export function ItemPage(): React.JSX.Element {
 
   React.useEffect(() => {
     fetchitemData();
-  }, [page, rowsPerPage, search])
+  }, [page, rowsPerPage, search, categoryFilter, locationFilter, conditionFilter, typeFilter, statusFilter,statusFilter])
 
   useOnMount(() => {
     GetStorage()
+    fetchCategories()
+    fetchStatusOptions()
   })
   const HandleModalAddData = () => {
     handleOpen()
@@ -302,6 +355,68 @@ export function ItemPage(): React.JSX.Element {
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: '300px', height: '40px' }}
             />
+            <Box sx={{ minWidth: 120 }}>
+              <Autocomplete
+                options={categories}
+                getOptionLabel={(option) => option.name}
+                value={categories.find(cat => cat.id === categoryFilter) || null}
+                onChange={(_, newValue) => setCategoryFilter(newValue ? newValue.id : 0)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Category"
+                    size="small"
+                    sx={{ height: '40px' }}
+                  />
+                )}
+                size="small"
+              />
+            </Box>
+            <TextField
+              placeholder="Location"
+              size="small"
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              sx={{ width: '150px', height: '40px' }}
+            />
+            <TextField
+              select
+              size="small"
+              value={conditionFilter}
+              onChange={(e) => setConditionFilter(e.target.value)}
+              sx={{ width: '120px', height: '40px' }}
+              SelectProps={{ native: true }}
+            >
+              <option value="">Condition</option>
+              <option value="good">Good</option>
+              <option value="broken">Broken</option>
+            </TextField>
+            <TextField
+              select
+              size="small"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              sx={{ width: '120px', height: '40px' }}
+              SelectProps={{ native: true }}
+            >
+              <option value="">Type</option>
+              <option value="spare">Spare</option>
+              <option value="brand">Brand</option>
+              <option value="replacement">Replacement</option>
+            </TextField>
+            <TextField
+              select
+              size="small"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              sx={{ width: '120px', height: '40px' }}
+              SelectProps={{ native: true }}
+            >
+              <option value="">Status</option>
+              {statusOptions.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </TextField>
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchitemData}>
               refresh
             </Button>
