@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Grid, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Chip, Collapse, IconButton, Stack, Button, TextField, Modal, Paper, InputAdornment } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Chip, Collapse, IconButton, Stack, Button, TextField, Modal, Paper, InputAdornment, MenuItem, Select, SelectChangeEvent, Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { authClient } from '@/lib/auth/client';
 import { toast } from 'react-toastify';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -83,6 +83,51 @@ interface TaskDetailsModalProps {
     onClose: () => void;
     engineer: Engineer | null;
 }
+
+const groupHourlyData = (
+    hourlyData: HourlyData[], 
+    range: number, 
+    startHour?: number, 
+    endHour?: number
+): HourlyData[] => {
+    const groupedData: { [key: string]: HourlyData } = {};
+
+    hourlyData.forEach(entry => {
+        // Parse the time 
+        const [hours] = entry.time.split(':').map(Number);
+
+        // Apply time range filter if specified
+        if (
+            (startHour !== undefined && hours < startHour) || 
+            (endHour !== undefined && hours > endHour)
+        ) {
+            return; // Skip this entry
+        }
+
+        const groupKey = `${Math.floor(hours / range) * range}:00 - ${Math.floor(hours / range) * range + (range - 1)}:59`;
+
+        if (!groupedData[groupKey]) {
+            groupedData[groupKey] = {
+                time: groupKey,
+                working: 0,
+                available: 0,
+                ticketDetails: []
+            };
+        }
+
+        // Aggregate data for the group
+        groupedData[groupKey].working += entry.working;
+        groupedData[groupKey].available = Math.max(groupedData[groupKey].available, entry.available);
+        groupedData[groupKey].ticketDetails.push(...entry.ticketDetails);
+    });
+
+    // Convert grouped data to array and sort
+    return Object.values(groupedData).sort((a, b) => {
+        const [startA] = a.time.split(':').map(Number);
+        const [startB] = b.time.split(':').map(Number);
+        return startA - startB;
+    });
+};
 
 const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ open, onClose, engineer }) => {
     if (!engineer) return null;
@@ -358,107 +403,153 @@ const Dashboard: React.FC<DashboardProps> = ({ nodeData, onViewEngineers }) => {
 };
 
 const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
-    const [expanded, setExpanded] = useState(false);
-    const [expandedRow, setExpandedRow] = useState<number | null>(null);
+    const [groupRange, setGroupRange] = useState<number>(3);
+    
+    // Custom time range state
+    const [useCustomTimeRange, setUseCustomTimeRange] = useState(false);
+    const [startHour, setStartHour] = useState<number>(0);
+    const [endHour, setEndHour] = useState<number>(23);
+    const [isCustomFilterOpen, setIsCustomFilterOpen] = useState(false);
 
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
+    const handleGroupRangeChange = (event: SelectChangeEvent<number>) => {
+        setGroupRange(Number(event.target.value));
     };
 
-    const handleRowClick = (index: number) => {
-        setExpandedRow(expandedRow === index ? null : index);
+    // Open custom filter dialog
+    const handleOpenCustomFilter = () => {
+        setIsCustomFilterOpen(true);
     };
+
+    // Close custom filter dialog
+    const handleCloseCustomFilter = () => {
+        setIsCustomFilterOpen(false);
+    };
+
+    // Apply custom filter
+    const handleApplyCustomFilter = () => {
+        setUseCustomTimeRange(true);
+        handleCloseCustomFilter();
+    };
+
+    // Reset custom filter
+    const handleResetCustomFilter = () => {
+        setUseCustomTimeRange(false);
+        setStartHour(0);
+        setEndHour(23);
+        handleCloseCustomFilter();
+    };
+
+    // Prepare hourly data with optional filtering
+    const filteredHourlyData = useCustomTimeRange 
+        ? groupHourlyData(node.hourlyDistribution, groupRange, startHour, endHour)
+        : groupHourlyData(node.hourlyDistribution, groupRange);
 
     return (
-        <Box mt={2}>
-            <Box display="flex" alignItems="center">
-                <Typography sx={{ fontWeight: 'bold', fontSize: '16px' }} color="textPrimary">
-                    Hourly Data
-                </Typography>
-                <IconButton
-                    onClick={handleExpandClick}
-                    aria-expanded={expanded}
-                    aria-label="show more"
-                    sx={{ marginLeft: 'auto' }}
+        <Card sx={{ mb: 2 }}>
+            <CardContent>
+                <Stack 
+                    direction="row" 
+                    spacing={2} 
+                    alignItems="center" 
+                    sx={{ mb: 2 }}
                 >
-                    <ExpandMoreIcon />
-                </IconButton>
-            </Box>
-            <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <TableContainer>
+                    <Typography variant="subtitle1">Group Range:</Typography>
+                    <Select
+                        value={groupRange}
+                        onChange={handleGroupRangeChange}
+                        size="small"
+                        sx={{ minWidth: 100 }}
+                    >
+                        <MenuItem value={1}>1 Hour</MenuItem>
+                        <MenuItem value={2}>2 Hours</MenuItem>
+                        <MenuItem value={3}>3 Hours</MenuItem>
+                        <MenuItem value={4}>4 Hours</MenuItem>
+                        <MenuItem value={6}>6 Hours</MenuItem>
+                        <MenuItem value={12}>12 Hours</MenuItem>
+                    </Select>
+
+                    <Button 
+                        variant="outlined" 
+                        size="small" 
+                        onClick={handleOpenCustomFilter}
+                    >
+                        Custom Time Filter
+                    </Button>
+
+                    {useCustomTimeRange && (
+                        <Chip 
+                            label={`Time: ${startHour}:00 - ${endHour}:59`} 
+                            onDelete={() => setUseCustomTimeRange(false)} 
+                            color="primary" 
+                            size="small" 
+                        />
+                    )}
+                </Stack>
+
+                <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
                             <TableRow>
                                 <TableCell>Time</TableCell>
                                 <TableCell>Working</TableCell>
                                 <TableCell>Available</TableCell>
-                                <TableCell padding="checkbox"></TableCell>
+                                <TableCell>Tickets</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {node.hourlyDistribution.map((hour, index) => (
+                            {filteredHourlyData.map((hour, index) => (
                                 <React.Fragment key={index}>
                                     <TableRow
                                         sx={{
-                                            backgroundColor: index % 2 === 0 ? '#f5f5f5' : '#ffffff',
-                                            cursor: hour.working > 0 ? 'pointer' : 'default',
-                                            '&:hover': hour.working > 0 ? { backgroundColor: '#e0e0e0' } : {},
+                                            '&:last-child td, &:last-child th': { border: 0 },
+                                            backgroundColor: hour.working > 0 ? 'rgba(255, 165, 0, 0.1)' : 'inherit',
                                         }}
-                                        onClick={() => hour.working > 0 && handleRowClick(index)}
                                     >
-                                        <TableCell>{hour.time}</TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={hour.working}
-                                                color={hour.working > 0 ? 'primary' : 'default'}
-                                                size="small"
-                                                sx={{ fontWeight: 'bold' }}
+                                        <TableCell component="th" scope="row">
+                                            {hour.time}
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Chip 
+                                                label={hour.working} 
+                                                color="warning" 
+                                                size="small" 
+                                                sx={{ fontWeight: 'bold' }} 
                                             />
                                         </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={hour.available}
-                                                color={hour.available > 0 ? 'secondary' : 'default'}
-                                                size="small"
-                                                sx={{ fontWeight: 'bold' }}
+                                        <TableCell align="center">
+                                            <Chip 
+                                                label={hour.available} 
+                                                color="success" 
+                                                size="small" 
+                                                sx={{ fontWeight: 'bold' }} 
                                             />
                                         </TableCell>
-                                        <TableCell padding="checkbox">
-                                            {hour.working > 0 && (
-                                                <IconButton
-                                                    size="small"
-                                                    sx={{
-                                                        transform: expandedRow === index ? 'rotate(180deg)' : 'none',
-                                                        transition: 'transform 0.2s',
-                                                    }}
-                                                >
-                                                    <ExpandMoreIcon />
-                                                </IconButton>
-                                            )}
+                                        <TableCell align="center">
+                                            {hour.ticketDetails.length}
                                         </TableCell>
                                     </TableRow>
-                                    {hour.working > 0 && (
+                                    {hour.ticketDetails.length > 0 && (
                                         <TableRow>
-                                            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
-                                                <Collapse in={expandedRow === index} timeout="auto" unmountOnExit>
+                                            <TableCell colSpan={4} sx={{ py: 0 }}>
+                                                <Collapse in={true} timeout="auto" unmountOnExit>
                                                     <Box sx={{ margin: 1 }}>
-                                                        <Typography variant="h6" gutterBottom component="div">
-                                                            Working Engineers
+                                                        <Typography variant="subtitle2" gutterBottom>
+                                                            Ticket Details
                                                         </Typography>
                                                         <Table size="small">
                                                             <TableHead>
                                                                 <TableRow>
                                                                     <TableCell>Ticket Number</TableCell>
-                                                                    <TableCell>INC Number</TableCell>
                                                                     <TableCell>Engineer Name</TableCell>
+                                                                    <TableCell>Inc Number</TableCell>
                                                                 </TableRow>
                                                             </TableHead>
                                                             <TableBody>
-                                                                {hour.ticketDetails.map((detail, detailIndex) => (
-                                                                    <TableRow key={detailIndex}>
-                                                                        <TableCell>{detail.ticket_number}</TableCell>
-                                                                        <TableCell>{detail.inc_number}</TableCell>
-                                                                        <TableCell>{detail.engineer_name}</TableCell>
+                                                                {hour.ticketDetails.map((ticket, ticketIndex) => (
+                                                                    <TableRow key={ticketIndex}>
+                                                                        <TableCell>{ticket.ticket_number}</TableCell>
+                                                                        <TableCell>{ticket.engineer_name}</TableCell>
+                                                                        <TableCell>{ticket.inc_number}</TableCell>
                                                                     </TableRow>
                                                                 ))}
                                                             </TableBody>
@@ -473,8 +564,46 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Collapse>
-        </Box>
+
+                {/* Custom Time Range Filter Dialog */}
+                <Dialog 
+                    open={isCustomFilterOpen} 
+                    onClose={handleCloseCustomFilter}
+                    maxWidth="xs"
+                    fullWidth
+                >
+                    <DialogTitle>Custom Time Range Filter</DialogTitle>
+                    <DialogContent>
+                        <Stack spacing={2} sx={{ pt: 1 }}>
+                            <TextField
+                                label="Start Hour"
+                                type="number"
+                                inputProps={{ min: 0, max: 23 }}
+                                value={startHour}
+                                onChange={(e) => setStartHour(Number(e.target.value))}
+                                fullWidth
+                            />
+                            <TextField
+                                label="End Hour"
+                                type="number"
+                                inputProps={{ min: 0, max: 23 }}
+                                value={endHour}
+                                onChange={(e) => setEndHour(Number(e.target.value))}
+                                fullWidth
+                            />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleResetCustomFilter} color="secondary">
+                            Reset
+                        </Button>
+                        <Button onClick={handleApplyCustomFilter} color="primary">
+                            Apply
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </CardContent>
+        </Card>
     );
 };
 
