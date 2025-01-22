@@ -1,4 +1,4 @@
-import { Box, Modal, Button, TextField, Typography, Stack, Autocomplete, FormControl, InputLabel, Select, MenuItem, IconButton } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack, Autocomplete, FormControl, InputLabel, MenuItem, IconButton } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
@@ -13,7 +13,7 @@ const modalStyle = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 500,
+  width: 700,
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 4,
@@ -139,7 +139,11 @@ export default function NodeModalForm({ open, handleClose, nodeID, fetchnodeData
       .then((res) => {
         if (res.ok) {
           res.json().then((data) => {
-            setProvinces(data);
+            // Sort provinces alphabetically by name
+            const sortedProvinces = data.sort((a: Province, b: Province) => 
+              a.name.localeCompare(b.name)
+            );
+            setProvinces(sortedProvinces);
           })
         } else {
           throw new Error("Failed to fetch province data");
@@ -187,28 +191,30 @@ export default function NodeModalForm({ open, handleClose, nodeID, fetchnodeData
           <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Provinces</Typography>
           {formData.provinceData.map((provinceData, index) => (
             <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel>Province</InputLabel>
-                <Select
-                  value={provinceData.province_id}
-                  label="Province"
-                  onChange={(e) => handleProvinceChange(index, 'province_id', Number(e.target.value))}
-                  required
-                >
-                  {provinces.map((province) => (
-                    <MenuItem key={province.id} value={province.id}>
-                      {province.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                fullWidth
+                options={provinces}
+                getOptionLabel={(option) => option.name}
+                value={provinces.find(p => p.id === provinceData.province_id) || null}
+                onChange={(_, newValue) => {
+                  handleProvinceChange(index, 'province_id', newValue ? newValue.id : 0);
+                }}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="Province" 
+                    variant="outlined" 
+                    required 
+                  />
+                )}
+              />
               <TextField
                 label="Node Time (minutes)"
                 type="number"
                 value={provinceData.node_time}
                 onChange={(e) => handleProvinceChange(index, 'node_time', Number(e.target.value))}
                 required
-                sx={{ width: '200px' }}
+                sx={{ width: '250px' }}
               />
               <IconButton color="error" onClick={() => removeProvinceRow(index)}>
                 <Delete />

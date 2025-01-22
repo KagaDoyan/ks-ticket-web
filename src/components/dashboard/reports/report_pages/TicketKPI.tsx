@@ -215,6 +215,7 @@ export default function TicketKPIReportPage() {
                                         <TableCell>Category</TableCell>
                                         <TableCell>Shop</TableCell>
                                         <TableCell>Time In/Out</TableCell>
+                                        <TableCell>SLA</TableCell>
                                         <TableCell align="center">Mail & Appointment</TableCell>
                                         <TableCell align="center">Appointment</TableCell>
                                         <TableCell align="center">Arrival</TableCell>
@@ -240,6 +241,7 @@ export default function TicketKPIReportPage() {
                                                 {row.time_in}<br />
                                                 {row.time_out}
                                             </TableCell>
+                                            <TableCell>{row.sla}</TableCell>
                                             <TableCell align="center">
                                                 {row.kpi_mail_appointment}<br />
                                                 <Chip
