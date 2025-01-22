@@ -404,6 +404,8 @@ const Dashboard: React.FC<DashboardProps> = ({ nodeData, onViewEngineers }) => {
 
 const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
     const [groupRange, setGroupRange] = useState<number>(3);
+    const [isTableExpanded, setIsTableExpanded] = useState(false);
+    const [expandedRowIndex, setExpandedRowIndex] = useState<Set<number>>(new Set());
     
     // Custom time range state
     const [useCustomTimeRange, setUseCustomTimeRange] = useState(false);
@@ -413,6 +415,28 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
 
     const handleGroupRangeChange = (event: SelectChangeEvent<number>) => {
         setGroupRange(Number(event.target.value));
+    };
+
+    // Toggle entire table expansion
+    const handleTableExpandClick = () => {
+        setIsTableExpanded(!isTableExpanded);
+        // Reset row-specific expansion when toggling entire table
+        setExpandedRowIndex(new Set());
+    };
+
+    // Toggle individual row expansion
+    const handleRowExpandClick = (index: number) => {
+        if (expandedRowIndex.has(index)) {
+            const newSet = new Set(expandedRowIndex);
+            newSet.delete(index);
+            setExpandedRowIndex(newSet);
+        } else {
+            setExpandedRowIndex(new Set([...expandedRowIndex, index]));
+        }
+        // Ensure table is expanded when a row is expanded
+        if (!isTableExpanded) {
+            setIsTableExpanded(true);
+        }
     };
 
     // Open custom filter dialog
@@ -484,86 +508,116 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
                             size="small" 
                         />
                     )}
+
+                    <IconButton 
+                        onClick={handleTableExpandClick}
+                        sx={{ marginLeft: 'auto' }}
+                    >
+                        <ExpandMoreIcon 
+                            sx={{ 
+                                transform: isTableExpanded ? 'rotate(180deg)' : 'none',
+                                transition: 'transform 0.2s'
+                            }} 
+                        />
+                    </IconButton>
                 </Stack>
 
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Time</TableCell>
-                                <TableCell>Working</TableCell>
-                                <TableCell>Available</TableCell>
-                                <TableCell>Tickets</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {filteredHourlyData.map((hour, index) => (
-                                <React.Fragment key={index}>
-                                    <TableRow
-                                        sx={{
-                                            '&:last-child td, &:last-child th': { border: 0 },
-                                            backgroundColor: hour.working > 0 ? 'rgba(255, 165, 0, 0.1)' : 'inherit',
-                                        }}
-                                    >
-                                        <TableCell component="th" scope="row">
-                                            {hour.time}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Chip 
-                                                label={hour.working} 
-                                                color="warning" 
-                                                size="small" 
-                                                sx={{ fontWeight: 'bold' }} 
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Chip 
-                                                label={hour.available} 
-                                                color="success" 
-                                                size="small" 
-                                                sx={{ fontWeight: 'bold' }} 
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {hour.ticketDetails.length}
-                                        </TableCell>
-                                    </TableRow>
-                                    {hour.ticketDetails.length > 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={4} sx={{ py: 0 }}>
-                                                <Collapse in={true} timeout="auto" unmountOnExit>
-                                                    <Box sx={{ margin: 1 }}>
-                                                        <Typography variant="subtitle2" gutterBottom>
-                                                            Ticket Details
-                                                        </Typography>
-                                                        <Table size="small">
-                                                            <TableHead>
-                                                                <TableRow>
-                                                                    <TableCell>Ticket Number</TableCell>
-                                                                    <TableCell>Engineer Name</TableCell>
-                                                                    <TableCell>Inc Number</TableCell>
-                                                                </TableRow>
-                                                            </TableHead>
-                                                            <TableBody>
-                                                                {hour.ticketDetails.map((ticket, ticketIndex) => (
-                                                                    <TableRow key={ticketIndex}>
-                                                                        <TableCell>{ticket.ticket_number}</TableCell>
-                                                                        <TableCell>{ticket.engineer_name}</TableCell>
-                                                                        <TableCell>{ticket.inc_number}</TableCell>
-                                                                    </TableRow>
-                                                                ))}
-                                                            </TableBody>
-                                                        </Table>
-                                                    </Box>
-                                                </Collapse>
+                <Collapse in={isTableExpanded} timeout="auto" unmountOnExit>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Time</TableCell>
+                                    <TableCell>Working</TableCell>
+                                    <TableCell>Available</TableCell>
+                                    <TableCell>Tickets</TableCell>
+                                    <TableCell padding="checkbox"></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {filteredHourlyData.map((hour, index) => (
+                                    <React.Fragment key={index}>
+                                        <TableRow
+                                            sx={{
+                                                '&:last-child td, &:last-child th': { border: 0 },
+                                                backgroundColor: hour.working > 0 ? 'rgba(255, 165, 0, 0.1)' : 'inherit',
+                                                cursor: hour.working > 0 ? 'pointer' : 'default',
+                                            }}
+                                            onClick={() => hour.working > 0 && handleRowExpandClick(index)}
+                                        >
+                                            <TableCell component="th" scope="row">
+                                                {hour.time}
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Chip 
+                                                    label={hour.working} 
+                                                    color="warning" 
+                                                    size="small" 
+                                                    sx={{ fontWeight: 'bold' }} 
+                                                />
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Chip 
+                                                    label={hour.available} 
+                                                    color="success" 
+                                                    size="small" 
+                                                    sx={{ fontWeight: 'bold' }} 
+                                                />
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                {hour.ticketDetails.length}
+                                            </TableCell>
+                                            <TableCell padding="checkbox">
+                                                {hour.working > 0 && (
+                                                    <IconButton
+                                                        size="small"
+                                                        sx={{
+                                                            transform: expandedRowIndex.has(index) ? 'rotate(180deg)' : 'none',
+                                                            transition: 'transform 0.2s',
+                                                        }}
+                                                    >
+                                                        <ExpandMoreIcon />
+                                                    </IconButton>
+                                                )}
                                             </TableCell>
                                         </TableRow>
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                        {hour.working > 0 && expandedRowIndex.has(index) && (
+                                            <TableRow>
+                                                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+                                                    <Collapse in={true} timeout="auto" unmountOnExit>
+                                                        <Box sx={{ margin: 1 }}>
+                                                            <Typography variant="h6" gutterBottom component="div">
+                                                                Ticket Details
+                                                            </Typography>
+                                                            <Table size="small">
+                                                                <TableHead>
+                                                                    <TableRow>
+                                                                        <TableCell>Ticket Number</TableCell>
+                                                                        <TableCell>Engineer Name</TableCell>
+                                                                        <TableCell>Inc Number</TableCell>
+                                                                    </TableRow>
+                                                                </TableHead>
+                                                                <TableBody>
+                                                                    {hour.ticketDetails.map((ticket, ticketIndex) => (
+                                                                        <TableRow key={ticketIndex}>
+                                                                            <TableCell>{ticket.ticket_number}</TableCell>
+                                                                            <TableCell>{ticket.engineer_name}</TableCell>
+                                                                            <TableCell>{ticket.inc_number}</TableCell>
+                                                                        </TableRow>
+                                                                    ))}
+                                                                </TableBody>
+                                                            </Table>
+                                                        </Box>
+                                                    </Collapse>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Collapse>
 
                 {/* Custom Time Range Filter Dialog */}
                 <Dialog 
@@ -611,9 +665,8 @@ export function NodeDashboardPage(): React.JSX.Element {
     const [nodeData, setNodeData] = useState<NodeSummary[]>([]);
     const [filteredData, setFilteredData] = useState<NodeSummary[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState<string>(dayjs().format('DD/MM/YYYY'));
     const [searchQuery, setSearchQuery] = useState<string>('');
-    const [selectedDate, setSelectedDate] = useState<string>(dayjs(Date.now()).format('DD/MM/YYYY'));
     const [selectedNode, setSelectedNode] = useState<NodeSummary | null>(null);
     const [isEngineerModalOpen, setIsEngineerModalOpen] = useState(false);
 
@@ -637,7 +690,6 @@ export function NodeDashboardPage(): React.JSX.Element {
             setFilteredData(data.data);
         } catch (error: any) {
             toast.error("Failed to fetch node data");
-            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -675,9 +727,9 @@ export function NodeDashboardPage(): React.JSX.Element {
         setSelectedNode(null);
     };
 
-    if (error) {
-        return <Typography variant="h6" color="error">Error: {error}</Typography>;
-    }
+    // if (error) {
+    //     return <Typography variant="h6" color="error">Error: {error}</Typography>;
+    // }
 
     return (
         <div>
@@ -785,4 +837,4 @@ export function NodeDashboardPage(): React.JSX.Element {
             />
         </div>
     );
-};
+}
