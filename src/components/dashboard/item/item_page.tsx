@@ -92,8 +92,13 @@ export function ItemPage(): React.JSX.Element {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState<item[]>([]);
   const [search, setSearch] = React.useState<string>('');
+  const [searchFilters, setSearchFilters] = React.useState<{
+    engineer?: string;
+    shop?: string;
+    storage?: string;
+    default?: string;
+  }>({});
   const [categoryFilter, setCategoryFilter] = React.useState<number>(0);
-  const [locationFilter, setLocationFilter] = React.useState<string>('');
   const [conditionFilter, setConditionFilter] = React.useState<string>('');
   const [typeFilter, setTypeFilter] = React.useState<string>('');
   const [statusFilter, setStatusFilter] = React.useState<string>('');
@@ -102,6 +107,9 @@ export function ItemPage(): React.JSX.Element {
   const [itemID, setitemID] = React.useState(0);
   const [storage, setStorage] = React.useState<storage[]>([]);
   const [categories, setCategories] = React.useState<{ id: number; name: string }[]>([]);
+  const [locationIndicators, setLocationIndicators] = React.useState<{ label: string; value: string }[]>([]);
+  const [selectedIndicator, setSelectedIndicator] = React.useState<{ label: string; value: string } | null>(null);
+  const [locationSearchValue, setLocationSearchValue] = React.useState<string>('');
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -175,17 +183,53 @@ export function ItemPage(): React.JSX.Element {
       })
   }
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+    const filters: typeof searchFilters = {};
+
+    // Parse indicator-based search
+    const indicatorMatches = inputValue.match(/(\w+):([^:\s]+)/g);
+    if (indicatorMatches) {
+      indicatorMatches.forEach(match => {
+        const [indicator, value] = match.split(':');
+        switch (indicator) {
+          case 'engineer':
+            filters.engineer = value;
+            break;
+          case 'shop':
+            filters.shop = value;
+            break;
+          case 'storage':
+            filters.storage = value;
+            break;
+        }
+      });
+
+      // Remove indicator parts from the search string
+      filters.default = inputValue.replace(/(\w+):([^:\s]+)\s*/g, '').trim();
+    } else {
+      // If no indicators, use the entire input as default search
+      filters.default = inputValue;
+    }
+
+    setSearch(inputValue);
+    setSearchFilters(filters);
+  };
+
   const fetchitemData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
     const params = new URLSearchParams({
       page: (page + 1).toString(),
       limit: rowsPerPage.toString(),
-      search: search,
+      ...(searchFilters.default && { search: searchFilters.default }),
       ...(categoryFilter && { category: categoryFilter.toString() }),
-      ...(locationFilter && { location: encodeURIComponent(locationFilter) }),
+      ...(searchFilters.engineer && { engineer: encodeURIComponent(searchFilters.engineer) }),
+      ...(searchFilters.shop && { shop: encodeURIComponent(searchFilters.shop) }),
+      ...(searchFilters.storage && { storage: encodeURIComponent(searchFilters.storage) }),
       ...(conditionFilter && { condition: conditionFilter }),
       ...(typeFilter && { type: typeFilter }),
-      ...(statusFilter && { status: statusFilter })
+      ...(statusFilter && { status: statusFilter }),
+      ...(selectedIndicator && locationSearchValue && { location: `${selectedIndicator.value}:${locationSearchValue}` }),
     });
 
     fetch(`${baseUrl}/api/item?${params}`,
@@ -199,14 +243,15 @@ export function ItemPage(): React.JSX.Element {
         if (res.ok) {
           res.json().then((data) => {
             setRows(data.data.data);
-            setCount(data.data.total_rows);
+            setCount(data.data.total);
           })
         }
-      }).catch((err) => {
-        // throw new Error(err);
-        toast.error("Failed to fetch item data");
+      })
+      .catch((error) => {
+        console.error('Error fetching item data:', error);
+        toast.error('Failed to fetch items');
       });
-  }
+  };
 
   const handleEdititem = (id: number) => {
     setitemID(id)
@@ -298,14 +343,23 @@ export function ItemPage(): React.JSX.Element {
     });
   }
 
+  const handleLocationSearch = () => {
+    fetchitemData();
+  }
+
   React.useEffect(() => {
     fetchitemData();
-  }, [page, rowsPerPage, search, categoryFilter, locationFilter, conditionFilter, typeFilter, statusFilter,statusFilter])
+  }, [page, rowsPerPage, searchFilters, categoryFilter, conditionFilter, typeFilter, statusFilter, selectedIndicator, locationSearchValue])
 
   useOnMount(() => {
     GetStorage()
     fetchCategories()
     fetchStatusOptions()
+    setLocationIndicators([
+      { label: 'Engineer', value: 'engineer' },
+      { label: 'Shop', value: 'shop' },
+      { label: 'Storage', value: 'storage' },
+    ])
   })
   const HandleModalAddData = () => {
     handleOpen()
@@ -352,7 +406,7 @@ export function ItemPage(): React.JSX.Element {
                   <MagnifyingGlassIcon fontSize="12px" />
                 </InputAdornment>
               }
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={handleSearchChange}
               sx={{ maxWidth: '300px', height: '40px' }}
             />
             <Box sx={{ minWidth: 120 }}>
@@ -372,13 +426,6 @@ export function ItemPage(): React.JSX.Element {
                 size="small"
               />
             </Box>
-            <TextField
-              placeholder="Location"
-              size="small"
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              sx={{ width: '150px', height: '40px' }}
-            />
             <TextField
               select
               size="small"
@@ -419,6 +466,31 @@ export function ItemPage(): React.JSX.Element {
             </TextField>
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchitemData}>
               refresh
+            </Button>
+          </Stack>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Autocomplete
+              options={locationIndicators}
+              getOptionLabel={(option) => option.label}
+              value={selectedIndicator}
+              onChange={(event, newValue) => setSelectedIndicator(newValue)}
+              renderInput={(params) => <TextField {...params} label="Location Indicator" variant="outlined" />}
+              sx={{ width: 150 }}
+            />
+            <TextField
+              label="Location search"
+              variant="outlined"
+              value={locationSearchValue}
+              onChange={(e) => setLocationSearchValue(e.target.value)}
+              sx={{ flexGrow: 1 }}
+            />
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleLocationSearch}
+              disabled={!selectedIndicator || !locationSearchValue}
+            >
+              Search
             </Button>
           </Stack>
         </Stack>
