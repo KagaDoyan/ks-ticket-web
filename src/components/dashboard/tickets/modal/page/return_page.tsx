@@ -1242,7 +1242,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                         },
                         textField: { fullWidth: true, required: true },
                     }}
-                    onChange={(date) => setFormData({ ...formData, time_in: date?.toISOString() || "" })}
+                    onChange={(date) => setFormData({ ...formData, time_in: date?.format("YYYY-MM-DD HH:mm") || "" })}
                 />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1260,7 +1260,7 @@ export default function ReturnPage({ open, handleClose, ticketID, fetchticketDat
                         },
                         textField: { fullWidth: true, required: true },
                     }}
-                    onChange={(date) => setFormData({ ...formData, time_out: date?.toISOString() || "" })}
+                    onChange={(date) => setFormData({ ...formData, time_out: date?.format("YYYY-MM-DD HH:mm") || "" })}
                 />
             </Grid>
             <Stack justifyContent={"flex-start"} direction="row" spacing={2}>

@@ -121,7 +121,7 @@ export default function OpenEmailPreviewPage({ open, handleClose, ticketData }: 
                         </span>
                     </b>
                     <span style={{}}>
-                        {dayjs(ticket.due_by).format('DD-MM-YYYY hh:mm')}
+                        {dayjs(ticket.due_by).format('DD-MM-YYYY HH:mm')}
                     </span>
                 </p>
 

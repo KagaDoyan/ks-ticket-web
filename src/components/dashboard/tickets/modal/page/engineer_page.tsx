@@ -1173,7 +1173,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                             },
                             textField: { fullWidth: true, required: true },
                         }}
-                        onChange={(date) => setFormData({ ...formData, time_in: date?.toISOString() || "" })}
+                        onChange={(date) => setFormData({ ...formData, time_in: date?.format("YYYY-MM-DD HH:mm") || "" })}
                     />
                 </Grid>
             </Grid>
@@ -1192,7 +1192,7 @@ export default function EngineerPage({ open, handleClose, ticketID, fetchticketD
                         },
                         textField: { fullWidth: true, required: true },
                     }}
-                    onChange={(date) => setFormData({ ...formData, time_out: date?.toISOString() || "" })}
+                    onChange={(date) => setFormData({ ...formData, time_out: date?.format('YYYY-MM-DD HH:mm') || "" })}
                 />
             </Grid>
             <Stack justifyContent={"flex-start"} direction="row" spacing={2}>
