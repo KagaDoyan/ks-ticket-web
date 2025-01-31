@@ -19,16 +19,13 @@ interface Customer {
 
 export default function MAReportPage() {
     const [customers, setCustomers] = React.useState<Customer[]>([]);
-    const currentDate = new Date();
-    const sevenDaysBefore = new Date(currentDate);
-    sevenDaysBefore.setDate(currentDate.getDate() - 7);
 
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [rows, setRows] = React.useState<any>([]);
     const [count, setCount] = React.useState(0);
-    const [from, setFrom] = React.useState(dayjs(sevenDaysBefore).format("DD/MM/YYYY"));
-    const [to, setTo] = React.useState(dayjs(currentDate).format("DD/MM/YYYY"));
+    const [from, setFrom] = React.useState("");
+    const [to, setTo] = React.useState("");
     const [customer_name, setCustomer] = React.useState("");
 
     const handleChangePage = (
@@ -64,7 +61,7 @@ export default function MAReportPage() {
 
     const fetchMAData = async () => {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-        fetch(`${baseUrl}/api/inventory/report?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${to}&search=${customer_name}`, {
+        fetch(`${baseUrl}/api/inventory/report?from=${dayjs(from, "DD/MM/YYYY").format("YYYY-MM-DD")}&to=${dayjs(to, "DD/MM/YYYY").format("YYYY-MM-DD")}&search=${customer_name}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
