@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SellModalForm from "./modal/sell_modal";
 import { Box, Button, Card, Divider, IconButton, InputAdornment, OutlinedInput, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
@@ -19,7 +19,7 @@ export function SellPage(): React.JSX.Element {
     const [SellID, setSellID] = useState(0);
     const [open, setOpen] = useState(false);
     const [rows, setRows] = useState<any[]>([]);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [count, setCount] = useState(0);
 
@@ -47,7 +47,7 @@ export function SellPage(): React.JSX.Element {
         setOpen(true);
     }
     const fetchSellData = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory?page=${page}&limit=${rowsPerPage}&search=${search}`,
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
             {
                 method: 'GET',
                 headers: {
@@ -86,7 +86,7 @@ export function SellPage(): React.JSX.Element {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${authClient.getToken()}`
-                    }  
+                    }
                 }).then((res) => {
                     if (res.ok) {
                         fetchSellData();
@@ -104,7 +104,11 @@ export function SellPage(): React.JSX.Element {
     useOnMount(() => {
         fetchSellData();
     })
-    
+
+    useEffect(() => {
+        fetchSellData();
+    }, [page, rowsPerPage, search])
+
     return (
         <>
             <SellModalForm open={open} handleClose={handleClose} SellID={SellID} fetchsellData={fetchSellData} />
@@ -160,7 +164,7 @@ export function SellPage(): React.JSX.Element {
                                         </TableCell>
                                         <TableCell>{row.model}</TableCell>
                                         <TableCell>{row.buyer_name}</TableCell>
-                                        <TableCell>{dayjs(row.warranty_expire_date).format('DD-MM-YYYY')}</TableCell>
+                                        <TableCell>{dayjs(row.warranty).format('DD-MM-YYYY')}</TableCell>
                                         <TableCell>{dayjs(row.sell_date).format('DD-MM-YYYY')}</TableCell>
                                         <TableCell>{dayjs(row.created_at).format('DD-MM-YYYY')}</TableCell>
                                         <TableCell>
