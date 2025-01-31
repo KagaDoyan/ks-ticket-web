@@ -37,6 +37,7 @@ interface TicketKPI {
     send_mail: string;
     time_in: string;
     time_out: string;
+    ticket_status: string;
     kpi_sla: string;
     kpi_sla_status: string;
     kpi_mail_appointment: any;
@@ -121,6 +122,7 @@ export default function TicketKPIReportPage() {
             'send_mail': item.send_mail,
             'time_in': item.time_in,
             'time_out': item.time_out,
+            'ticket_status': item.ticket_status,
             'kpi_sla': item.kpi_sla,
             'kpi_sla_status': item.kpi_sla_status,
             'kpi_mail_appointment': item.kpi_mail_appointment,
@@ -217,6 +219,7 @@ export default function TicketKPIReportPage() {
                                         <TableCell>Category</TableCell>
                                         <TableCell>Shop</TableCell>
                                         <TableCell>Time In/Out</TableCell>
+                                        <TableCell>Status</TableCell>
                                         <TableCell>SLA</TableCell>
                                         <TableCell align="center">Mail & Appointment</TableCell>
                                         <TableCell align="center">Appointment</TableCell>
@@ -243,6 +246,7 @@ export default function TicketKPIReportPage() {
                                                 {row.time_in}<br />
                                                 {row.time_out}
                                             </TableCell>
+                                            <TableCell>{row.ticket_status}</TableCell>
                                             <TableCell align='center'>
                                                 {row.kpi_sla} <br />
                                                 <Chip

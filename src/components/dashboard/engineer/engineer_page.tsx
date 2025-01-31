@@ -38,6 +38,7 @@ interface engineer {
   deleted_at: Date;
   created_at: Date;
   created_by: number;
+  out_source: boolean;
 }
 
 interface provinces {
@@ -198,6 +199,7 @@ export function EngineerPage(): React.JSX.Element {
                 <TableCell>Line Name</TableCell>
                 <TableCell>Node</TableCell>
                 <TableCell>Location </TableCell>
+                <TableCell>Outsource</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -211,6 +213,7 @@ export function EngineerPage(): React.JSX.Element {
                     <TableCell>{row.line_name}</TableCell>
                     <TableCell>{row.node.name}</TableCell>
                     <TableCell>{row.latitude}, {row.longitude}</TableCell>
+                    <TableCell>{row.out_source ? "Yes" : "No"}</TableCell>
                     <TableCell>
                       {userData?.role === "Admin" || userData?.role === "SuperAdmin" ? <div>
                         <IconButton color='warning' onClick={() => handleEditengineer(row.id)}>

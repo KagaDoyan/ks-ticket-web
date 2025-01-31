@@ -1,4 +1,4 @@
-import { Box, Modal, Button, TextField, Typography, Stack, IconButton, InputAdornment, Grid, InputLabel, Autocomplete, Chip } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack, IconButton, InputAdornment, Grid, InputLabel, Autocomplete, Chip, FormControlLabel, Checkbox } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
@@ -41,7 +41,8 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
         node: "",
         node_id: 0,
         email: "",
-        password: ""
+        password: "",
+        out_source: false
     });
 
     const [nodes, setNodes] = useState<node[]>([]);
@@ -119,7 +120,8 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
                                 node: data.data.node,
                                 email: data.data.email,
                                 node_id: data.data.node_id,
-                                password: ""
+                                password: "",
+                                out_source: data.data.out_source
                             });
                         })
                     } else {
@@ -143,7 +145,8 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
             node: "",
             node_id: 0,
             email: "",
-            password: ""
+            password: "",
+            out_source: false
         });
     };
 
@@ -379,6 +382,23 @@ export default function EngineerModalForm({ open, handleClose, engineerID, fetch
                                     />
                                 </Grid>
                         }
+                        <Grid item xs={12} sm={6}>
+                            {/* indicate that engineer is out source  */}
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={formData.out_source}
+                                        onChange={(event) => {
+                                            setFormData({
+                                                ...formData,
+                                                out_source: event.target.checked
+                                            });
+                                        }}
+                                    />
+                                }
+                                label="Outsource"
+                            />
+                        </Grid>
                     </Grid>
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                         <Button onClick={handleClose} variant="contained" color="warning">
