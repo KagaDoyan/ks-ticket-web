@@ -139,7 +139,7 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
     }
 
     const fetchTeams = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team/option`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team/option?customer_id=${formData.customer_id}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -310,6 +310,10 @@ export default function CreateTicketModalForm({ open, handleClose, ticketID, fet
         fetchEngineer();
         getCategoryOption();
     })
+
+    useEffect(() => {
+        fetchTeams();
+    }, [formData.customer_id])
 
     useEffect(() => {
         fetchCustomer();

@@ -23,6 +23,7 @@ interface MA {
     assignedTo: string;
     ticketopenDate: string; // Consider using Date type if you're handling date objects
     ticketopenTime: string; // Consider using Date type if you're handling time objects
+    storeNumber: string;
     storeName: string;
     storeContactPhone: string;
     ticketStatus: string;
@@ -40,34 +41,45 @@ interface MA {
     recoveryTime: string; // Deadline for SLA (could also be Date if preferred)
     slaOverdue: string; // Whether it was closed within SLA (Yes/No as boolean)
     action: string;
+    updated_by?: string;
     lastUpdated?: string; // Date when the ticket was last updated
+    storeDeviceCategory1?: string;
     storeDeviceBrand1?: string;
     storeDeviceModel1?: string;
     storeDeviceSerial1?: string;
+    storeDeviceCategory2?: string;
     storeDeviceBrand2?: string;
     storeDeviceModel2?: string;
     storeDeviceSerial2?: string;
+    storeDeviceCategory3?: string;
     storeDeviceBrand3?: string;
     storeDeviceModel3?: string;
     storeDeviceSerial3?: string;
+    storeDeviceCategory4?: string;
     storeDeviceBrand4?: string;
     storeDeviceModel4?: string;
     storeDeviceSerial4?: string;
+    storeDeviceCategory5?: string;
     storeDeviceBrand5?: string;
     storeDeviceModel5?: string;
     storeDeviceSerial5?: string;
+    spareDeviceCategory1?: string;
     spareDeviceBrand1?: string;
     spareDeviceModel1?: string;
     spareDeviceSerial1?: string;
+    spareDeviceCategory2?: string;
     spareDeviceBrand2?: string;
     spareDeviceModel2?: string;
     spareDeviceSerial2?: string;
+    spareDeviceCategory3?: string;
     spareDeviceBrand3?: string;
     spareDeviceModel3?: string;
     spareDeviceSerial3?: string;
+    spareDeviceCategory4?: string;
     spareDeviceBrand4?: string;
     spareDeviceModel4?: string;
     spareDeviceSerial4?: string;
+    spareDeviceCategory5?: string;
     spareDeviceBrand5?: string;
     spareDeviceModel5?: string;
     spareDeviceSerial5?: string;
@@ -75,18 +87,23 @@ interface MA {
     return_solution?: string;
     return_time_in?: string;
     return_time_out?: string;
+    returnDeviceCategory1?: string;
     returnDeviceBrand1?: string;
     returnDeviceModel1?: string;
     returnDeviceSerial1?: string;
+    returnDeviceCategory2?: string;
     returnDeviceBrand2?: string;
     returnDeviceModel2?: string;
     returnDeviceSerial2?: string;
+    returnDeviceCategory3?: string;
     returnDeviceBrand3?: string;
     returnDeviceModel3?: string;
     returnDeviceSerial3?: string;
+    returnDeviceCategory4?: string;
     returnDeviceBrand4?: string;
     returnDeviceModel4?: string;
     returnDeviceSerial4?: string;
+    returnDeviceCategory5?: string;
     returnDeviceBrand5?: string;
     returnDeviceModel5?: string;
     returnDeviceSerial5?: string;
@@ -100,7 +117,7 @@ interface Customer {
 
 
 export default function MAReportPage() {
-    const [userData, setUserData] = React.useState<{ role?: string, customer?: { shortname: string,fullname: string } } | null>(null);
+    const [userData, setUserData] = React.useState<{ role?: string, customer?: { shortname: string, fullname: string } } | null>(null);
     React.useEffect(() => {
         const storedUserData = JSON.parse(localStorage.getItem('user_info') || '{}');
         setUserData(storedUserData);
@@ -188,23 +205,113 @@ export default function MAReportPage() {
     const exportToExcel = () => {
         const headers: (keyof MA)[] = [
             "created_by",
-            "brand", "ticketTitle", "ticketDescription", "incNo", "ticketNumber", "assignedTo",
-            "ticketopenDate", "ticketopenTime", "storeName", "storeContactPhone", "ticketStatus",
-            "ticketCloseTime", "ticketCloseDate", "engineerName",
-            "engineerNode", "appointmentTime", "appointmentDate", "solution", "slaPriorityGroup", "slaPriority", "slaPriorityTime",
-            "recoveryTime", "slaOverdue", "action", "lastUpdated", "storeDeviceBrand1",
-            "storeDeviceModel1", "storeDeviceSerial1", "storeDeviceBrand2", "storeDeviceModel2",
-            "storeDeviceSerial2", "storeDeviceBrand3", "storeDeviceModel3", "storeDeviceSerial3",
-            "storeDeviceBrand4", "storeDeviceModel4", "storeDeviceSerial4", "storeDeviceBrand5",
-            "storeDeviceModel5", "storeDeviceSerial5", "spareDeviceBrand1", "spareDeviceModel1",
-            "spareDeviceSerial1", "spareDeviceBrand2", "spareDeviceModel2", "spareDeviceSerial2",
-            "spareDeviceBrand3", "spareDeviceModel3", "spareDeviceSerial3", "spareDeviceBrand4",
-            "spareDeviceModel4", "spareDeviceSerial4", "spareDeviceBrand5", "spareDeviceModel5",
-            "spareDeviceSerial5", "return_investigation", "return_solution", "return_time_in",
-            "return_time_out", "returnDeviceBrand1", "returnDeviceModel1", "returnDeviceSerial1",
-            "returnDeviceBrand2", "returnDeviceModel2", "returnDeviceSerial2", "returnDeviceBrand3",
-            "returnDeviceModel3", "returnDeviceSerial3", "returnDeviceBrand4", "returnDeviceModel4",
-            "returnDeviceSerial4", "returnDeviceBrand5", "returnDeviceModel5", "returnDeviceSerial5",
+            "brand",
+            "ticketTitle",
+            "ticketDescription",
+            "incNo",
+            "ticketNumber",
+            "assignedTo",
+            "ticketopenDate",
+            "ticketopenTime",
+            "storeNumber",
+            "storeName",
+            "storeContactPhone",
+            "ticketStatus",
+            "ticketCloseTime",
+            "ticketCloseDate",
+            "engineerName",
+            "engineerNode",
+            "appointmentTime",
+            "appointmentDate",
+            "solution",
+            "slaPriorityGroup",
+            "slaPriority",
+            "slaPriorityTime",
+            "recoveryTime",
+            "slaOverdue",
+            "action",
+            "updated_by",
+            "lastUpdated",
+
+            "storeDeviceCategory1",
+            "storeDeviceBrand1",
+            "storeDeviceModel1",
+            "storeDeviceSerial1",
+            
+            "storeDeviceCategory2",
+            "storeDeviceBrand2",
+            "storeDeviceModel2",
+            "storeDeviceSerial2",
+
+            "storeDeviceCategory3",
+            "storeDeviceBrand3",
+            "storeDeviceModel3",
+            "storeDeviceSerial3",
+
+            "storeDeviceCategory4",
+            "storeDeviceBrand4",
+            "storeDeviceModel4",
+            "storeDeviceSerial4",
+
+            "storeDeviceCategory5",
+            "storeDeviceBrand5",
+            "storeDeviceModel5",
+            "storeDeviceSerial5",
+
+            "spareDeviceCategory1",
+            "spareDeviceBrand1",
+            "spareDeviceModel1",
+            "spareDeviceSerial1",
+
+            "spareDeviceCategory2",
+            "spareDeviceBrand2",
+            "spareDeviceModel2",
+            "spareDeviceSerial2",
+
+            "spareDeviceCategory3",
+            "spareDeviceBrand3",
+            "spareDeviceModel3",
+            "spareDeviceSerial3",
+
+            "spareDeviceCategory4",
+            "spareDeviceBrand4",
+            "spareDeviceModel4",
+            "spareDeviceSerial4",
+
+            "spareDeviceCategory5",
+            "spareDeviceBrand5",
+            "spareDeviceModel5",
+            "spareDeviceSerial5",
+
+            "return_investigation",
+            "return_solution",
+            "return_time_in",
+            "return_time_out",
+
+            "returnDeviceCategory1",
+            "returnDeviceBrand1",
+            "returnDeviceModel1",
+            "returnDeviceSerial1",
+
+            "returnDeviceCategory2",
+            "returnDeviceBrand2",
+            "returnDeviceModel2",
+            "returnDeviceSerial2",
+
+            "returnDeviceCategory3",
+            "returnDeviceBrand3",
+            "returnDeviceModel3",
+            "returnDeviceSerial3",
+
+            "returnDeviceCategory4",
+            "returnDeviceBrand4",
+            "returnDeviceModel4",
+            "returnDeviceSerial4",
+
+            "returnDeviceCategory5",
+            "returnDeviceBrand5",
+            "returnDeviceModel5",
+            "returnDeviceSerial5",
         ];
         const orderedRows = rows.map(row => {
             const orderedRow: Partial<MA> = {};

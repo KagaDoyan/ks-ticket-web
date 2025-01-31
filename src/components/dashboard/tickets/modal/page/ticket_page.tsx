@@ -154,7 +154,7 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
     }
 
     const fetchTeams = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team/option`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team/option?customer_id=${formData.customer_id}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authClient.getToken()}`
@@ -358,6 +358,10 @@ export default function TicketPage({ open, handleClose, ticketID, fetchticketDat
         fetchShop();
         fetchEngineer();
     }, [formData.shop_id]);
+
+    useEffect(() => {
+        fetchTeams();
+    }, [formData.customer_id]);
 
     useEffect(() => {
         if (formData.shop_id != 0) {

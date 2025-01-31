@@ -13,7 +13,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { Button, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
+import { Autocomplete, Button, IconButton, InputAdornment, OutlinedInput, TextField } from '@mui/material';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
@@ -28,6 +28,17 @@ function noop(): void {
 export interface team {
   id: number;
   team_name: string;
+  customers_id: number;
+  customer?: {
+    fullname: string;
+    shortname: string;
+  };
+}
+
+interface Customer {
+  id: number;
+  fullname: string;
+  shortname: string;
 }
 
 export function TeamPage(): React.JSX.Element {
@@ -37,6 +48,27 @@ export function TeamPage(): React.JSX.Element {
   const [search, setSearch] = React.useState<string>('');
   const [count, setCount] = React.useState(0);
   const [teamID, setteamID] = React.useState(0);
+
+  const [customers, setCustomers] = React.useState<Customer[]>([]);
+  const [selectedcustomer_id, setSelectedcustomer_id] = React.useState("");
+  const GetCustomer = () => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
+    })
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            setCustomers(data.data);
+          })
+        }
+      })
+  }
+  React.useEffect(() => {
+    GetCustomer();
+  }, [])
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -57,7 +89,7 @@ export function TeamPage(): React.JSX.Element {
 
   const fetchteamData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-    fetch(`${baseUrl}/api/team?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
+    fetch(`${baseUrl}/api/team?page=${page + 1}&limit=${rowsPerPage}&search=${search}&customer_id=${selectedcustomer_id}`,
       {
         method: 'GET',
         headers: {
@@ -114,7 +146,7 @@ export function TeamPage(): React.JSX.Element {
 
   React.useEffect(() => {
     fetchteamData();
-  }, [page, rowsPerPage, search])
+  }, [page, rowsPerPage, search, selectedcustomer_id]);
 
   const HandleModalAddData = () => {
     handleOpen()
@@ -144,6 +176,18 @@ export function TeamPage(): React.JSX.Element {
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: '300px', height: '40px' }}
             />
+            <Autocomplete
+              sx={{ minWidth: '200px' }}
+              size="small"
+              options={customers}
+              getOptionLabel={(option) => option.fullname}
+              value={customers.find((customer: any) => customer.id === Number(selectedcustomer_id)) || null}
+              onChange={(event, newValue) => {
+                const selectedId = newValue ? String(newValue.id) : "";
+                setSelectedcustomer_id(selectedId);
+              }}
+              renderInput={(params) => <TextField {...params} label="Customer" />}
+            />
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchteamData}>
               refresh
             </Button>
@@ -161,6 +205,7 @@ export function TeamPage(): React.JSX.Element {
             <TableHead>
               <TableRow>
                 <TableCell>Team name</TableCell>
+                <TableCell>Customer</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -169,6 +214,7 @@ export function TeamPage(): React.JSX.Element {
                 return (
                   <TableRow hover key={row.id}>
                     <TableCell>{row.team_name}</TableCell>
+                    <TableCell>{row.customer?.fullname}</TableCell>
                     <TableCell>
                       <IconButton color='warning' onClick={() => handleEditteam(row.id)}>
                         <Edit />

@@ -1,4 +1,4 @@
-import { Box, Modal, Button, TextField, Typography, Stack } from "@mui/material";
+import { Box, Modal, Button, TextField, Typography, Stack, Autocomplete } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth/client";
@@ -16,10 +16,36 @@ const style = {
     p: 4,
 };
 const roles = ["Admin", "team"];
+interface Customer {
+    id: number;
+    fullname: string;
+    shortname: string;
+}
 export default function TeamModalForm({ open, handleClose, teamID, fetchteamData }: { open: boolean, handleClose: () => void, teamID: number, fetchteamData: () => void }): React.JSX.Element {
     const [formData, setFormData] = useState({
-        team_name: ""
+        team_name: "",
+        customers_id: 0,
     });
+
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomers(data.data);
+                    })
+                }
+            })
+    }
+    useEffect(() => {
+        GetCustomer();
+    }, [])
 
     const getteamData = () => {
         if (teamID) {
@@ -34,6 +60,7 @@ export default function TeamModalForm({ open, handleClose, teamID, fetchteamData
                         res.json().then((data) => {
                             setFormData({
                                 team_name: data.team_name,
+                                customers_id: data.customers_id
                             });
                         })
                     } else {
@@ -48,6 +75,7 @@ export default function TeamModalForm({ open, handleClose, teamID, fetchteamData
     const clearFormData = () => {
         setFormData({
             team_name: "",
+            customers_id: 0,
         });
     }
 
@@ -151,6 +179,19 @@ export default function TeamModalForm({ open, handleClose, teamID, fetchteamData
                         value={formData.team_name}
                         onChange={handleChange}
                         required
+                    />
+                    <Autocomplete
+                        options={customers}
+                        getOptionLabel={(option) => option.fullname}
+                        value={customers.find((customer: any) => customer.id === formData.customers_id) || null}
+                        onChange={(event, newValue) => {
+                            const selectedId = newValue ? newValue.id : 0;
+                            setFormData({
+                                ...formData,
+                                customers_id: selectedId
+                            })
+                        }}
+                        renderInput={(params) => <TextField {...params} label="Customer" />}
                     />
                     <Stack justifyContent={"flex-end"} direction="row" spacing={2}>
                         <Button onClick={handleClose} variant="contained" color="warning">
