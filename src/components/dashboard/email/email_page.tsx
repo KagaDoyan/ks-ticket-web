@@ -14,7 +14,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { Button, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
+import { Autocomplete, Button, IconButton, InputAdornment, OutlinedInput, TextField } from '@mui/material';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
@@ -38,6 +38,12 @@ export interface email {
   };
 }
 
+interface Customer {
+  id: number;
+  fullname: string;
+  shortname: string;
+}
+
 export function EmailPage(): React.JSX.Element {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -45,6 +51,27 @@ export function EmailPage(): React.JSX.Element {
   const [search, setSearch] = React.useState<string>('');
   const [count, setCount] = React.useState(0);
   const [emailID, setemailID] = React.useState(0);
+
+  const [customers, setCustomers] = React.useState<Customer[]>([]);
+  const [selectedcustomer_id, setSelectedcustomer_id] = React.useState("");
+  const GetCustomer = () => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
+    })
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            setCustomers(data.data);
+          })
+        }
+      })
+  }
+  React.useEffect(() => {
+    GetCustomer();
+  }, [])
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -65,7 +92,7 @@ export function EmailPage(): React.JSX.Element {
 
   const fetchbrandData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-    fetch(`${baseUrl}/api/mail_recipient?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
+    fetch(`${baseUrl}/api/mail_recipient?page=${page + 1}&limit=${rowsPerPage}&search=${search}&customer_id=${selectedcustomer_id}`,
       {
         method: 'GET',
         headers: {
@@ -122,7 +149,7 @@ export function EmailPage(): React.JSX.Element {
 
   React.useEffect(() => {
     fetchbrandData();
-  }, [page, rowsPerPage, search])
+  }, [page, rowsPerPage, search, selectedcustomer_id]);
 
   const HandleModalAddData = () => {
     handleOpen()
@@ -151,6 +178,18 @@ export function EmailPage(): React.JSX.Element {
               }
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: '300px', height: '40px' }}
+            />
+            <Autocomplete
+              sx={{ minWidth: '200px' }}
+              size="small"
+              options={customers}
+              getOptionLabel={(option) => option.fullname}
+              value={customers.find((customer: any) => customer.id === Number(selectedcustomer_id)) || null}
+              onChange={(event, newValue) => {
+                const selectedId = newValue ? String(newValue.id) : "";
+                setSelectedcustomer_id(selectedId);
+              }}
+              renderInput={(params) => <TextField {...params} label="Customer" />}
             />
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchbrandData}>
               refresh

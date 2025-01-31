@@ -14,7 +14,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { Button, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
+import { Autocomplete, Button, IconButton, InputAdornment, OutlinedInput, TextField } from '@mui/material';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
@@ -39,6 +39,11 @@ interface engineer {
   created_at: Date;
   created_by: number;
   out_source: boolean;
+}
+
+interface node {
+  id: number;
+  name: string
 }
 
 interface provinces {
@@ -70,6 +75,29 @@ export function EngineerPage(): React.JSX.Element {
   const [search, setSearch] = React.useState<string>('');
   const [count, setCount] = React.useState(0);
   const [engineerID, setengineerID] = React.useState(0);
+  const [nodes, setNodes] = React.useState<node[]>([]);
+  const [selected_node, setSelected_node] = React.useState('');
+
+  const GetNode = () => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/node/option`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
+    })
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            setNodes(data.data);
+          })
+        }
+      })
+  }
+
+  React.useEffect(() => {
+    GetNode();
+  }, [])
+
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -90,7 +118,7 @@ export function EngineerPage(): React.JSX.Element {
 
   const fetchengineerData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-    fetch(`${baseUrl}/api/engineer?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
+    fetch(`${baseUrl}/api/engineer?page=${page + 1}&limit=${rowsPerPage}&search=${search}&node_id=${selected_node}`,
       {
         method: 'GET',
         headers: {
@@ -147,7 +175,7 @@ export function EngineerPage(): React.JSX.Element {
 
   React.useEffect(() => {
     fetchengineerData();
-  }, [page, rowsPerPage, search])
+  }, [page, rowsPerPage, search, selected_node]);
 
   const HandleModalAddData = () => {
     handleOpen()
@@ -176,6 +204,18 @@ export function EngineerPage(): React.JSX.Element {
               }
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: '300px', height: '40px' }}
+            />
+            <Autocomplete
+              options={nodes}
+              sx={{ minWidth: '200px' }}
+              size='small'
+              getOptionLabel={(option) => option.name}
+              value={nodes.find((node) => node.id === Number(selected_node)) || null}
+              onChange={(event, newValue) => {
+                const selectedId = newValue ? String(newValue.id) : '';
+                setSelected_node(selectedId);
+              }}
+              renderInput={(params) => <TextField {...params} label="Node" />}
             />
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchengineerData}>
               refresh
