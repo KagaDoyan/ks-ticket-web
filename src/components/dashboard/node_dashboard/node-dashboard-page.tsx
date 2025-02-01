@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Grid, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Chip, Collapse, IconButton, Stack, Button, TextField, Modal, Paper, InputAdornment, MenuItem, Select, SelectChangeEvent, Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Chip, Collapse, IconButton, Stack, Button, TextField, Modal, Paper, InputAdornment, MenuItem, Select, SelectChangeEvent, Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete } from '@mui/material';
 import { authClient } from '@/lib/auth/client';
 import { toast } from 'react-toastify';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -16,6 +16,12 @@ interface Engineer {
     currentTask?: string;
 }
 
+interface Customer {
+    id: number;
+    fullname: string;
+    shortname: string;
+}
+
 interface HourlyData {
     time: string;
     working: number;
@@ -24,6 +30,8 @@ interface HourlyData {
         ticket_number: string;
         engineer_name: string;
         inc_number: string;
+        shop_name: string;
+        node_name: string;
     }[];
 }
 
@@ -85,9 +93,9 @@ interface TaskDetailsModalProps {
 }
 
 const groupHourlyData = (
-    hourlyData: HourlyData[], 
-    range: number, 
-    startHour?: number, 
+    hourlyData: HourlyData[],
+    range: number,
+    startHour?: number,
     endHour?: number
 ): HourlyData[] => {
     const groupedData: { [key: string]: HourlyData } = {};
@@ -98,7 +106,7 @@ const groupHourlyData = (
 
         // Apply time range filter if specified
         if (
-            (startHour !== undefined && hours < startHour) || 
+            (startHour !== undefined && hours < startHour) ||
             (endHour !== undefined && hours > endHour)
         ) {
             return; // Skip this entry
@@ -210,7 +218,7 @@ const EngineerListModal: React.FC<EngineerListModalProps> = ({ open, onClose, no
     useEffect(() => {
         const fetchEngineers = async () => {
             if (!node) return;
-            
+
             try {
                 setLoading(true);
                 const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
@@ -406,7 +414,7 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
     const [groupRange, setGroupRange] = useState<number>(3);
     const [isTableExpanded, setIsTableExpanded] = useState(false);
     const [expandedRowIndex, setExpandedRowIndex] = useState<Set<number>>(new Set());
-    
+
     // Custom time range state
     const [useCustomTimeRange, setUseCustomTimeRange] = useState(false);
     const [startHour, setStartHour] = useState<number>(0);
@@ -464,17 +472,17 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
     };
 
     // Prepare hourly data with optional filtering
-    const filteredHourlyData = useCustomTimeRange 
+    const filteredHourlyData = useCustomTimeRange
         ? groupHourlyData(node.hourlyDistribution, groupRange, startHour, endHour)
         : groupHourlyData(node.hourlyDistribution, groupRange);
 
     return (
         <Card sx={{ mb: 2 }}>
             <CardContent>
-                <Stack 
-                    direction="row" 
-                    spacing={2} 
-                    alignItems="center" 
+                <Stack
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
                     sx={{ mb: 2 }}
                 >
                     <Typography variant="subtitle1">Group Range:</Typography>
@@ -492,32 +500,32 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
                         <MenuItem value={12}>12 Hours</MenuItem>
                     </Select>
 
-                    <Button 
-                        variant="outlined" 
-                        size="small" 
+                    <Button
+                        variant="outlined"
+                        size="small"
                         onClick={handleOpenCustomFilter}
                     >
                         Custom Time Filter
                     </Button>
 
                     {useCustomTimeRange && (
-                        <Chip 
-                            label={`Time: ${startHour}:00 - ${endHour}:59`} 
-                            onDelete={() => setUseCustomTimeRange(false)} 
-                            color="primary" 
-                            size="small" 
+                        <Chip
+                            label={`Time: ${startHour}:00 - ${endHour}:59`}
+                            onDelete={() => setUseCustomTimeRange(false)}
+                            color="primary"
+                            size="small"
                         />
                     )}
 
-                    <IconButton 
+                    <IconButton
                         onClick={handleTableExpandClick}
                         sx={{ marginLeft: 'auto' }}
                     >
-                        <ExpandMoreIcon 
-                            sx={{ 
+                        <ExpandMoreIcon
+                            sx={{
                                 transform: isTableExpanded ? 'rotate(180deg)' : 'none',
                                 transition: 'transform 0.2s'
-                            }} 
+                            }}
                         />
                     </IconButton>
                 </Stack>
@@ -549,19 +557,19 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
                                                 {hour.time}
                                             </TableCell>
                                             <TableCell align="center">
-                                                <Chip 
-                                                    label={hour.working} 
-                                                    color="warning" 
-                                                    size="small" 
-                                                    sx={{ fontWeight: 'bold' }} 
+                                                <Chip
+                                                    label={hour.working}
+                                                    color="warning"
+                                                    size="small"
+                                                    sx={{ fontWeight: 'bold' }}
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
-                                                <Chip 
-                                                    label={hour.available} 
-                                                    color="success" 
-                                                    size="small" 
-                                                    sx={{ fontWeight: 'bold' }} 
+                                                <Chip
+                                                    label={hour.available}
+                                                    color="success"
+                                                    size="small"
+                                                    sx={{ fontWeight: 'bold' }}
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
@@ -593,6 +601,8 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
                                                                 <TableHead>
                                                                     <TableRow>
                                                                         <TableCell>Ticket Number</TableCell>
+                                                                        <TableCell>Shop</TableCell>
+                                                                        <TableCell>Node</TableCell>
                                                                         <TableCell>Engineer Name</TableCell>
                                                                         <TableCell>Inc Number</TableCell>
                                                                     </TableRow>
@@ -601,6 +611,8 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
                                                                     {hour.ticketDetails.map((ticket, ticketIndex) => (
                                                                         <TableRow key={ticketIndex}>
                                                                             <TableCell>{ticket.ticket_number}</TableCell>
+                                                                            <TableCell>{ticket.shop_name}</TableCell>
+                                                                            <TableCell>{ticket.node_name}</TableCell>
                                                                             <TableCell>{ticket.engineer_name}</TableCell>
                                                                             <TableCell>{ticket.inc_number}</TableCell>
                                                                         </TableRow>
@@ -620,8 +632,8 @@ const CollapseCard: React.FC<{ node: NodeSummary }> = ({ node }) => {
                 </Collapse>
 
                 {/* Custom Time Range Filter Dialog */}
-                <Dialog 
-                    open={isCustomFilterOpen} 
+                <Dialog
+                    open={isCustomFilterOpen}
                     onClose={handleCloseCustomFilter}
                     maxWidth="xs"
                     fullWidth
@@ -674,7 +686,7 @@ export function NodeDashboardPage(): React.JSX.Element {
         try {
             setLoading(true);
             const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-            const res = await fetch(`${baseUrl}/api/node/with-engineer?date=${dayjs(selectedDate, 'DD/MM/YYYY').format('YYYY-MM-DD')}`, {
+            const res = await fetch(`${baseUrl}/api/node/with-engineer?date=${dayjs(selectedDate, 'DD/MM/YYYY').format('YYYY-MM-DD')}&customer_id=${selectedcustomer_id}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${authClient.getToken()}`
@@ -697,16 +709,12 @@ export function NodeDashboardPage(): React.JSX.Element {
 
     // Filter data based on search query
     useEffect(() => {
-        const filtered = nodeData.filter(node => 
+        const filtered = nodeData.filter(node =>
             node.nodeName.toLowerCase().includes(searchQuery.toLowerCase())
         );
         setFilteredData(filtered);
     }, [searchQuery, nodeData]);
 
-    // Fetch data from API
-    useEffect(() => {
-        fetchData(selectedDate);
-    }, [selectedDate]);
 
     const handleRefresh = () => {
         fetchData(selectedDate);
@@ -726,6 +734,32 @@ export function NodeDashboardPage(): React.JSX.Element {
         setIsEngineerModalOpen(false);
         setSelectedNode(null);
     };
+
+    const [customers, setCustomers] = React.useState<Customer[]>([]);
+    const [selectedcustomer_id, setSelectedcustomer_id] = React.useState("");
+    const GetCustomer = () => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authClient.getToken()}`
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    res.json().then((data) => {
+                        setCustomers(data.data);
+                    })
+                }
+            })
+    }
+    React.useEffect(() => {
+        GetCustomer();
+    }, [])
+
+    // Fetch data from API
+    useEffect(() => {
+        fetchData(selectedDate);
+    }, [selectedDate, selectedcustomer_id]);
 
     // if (error) {
     //     return <Typography variant="h6" color="error">Error: {error}</Typography>;
@@ -748,7 +782,7 @@ export function NodeDashboardPage(): React.JSX.Element {
                         </Button>
                     </Stack>
                 </Grid>
-                
+
                 {/* Summary Statistics */}
                 <Grid item lg={12} md={12} xs={12}>
                     <Grid container spacing={2}>
@@ -802,6 +836,18 @@ export function NodeDashboardPage(): React.JSX.Element {
                                     }}
                                     slotProps={{ textField: { size: 'small' } }}
                                 />
+                                <Autocomplete
+                                    sx={{ minWidth: '200px' }}
+                                    size="small"
+                                    options={customers}
+                                    getOptionLabel={(option) => option.fullname}
+                                    value={customers.find((customer: any) => customer.id === Number(selectedcustomer_id)) || null}
+                                    onChange={(event, newValue) => {
+                                        const selectedId = newValue ? String(newValue.id) : "";
+                                        setSelectedcustomer_id(selectedId);
+                                    }}
+                                    renderInput={(params) => <TextField {...params} label="Customer" />}
+                                />
                                 <TextField
                                     size="small"
                                     label="Search node name"
@@ -821,8 +867,8 @@ export function NodeDashboardPage(): React.JSX.Element {
                             <Typography>Loading data...</Typography>
                         </Box>
                     ) : (
-                        <Dashboard 
-                            nodeData={filteredData} 
+                        <Dashboard
+                            nodeData={filteredData}
                             onViewEngineers={handleViewEngineers}
                         />
                     )}
