@@ -14,7 +14,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { Button, IconButton, InputAdornment, OutlinedInput } from '@mui/material';
+import { Autocomplete, Button, IconButton, InputAdornment, OutlinedInput, TextField } from '@mui/material';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { toast } from 'react-toastify';
 import { Delete, Edit, Refresh } from '@mui/icons-material';
@@ -95,6 +95,12 @@ interface ticket {
   }
 }
 
+interface Customer {
+  id: number;
+  fullname: string;
+  shortname: string;
+}
+
 export function TicketPage(): React.JSX.Element {
   const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
   React.useEffect(() => {
@@ -117,11 +123,34 @@ export function TicketPage(): React.JSX.Element {
   const [search, setSearch] = React.useState<string>('');
   const [count, setCount] = React.useState(0);
   const [ticketID, setticketID] = React.useState(0);
+  const [customers, setCustomers] = React.useState<Customer[]>([]);
+  const [selectedcustomer_id, setSelectedcustomer_id] = React.useState("");
+  const GetCustomer = () => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/all`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authClient.getToken()}`
+      }
+    })
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            setCustomers(data.data);
+          })
+        }
+      })
+  }
+  React.useEffect(() => {
+    GetCustomer();
+  }, [])
 
   const [open, setOpen] = React.useState(false);
   const [openProcess, setOpenProcess] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleProcessOpen = () => setOpenProcess(true);
+
+  const [selectStatus, setSelectStatus] = React.useState("");
+  const status = ["open", "pending", "close", "spare", "oncall", "cancel"]
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -158,7 +187,7 @@ export function TicketPage(): React.JSX.Element {
 
   const fetchticketData = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3030';
-    fetch(`${baseUrl}/api/ticket?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
+    fetch(`${baseUrl}/api/ticket?page=${page + 1}&limit=${rowsPerPage}&search=${search}&brand_name=${selectedcustomer_id}&status=${selectStatus}`,
       {
         method: 'GET',
         headers: {
@@ -215,7 +244,7 @@ export function TicketPage(): React.JSX.Element {
 
   React.useEffect(() => {
     fetchticketData();
-  }, [page, rowsPerPage, search])
+  }, [page, rowsPerPage, search, selectedcustomer_id, selectStatus]);
 
   const HandleModalAddData = () => {
     handleOpen()
@@ -250,6 +279,29 @@ export function TicketPage(): React.JSX.Element {
               }
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: '300px', height: '40px' }}
+            />
+            <Autocomplete
+              sx={{ minWidth: '200px' }}
+              size="small"
+              options={customers}
+              getOptionLabel={(option) => option.fullname}
+              value={customers.find((customer: any) => customer.id === Number(selectedcustomer_id)) || null}
+              onChange={(event, newValue) => {
+                const selectedId = newValue ? String(newValue.id) : "";
+                setSelectedcustomer_id(selectedId);
+              }}
+              renderInput={(params) => <TextField {...params} label="Customer" />}
+            />
+            <Autocomplete
+              sx={{ minWidth: '200px' }}
+              size="small"
+              options={status}
+              getOptionLabel={(option) => option}
+              value={selectStatus || null}
+              onChange={(event, newValue) => {
+                setSelectStatus(newValue || '');
+              }}
+              renderInput={(params) => <TextField {...params} label="Status" />}
             />
             <Button color="inherit" startIcon={<Refresh />} sx={{ bgcolor: '#f6f9fc' }} onClick={fetchticketData}>
               refresh

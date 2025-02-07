@@ -24,6 +24,7 @@ import BrokenPartReportPage from './report_pages/Broken';
 import InventoryReportPage from './report_pages/Inventory';
 import { EngineerReportPage } from './report_pages/Engineer';
 import TicketKPIReportPage from './report_pages/TicketKPI';
+import ReturnReportPage from './report_pages/Return';
 
 export function ReportPage(): React.JSX.Element {
   const [userData, setUserData] = React.useState<{ role?: string } | null>(null);
@@ -60,6 +61,9 @@ export function ReportPage(): React.JSX.Element {
           <Tab value="Inventory" label="Inventory Report" />
           )}
           {userData?.role !== "Customer" && (
+          <Tab value="Return" label="Return Report" />
+          )}
+          {userData?.role !== "Customer" && (
           <Tab value="BrokenPart" label="Broken Part Report" />
           )}
           {userData?.role !== "Customer" && (
@@ -94,6 +98,11 @@ export function ReportPage(): React.JSX.Element {
             {active_tabs === "TicketKPI" && (
               <>
                 <TicketKPIReportPage />
+              </>
+            )}
+            {active_tabs === "Return" && (
+              <>
+                <ReturnReportPage />
               </>
             )}
           </>
