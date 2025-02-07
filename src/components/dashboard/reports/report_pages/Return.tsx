@@ -108,10 +108,10 @@ export default function ReturnReportPage() {
 
         const worksheet = XLSX.utils.json_to_sheet(rows);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "MA");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Return");
 
         // Export the file
-        XLSX.writeFile(workbook, `Broken-Part-Report.xlsx`);
+        XLSX.writeFile(workbook, `Return-Report.xlsx`);
     }
     return (
         <Box sx={{ mt: 2 }}>
