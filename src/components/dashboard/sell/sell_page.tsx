@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import Swal from "sweetalert2";
 import React from "react";
 import useOnMount from "@mui/utils/useOnMount";
+import ImportModalForm from "./modal/import_modal";
 
 export function SellPage(): React.JSX.Element {
 
@@ -27,7 +28,15 @@ export function SellPage(): React.JSX.Element {
         setSellID(0);
         setOpen(false);
     };
+    const [importOpen, setImportOpen] = useState(false);
 
+    const handleImportClose = () => {
+        setImportOpen(false);
+    };
+
+    const HandleModalImport = () => {
+        setImportOpen(true);
+    };
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
         newPage: number,
@@ -46,6 +55,7 @@ export function SellPage(): React.JSX.Element {
         setSellID(id);
         setOpen(true);
     }
+
     const fetchSellData = () => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inventory?page=${page + 1}&limit=${rowsPerPage}&search=${search}`,
             {
@@ -111,6 +121,7 @@ export function SellPage(): React.JSX.Element {
 
     return (
         <>
+            <ImportModalForm open={importOpen} onClose={handleImportClose} fetchSellData={fetchSellData}/>
             <SellModalForm open={open} handleClose={handleClose} SellID={SellID} fetchsellData={fetchSellData} />
             <Stack direction="row" spacing={3}>
                 <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
@@ -133,6 +144,11 @@ export function SellPage(): React.JSX.Element {
                         </Button>
                     </Stack>
                 </Stack>
+                <div>
+                    <Button onClick={HandleModalImport} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
+                        Import
+                    </Button>
+                </div>
                 <div>
                     <Button onClick={HandleModalAddData} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
                         Add
