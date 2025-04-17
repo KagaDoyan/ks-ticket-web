@@ -112,7 +112,7 @@ export default function DashboardPage(): React.JSX.Element {
     }
 
     useEffect(() => {
-        const initialSeries: { name: string, data: number[] }[] = ["open", "pending", "oncall", "spare", "close", "cancel"].map(status => (
+        const initialSeries: { name: string, data: number[] }[] = ["open", "pending", "oncall", "spare", "close", "cancel", "claim"].map(status => (
             {
                 name: status.charAt(0).toUpperCase() + status.slice(1),
                 data: []
@@ -125,12 +125,14 @@ export default function DashboardPage(): React.JSX.Element {
             const seriesIndexClosed = initialSeries.findIndex(series => series.name.toLowerCase() === 'close');
             const seriesIndexOnCall = initialSeries.findIndex(series => series.name.toLowerCase() === 'oncall');
             const seriesIndexCancel = initialSeries.findIndex(series => series.name.toLowerCase() === 'cancel');
+            const seriesIndexClaim = initialSeries.findIndex(series => series.name.toLowerCase() === 'claim');
             initialSeries[seriesIndexOpen].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'open' && ticket.customer.shortname === customer).length);
             initialSeries[seriesIndexPending].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'pending' && ticket.customer.shortname === customer).length);
             initialSeries[seriesIndexSpare].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'spare' && ticket.customer.shortname === customer).length);
             initialSeries[seriesIndexClosed].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'close' && ticket.customer.shortname === customer).length);
             initialSeries[seriesIndexOnCall].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'oncall' && ticket.customer.shortname === customer).length);
             initialSeries[seriesIndexCancel].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'cancel' && ticket.customer.shortname === customer).length);
+            initialSeries[seriesIndexClaim].data.push(ticketData.filter((ticket) => ticket.ticket_status === 'claim' && ticket.customer.shortname === customer).length);
         });
         setSeries(initialSeries);
     }, [ticketData, customers]);

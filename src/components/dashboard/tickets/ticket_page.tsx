@@ -150,7 +150,7 @@ export function TicketPage(): React.JSX.Element {
   const handleProcessOpen = () => setOpenProcess(true);
 
   const [selectStatus, setSelectStatus] = React.useState("");
-  const status = ["open", "pending", "close", "spare", "oncall", "cancel"]
+  const status = ["open", "pending", "close", "spare", "oncall", "cancel", "claim"]
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -166,6 +166,8 @@ export function TicketPage(): React.JSX.Element {
         return 'rgb(57, 156, 255)';
       case 'cancel':
         return 'rgb(158, 158, 158)';
+      case 'claim':
+        return 'rgb(255, 204, 153)';
       default:
         return 'info';
     }
